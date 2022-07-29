@@ -1,0 +1,11 @@
+{
+	"main" : "fr.cgi.minibadge.Minibadge",
+	"port" : 8131,
+	"app-name" : "Minibadge",
+	"app-address" : "/minibadge",
+	"app-icon" : "minibadge-large",
+	"app-displayName" : "Minibadge",
+	"mode": "dev",
+	"entcore.port" : 8090,
+	"auto-redeploy": false
+}
