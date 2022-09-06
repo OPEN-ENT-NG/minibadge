@@ -1,3 +1,9 @@
 {
+  "minibadge.badge.assign": "Décerner le badge",
+  "minibadge.badge.search": "Rechercher un badge",
+  "minibadge.error.get.badge.types": "Une erreur est survenue à la récupération de la bibliothèque de badges",
+  "minibadge.error.get.global.settings": "Une erreur est survenue à la récupération de la configuration",
+  "minibadge.navbar.badges.received": "Badges reçus",
+  "minibadge.navbar.badges.library": "Collection de badges",
   "minibadge.title": "Minibadge"
 }

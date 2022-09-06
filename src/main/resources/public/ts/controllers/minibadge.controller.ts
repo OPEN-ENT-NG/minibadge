@@ -1,19 +1,27 @@
 import {ng} from 'entcore';
+import {IScope} from "angular";
+import {ISetting} from "../models/setting.model";
 
 interface ViewModel {
-    $onInit(): any;
-    $onDestroy(): any;
 }
 
-export const minibadgeController = ng.controller('MinibadgeController', ['$scope', 'route', function ($scope, route) {
-    const vm: ViewModel = this;
+interface IMinibadgeScope extends IScope {
+    vm: ViewModel;
+    setting: ISetting;
+}
 
-    // init life's cycle hook
-    vm.$onInit = () => {
-    };
+class Controller implements ng.IController, ViewModel {
 
-    // destruction cycle hook
-    vm.$onDestroy = () => {
-    };
+    constructor(private $scope: IMinibadgeScope) {
+        this.$scope.vm = this;
 
-}]);
+    }
+
+    $onInit() {
+    }
+
+    $onDestroy() {
+    }
+}
+
+export const minibadgeController = ng.controller('MinibadgeController', ['$scope', Controller]);

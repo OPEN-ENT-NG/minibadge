@@ -1,0 +1,8 @@
+<div ng-controller="BadgeTypeController as vm" class="minibadge-container flex-row f-column">
+    <h2><i18n>minibadge.navbar.badges.library</i18n></h2>
+    <search-input on-search="vm.initBadgeTypes" placeholder="minibadge.badge.search"></search-input>
+    <div class="minibadge-card-list flex-row f-wrap justify-center">
+        <minibadge-card ng-repeat="badgeType in vm.badgeTypes" badge-type="badgeType"></minibadge-card>
+    </div>
+    <infinite-scroll scrolled="vm.onScroll()" loading-mode="true"></infinite-scroll>
+</div>

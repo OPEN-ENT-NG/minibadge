@@ -1,6 +1,8 @@
 package fr.cgi.minibadge.service;
 
+import fr.cgi.minibadge.service.impl.DefaultBadgeTypeService;
 import fr.cgi.minibadge.service.impl.DefaultMinibadgeService;
+import fr.cgi.minibadge.service.impl.DefaultSettingService;
 import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -25,6 +27,14 @@ public class ServiceFactory {
 
     public MinibadgeService minibadgeService() {
         return new DefaultMinibadgeService(sql);
+    }
+
+    public SettingService settingService() {
+        return new DefaultSettingService();
+    }
+
+    public BadgeTypeService badgeTypeService() {
+        return new DefaultBadgeTypeService(sql);
     }
 
     // Helpers

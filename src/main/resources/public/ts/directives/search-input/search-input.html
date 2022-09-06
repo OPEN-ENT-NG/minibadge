@@ -1,0 +1,8 @@
+<div class="minibadge-search flex-row justify-center centered-text">
+    <i class="search"></i>
+    <input type="text" ng-model="vm.searchQuery"
+           ng-keyup="vm.pausedTyping($event)" ng-keydown="vm.typing()"
+           placeholder="[[vm.lang.translate(vm.placeholder || 'search')]]"
+           autocomplete="off"
+           class="minibadge-search-input"/>
+</div>

@@ -1,9 +1,17 @@
-import {ng, template, model} from 'entcore';
+import {ng, template} from 'entcore';
+import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
+import {ISettingService} from "../services";
+import {AxiosError} from "axios";
+import {ISetting} from "../models/setting.model";
 import {IScope} from "angular";
 
-declare let window: any;
-
 interface ViewModel {
+    navbarViewSelected: NAVBAR_VIEWS;
+}
+
+interface IMinibadgeScope extends IScope {
+    vm: ViewModel;
+    setting: ISetting;
 }
 
 /**
@@ -13,23 +21,34 @@ interface ViewModel {
  **/
 
 class Controller implements ng.IController, ViewModel {
-    constructor(private $scope: IScope,
-                private $route: any) {
-        this.$scope['vm'] = this;
+    navbarViewSelected: NAVBAR_VIEWS;
+
+    constructor(private $scope: IMinibadgeScope,
+                private $route: any,
+                private settingService: ISettingService) {
+        this.$scope.vm = this;
 
         this.$route({
-            defaultView: () => {
+            badgeTypes: () => {
+                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_LIBRARY;
+                template.open('main', `badge-types`);
+            },
+            badgeReceived: () => {
+                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_RECEIVED;
                 template.open('main', `main`);
             }
         });
     }
 
     $onInit() {
-
+        this.settingService.getGlobalSettings()
+            .then((res: ISetting) => this.$scope.setting = res)
+            .catch((err: AxiosError) => this.$scope.setting = {pageSize: 0});
     }
 
     $onDestroy() {
     }
 }
 
-export const mainController = ng.controller('MainController', ['$scope', 'route', Controller]);
+export const mainController = ng.controller('MainController',
+    ['$scope', 'route', 'SettingService', Controller]);

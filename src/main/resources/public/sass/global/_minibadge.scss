@@ -1,5 +1,24 @@
-body.minibadge,.sniplet.minibadge {
+body.minibadge, .sniplet.minibadge {
+  @import "mixins";
+  @import "components/index";
+  @import "containers/index";
 
+  @include mobile {
+    font-size: 12px;
+  }
+
+  .mobile-disabled {
+    @include mobile {
+      display: none;
+    }
+  }
+
+  portal > div.main > section.main {
+    @include mobile {
+      padding: 0;
+      top: 50px;
+    }
+  }
 }
 
 

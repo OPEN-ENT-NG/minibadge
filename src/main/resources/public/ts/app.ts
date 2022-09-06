@@ -1,17 +1,17 @@
 import { ng, routes } from 'entcore';
 import * as controllers from './controllers';
-// import * as directives from './directives';
+import * as directives from './directives';
 import * as services from './services';
 
 for(let controller in controllers){
     ng.controllers.push(controllers[controller]);
 }
 
-/*
+
 for (let directive in directives) {
 	ng.directives.push(directives[directive]);
 }
-*/
+
 
 for (let service in services) {
 	ng.services.push(services[service]);
@@ -19,10 +19,13 @@ for (let service in services) {
 
 routes.define(function($routeProvider){
 	$routeProvider
-		.when('/list', {
-			action: 'list',
+		.when('/', {
+			action: 'badgeReceived'
+		})
+		.when('/badge-types', {
+			action: 'badgeTypes'
 		})
 		.otherwise({
-			action: 'defaultView'
+			redirectTo: '/'
 		});
 })

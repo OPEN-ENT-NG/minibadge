@@ -9,6 +9,7 @@
         "host": "${host}",
         "ssl" : $ssl,
         "sql": true,
+        "db-schema": "minibadge",
         "auto-redeploy": false,
         "userbook-host": "${host}",
         "integration-mode" : "HTTP",

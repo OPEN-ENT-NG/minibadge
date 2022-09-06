@@ -1,0 +1,13 @@
+.minibadge-container {
+  > h2 {
+    margin: 0;
+    margin-top: 10px;
+    font-weight: bold;
+    color: $minibadge-grey;
+
+    @include mobile {
+      @include marginX(10px);
+    }
+  }
+}
+

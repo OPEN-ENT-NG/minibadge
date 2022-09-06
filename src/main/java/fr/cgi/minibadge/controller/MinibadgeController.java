@@ -20,7 +20,7 @@ public class MinibadgeController extends ControllerHelper {
 
     @Get("")
     @ApiDoc("Render view")
-    @SecuredAction("view")
+    @SecuredAction("minibadge.view")
     public void view(HttpServerRequest request) {
         renderView(request, new JsonObject());
 

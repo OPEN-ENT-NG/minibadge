@@ -1,0 +1,44 @@
+$minibadge-blue-dark: #368daf;
+$minibadge-blue: #67add1;
+$minibadge-blue-light: #eff8fc;
+$minibadge-grey: #5b6472;
+$minibadge-grey-light: #ebebeb;
+$minibadge-white: #fff;
+
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 769px) {
+    @content;
+  }
+}
+
+@mixin paddingX($size) {
+  padding-left: $size;
+  padding-right: $size;
+}
+
+@mixin paddingY($size) {
+  padding-bottom: $size;
+  padding-top: $size;
+}
+
+@mixin marginX($size) {
+  margin-left: $size;
+  margin-right: $size;
+}
+
+@mixin marginY($size) {
+  margin-bottom: $size;
+  margin-top: $size;
+}
+
+@mixin navbarBorderBottom($size) {
+  padding-top: $size;
+  border-bottom: solid $size;
+  box-sizing: border-box;
+}

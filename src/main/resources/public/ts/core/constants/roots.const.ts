@@ -1,3 +1,3 @@
 export const RootsConst = {
-    directive: '/minibadge/public/ts/directives/'
+    directive: '/minibadge/public/ts/directives'
 };

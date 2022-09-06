@@ -1,0 +1,44 @@
+.minibadge-card {
+  &-list {
+    margin-top: 30px;
+    background: $minibadge-white;
+    gap: 15px;
+    @include paddingY(15px);
+  }
+
+  background: $minibadge-blue-light;
+  height: 232px;
+  width: 215px;
+  border-radius: 10px;
+
+  @include mobile {
+    width: 170px;
+    height: 183px;
+  }
+
+  &-body {
+    flex: 1;
+  }
+
+  &-footer {
+    height: 48px;
+
+    @include mobile {
+      height: 38px;
+    }
+
+    border-radius: 0 0 10px 10px;
+    background: $minibadge-blue;
+    color: $minibadge-white;
+  }
+
+  &-picture {
+    flex: 1;
+  }
+
+  &-title {
+    height: 31px;
+  }
+
+}
+
