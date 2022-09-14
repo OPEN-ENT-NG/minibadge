@@ -25,6 +25,9 @@ routes.define(function($routeProvider){
 		.when('/badge-types', {
 			action: 'badgeTypes'
 		})
+		.when('/badge-types/:typeId', {
+			action: 'badgeType'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});

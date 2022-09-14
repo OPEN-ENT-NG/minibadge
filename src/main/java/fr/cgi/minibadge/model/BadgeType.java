@@ -7,28 +7,39 @@ import io.vertx.core.json.JsonObject;
 
 public class BadgeType implements Model<BadgeType> {
 
-    private long id;
+    private Long id;
     private String structureId;
     private String ownerId;
     private String pictureId;
     private String label;
     private String description;
+    private String createdAt;
+    private User owner;
 
-    public BadgeType() {}
-    public BadgeType(JsonObject badgeType) {
-        this.id = badgeType.getLong(Field.ID);
-        this.structureId = badgeType.getString(Database.STRUCTUREID, badgeType.getString(Database.STRUCTURE_ID));
-        this.ownerId = badgeType.getString(Field.OWNER_ID, badgeType.getString(Field.OWNERID));
-        this.pictureId = badgeType.getString(Field.PICTURE_ID, badgeType.getString(Field.PICTURE_ID));
-        this.label = badgeType.getString(Field.LABEL);
-        this.description = badgeType.getString(Field.DESCRIPTION);
+    public BadgeType() {
     }
 
-    public long id() {
+    public BadgeType(JsonObject badgeType) {
+        this.set(badgeType);
+    }
+
+    @Override
+    public BadgeType set(JsonObject badgeType) {
+        this.id = badgeType.getLong(Field.ID);
+        this.structureId = badgeType.getString(Database.STRUCTURE_ID, badgeType.getString(Database.STRUCTUREID));
+        this.ownerId = badgeType.getString(Field.OWNER_ID, badgeType.getString(Field.OWNERID));
+        this.pictureId = badgeType.getString(Field.PICTURE_ID, badgeType.getString(Field.PICTUREID));
+        this.label = badgeType.getString(Field.LABEL);
+        this.description = badgeType.getString(Field.DESCRIPTION);
+        this.createdAt = badgeType.getString(Field.CREATED_AT, badgeType.getString(Field.CREATEDAT));
+        return this;
+    }
+
+    public Long id() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -72,15 +83,29 @@ public class BadgeType implements Model<BadgeType> {
         this.description = description;
     }
 
+    public User owner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
     @Override
     public JsonObject toJson() {
-        return new JsonObject()
+        JsonObject badgeType = new JsonObject()
                 .put(Field.ID, this.id)
                 .put(Database.STRUCTUREID, this.structureId)
                 .put(Field.OWNERID, this.ownerId)
                 .put(Field.PICTUREID, this.pictureId)
                 .put(Field.LABEL, this.label)
+                .put(Field.CREATEDAT, this.createdAt)
                 .put(Field.DESCRIPTION, this.description);
+
+        if (this.owner != null)
+            badgeType.put(Field.OWNER, this.owner.toJson());
+
+        return badgeType;
     }
 
     @Override

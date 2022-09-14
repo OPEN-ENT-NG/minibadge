@@ -13,6 +13,13 @@ public class SqlHelper {
         throw new IllegalStateException("Utility class");
     }
 
+    public static String filterStructures(List<String> structureIds, JsonArray params) {
+        if (structureIds == null || structureIds.isEmpty()) return "";
+
+        params.addAll(new JsonArray(structureIds));
+        return String.format("structure_id IN %s", Sql.listPrepared(structureIds));
+    }
+
     public static String addLimitOffset(Integer limit, Integer offset, JsonArray params) {
         String query = "";
         if (limit != null) {

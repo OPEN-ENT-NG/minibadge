@@ -1,74 +1,42 @@
-import {Behaviours, model, ng, notify} from 'entcore';
+import {ng, notify} from 'entcore';
 
 import {IBadgeTypeService} from "../services";
-import {IBadgeType, IBadgeTypesPayload, IBadgeTypesResponse} from "../models/badge-type.model";
+import {BadgeType} from "../models/badge-type.model";
 import {safeApply} from "../utils/safe-apply.utils";
 import {AxiosError} from "axios";
-import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {IScope} from "angular";
-import {ISetting} from "../models/setting.model";
+import {Setting} from "../models/setting.model";
 
 
 interface ViewModel {
-    getBadgeTypes(): Promise<void>;
-
-    initBadgeTypes(query?: string): Promise<void>;
-
-    onScroll(): Promise<void>;
-
-    badgeTypes: IBadgeType[];
+    badgeType: BadgeType;
 }
 
 interface IMinibadgeScope extends IScope {
     vm: ViewModel;
-    setting: ISetting;
+    setting: Setting;
 }
 
 class Controller implements ng.IController, ViewModel {
-    private payload: IBadgeTypesPayload;
-
-    badgeTypes: IBadgeType[];
+    badgeType: BadgeType;
 
     constructor(private $scope: IMinibadgeScope,
                 private $route: any,
-                private badgeTypeService: IBadgeTypeService,) {
+                private badgeTypeService: IBadgeTypeService) {
         this.$scope.vm = this;
-        this.payload = {
-            offset: 0,
-        };
     }
 
     $onInit() {
-        this.initBadgeTypes();
+        this.getBadgeType(this.$route.current.params.typeId);
     }
 
-    resetBadgeTypes = (): void => {
-        this.payload.offset = 0;
-        this.badgeTypes = [];
-    }
-
-    getBadgeTypes = async (): Promise<void> => {
-        this.badgeTypeService.getBadgeTypes(model.me.structures[0], this.payload)
-            .then((data: IBadgeTypesResponse) => {
-                if (data && data.all && data.all.length > 0) {
-                    this.badgeTypes.push(...data.all);
-                    Behaviours.applicationsBehaviours[MINIBADGE_APP].infiniteScrollService
-                        .updateScroll();
-                }
+    private getBadgeType = async (typeId: number): Promise<void> => {
+        this.badgeTypeService.getBadgeType(typeId)
+            .then((data: BadgeType) => {
+                if (data) this.badgeType = data;
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.get.badge.types'))
-    }
-
-    onScroll = async (): Promise<void> => {
-        this.payload.offset += this.$scope.setting.pageSize;
-        await this.getBadgeTypes();
-    };
-
-    initBadgeTypes = async (query?: string): Promise<void> => {
-        this.payload.query = query;
-        this.resetBadgeTypes();
-        await this.getBadgeTypes();
+            .catch((err: AxiosError) => notify.error('minibadge.error.get.badge.type'))
     }
 
 
@@ -77,4 +45,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const badgeTypeController = ng.controller('BadgeTypeController',
-    ['$scope', 'route', 'BadgeTypeService', Controller]);
+    ['$scope', '$route', 'BadgeTypeService', Controller]);

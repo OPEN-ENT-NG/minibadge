@@ -6,10 +6,16 @@ import io.vertx.core.json.JsonObject;
 
 public class GlobalSettings implements Model<GlobalSettings> {
 
-    private final int pageSize;
+    private int pageSize;
 
     public GlobalSettings(JsonObject globalSettings) {
+        this.set(globalSettings);
+    }
+
+    @Override
+    public GlobalSettings set(JsonObject globalSettings) {
         this.pageSize = globalSettings.getInteger(Request.PAGESIZE);
+        return this;
     }
 
     @Override
@@ -22,4 +28,6 @@ public class GlobalSettings implements Model<GlobalSettings> {
     public GlobalSettings model(JsonObject globalSettings) {
         return new GlobalSettings(globalSettings);
     }
+
+
 }

@@ -1,7 +1,5 @@
 body.minibadge, .sniplet.minibadge {
   @import "mixins";
-  @import "components/index";
-  @import "containers/index";
 
   @include mobile {
     font-size: 12px;
@@ -19,6 +17,12 @@ body.minibadge, .sniplet.minibadge {
       top: 50px;
     }
   }
+
+
+  @import "components/index";
+  @import "containers/index";
+
+
 }
 
 

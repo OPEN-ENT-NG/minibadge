@@ -1,6 +1,7 @@
 package fr.cgi.minibadge.service;
 
 import fr.cgi.minibadge.service.impl.DefaultBadgeTypeService;
+import fr.cgi.minibadge.service.impl.DefaultEventBusService;
 import fr.cgi.minibadge.service.impl.DefaultMinibadgeService;
 import fr.cgi.minibadge.service.impl.DefaultSettingService;
 import fr.wseduc.mongodb.MongoDb;
@@ -34,7 +35,11 @@ public class ServiceFactory {
     }
 
     public BadgeTypeService badgeTypeService() {
-        return new DefaultBadgeTypeService(sql);
+        return new DefaultBadgeTypeService(sql, this.eventBus());
+    }
+
+    public EventBusService eventBusService() {
+        return new DefaultEventBusService(this.eventBus());
     }
 
     // Helpers

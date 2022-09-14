@@ -1,13 +1,13 @@
 import {ng} from 'entcore';
 import {IScope} from "angular";
-import {ISetting} from "../models/setting.model";
+import {Setting} from "../models/setting.model";
 
 interface ViewModel {
 }
 
 interface IMinibadgeScope extends IScope {
     vm: ViewModel;
-    setting: ISetting;
+    setting: Setting;
 }
 
 class Controller implements ng.IController, ViewModel {

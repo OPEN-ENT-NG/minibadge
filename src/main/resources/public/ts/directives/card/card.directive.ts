@@ -1,25 +1,33 @@
 import {ng} from "entcore";
 import {RootsConst} from "../../core/constants/roots.const";
-import {ILocationService, IScope, IWindowService} from "angular";
-import {IBadgeType} from "../../models/badge-type.model";
+import {IDirective, ILocationService} from "angular";
+import {BadgeType} from "../../models/badge-type.model";
+import {CARD_FOOTER} from "../../core/enum/card-footers.enum";
 
 interface IViewModel {
-    navbarViewSelected: IBadgeType;
-}
+    clickRedirect(): void;
 
-interface IMinibadgeScope extends IScope {
-    vm: IViewModel;
+    CARD_FOOTER: typeof CARD_FOOTER;
+    footer?: CARD_FOOTER;
+    badgeType: BadgeType;
+    clickPath?: string;
 }
 
 class Controller implements ng.IController, IViewModel {
-    navbarViewSelected: IBadgeType;
+    CARD_FOOTER: typeof CARD_FOOTER;
+    footer?: CARD_FOOTER;
+    badgeType: BadgeType;
+    clickPath?: string;
 
-    constructor(private $scope: IMinibadgeScope,
-                private $location: ILocationService,
-                private $window: IWindowService) {
+    constructor(private $location: ILocationService) {
+        this.CARD_FOOTER = CARD_FOOTER;
     }
 
     $onInit() {
+    }
+
+    clickRedirect(): void {
+        if (this.clickPath) this.$location.path(this.clickPath);
     }
 
     $onDestroy() {
@@ -27,17 +35,20 @@ class Controller implements ng.IController, IViewModel {
 
 }
 
-function directive() {
+
+function directive(): IDirective {
     return {
         replace: true,
         restrict: 'E',
         templateUrl: `${RootsConst.directive}/card/card.html`,
         scope: {
-            badgeType: '='
+            badgeType: '=',
+            clickPath: '=?',
+            footer: '=?'
         },
         controllerAs: 'vm',
         bindToController: true,
-        controller: ['$scope', '$location', '$window', Controller],
+        controller: ['$location', Controller],
         /* interaction DOM/element */
         link: function (scope: ng.IScope,
                         element: ng.IAugmentedJQuery,
@@ -47,4 +58,4 @@ function directive() {
     }
 }
 
-export const minibadgeCard = ng.directive('minibadgeCard', directive)
+export const minibadgeCardType = ng.directive('minibadgeCardType', directive);

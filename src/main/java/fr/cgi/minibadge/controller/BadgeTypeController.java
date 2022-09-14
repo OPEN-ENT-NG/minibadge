@@ -7,9 +7,12 @@ import fr.cgi.minibadge.service.BadgeTypeService;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
+import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.user.UserUtils;
 
 public class BadgeTypeController extends ControllerHelper {
 
@@ -20,16 +23,27 @@ public class BadgeTypeController extends ControllerHelper {
         this.badgeTypeService = serviceFactory.badgeTypeService();
     }
 
-    @Get("/structures/:structureId/types")
+    @Get("/types")
     @ApiDoc("Retrieve badge type list")
     public void getBadgeTypes(HttpServerRequest request) {
-        String structureId = request.params().get(Database.STRUCTUREID);
         Integer offset = Integer.parseInt(request.params().get(Request.OFFSET));
         int limit = RequestHelper.cappingLimit(request.params());
         String query = request.params().get(Request.QUERY);
 
-        badgeTypeService.getBadgeTypes(structureId, query, limit, offset)
+        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset)
                 .onSuccess(badgeTypes -> renderJson(request, RequestHelper.formatResponse(limit, offset, badgeTypes)))
-                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+    }
+
+    @Get("/types/:typeId")
+    @ApiDoc("Retrieve badge type")
+    public void getBadgeType(HttpServerRequest request) {
+        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+
+        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeType(user.getStructures(), typeId, host, language)
+                .onSuccess(badgeType -> renderJson(request, badgeType.toJson()))
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
 }

@@ -1,4 +1,4 @@
-export interface IResponse<I> {
+export interface IPaginatedResponse<I> {
     page?: number;
     pageCount?: number;
     limit?: number;
@@ -13,7 +13,7 @@ export interface ILimitOffsetPayload {
     offset: number;
 }
 
-export interface IPaginatedPayload {
+export interface IPaginatedSearchPayload {
     query?: string;
     page: number;
 }

@@ -1,9 +1,15 @@
 {
+  "minibadge.admin": "Admin",
+  "minibadge.badge": "Badge",
   "minibadge.badge.assign": "Award badge",
-  "minibadge.badge.search": "Rechercher un badge",
-  "minibadge.error.get.badge.types": "Une erreur est survenue à la récupération de la bibliothèque de badges",
-  "minibadge.error.get.global.settings": "Une erreur est survenue à la récupération de la configuration",
+  "minibadge.badge.search": "Look for a badge",
+  "minibadge.created.by": "Created by",
+  "minibadge.description": "Description",
+  "minibadge.error.get.badge.type": "An error occurred while retrieving the type",
+  "minibadge.error.get.badge.types": "An error occurred while retrieving badge library",
+  "minibadge.error.get.global.settings": "An error occurred while retrieving the configuration",
   "minibadge.navbar.badges.received": "Badges received",
   "minibadge.navbar.badges.library": "Badges library",
+  "minibadge.the": "",
   "minibadge.title": "Minibadge"
 }

@@ -5,6 +5,7 @@ public class Database {
     public static final String LABEL = "label";
     public static final String STRUCTUREID = "structureId";
     public static final String STRUCTURE_ID = "structure_Id";
+    public static final String TYPEID = "typeId";
 
     private Database() {
         throw new IllegalStateException("Utility class");

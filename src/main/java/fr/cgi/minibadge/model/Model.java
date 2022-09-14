@@ -11,6 +11,8 @@ public interface Model<I extends Model<I>> {
 
     I model(JsonObject model);
 
+    I set(JsonObject model);
+
     @SuppressWarnings("unchecked")
     default List<I> toList(JsonArray results) {
         return ((List<JsonObject>) results.getList()).stream().map(this::model).collect(Collectors.toList());

@@ -1,0 +1,59 @@
+.minibadge-type {
+  margin-top: 20px;
+  background: $minibadge-white;
+  @include paddingY(15px);
+  @include paddingX(15px);
+
+  @include desktop {
+    flex-direction: column;
+    border: solid $minibadge-grey-light 2px;
+    border-radius: 5px;
+  }
+
+  @include mobile {
+    font-size: 16px;
+  }
+
+  > h2 {
+    margin-top: 0;
+    font-weight: normal;
+    font-size: 25px;
+    color: $minibadge-grey;
+  }
+
+  &-container {
+    @include mobile {
+      flex-direction: column;
+    }
+  }
+
+  &-id {
+    @include desktop {
+      width: 420px;
+    }
+
+    .minibadge-card-simple {
+      @include desktop {
+        align-self: center;
+        background-color: $minibadge-white !important;
+      }
+    }
+  }
+
+  &-description {
+    @include desktop {
+      flex: 1;
+      margin-left: 30px;
+    }
+  }
+
+  &-data {
+    @include paddingX(15px);
+    line-height: 30px;
+    @include desktop {
+      margin-top: 20px;
+    }
+  }
+
+}
+

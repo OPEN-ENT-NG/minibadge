@@ -34,6 +34,9 @@
 
   &-picture {
     flex: 1;
+    img {
+      max-height: 100%;
+    }
   }
 
   &-title {

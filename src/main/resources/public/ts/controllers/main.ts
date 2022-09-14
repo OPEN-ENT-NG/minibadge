@@ -2,7 +2,7 @@ import {ng, template} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {ISettingService} from "../services";
 import {AxiosError} from "axios";
-import {ISetting} from "../models/setting.model";
+import {Setting} from "../models/setting.model";
 import {IScope} from "angular";
 
 interface ViewModel {
@@ -11,7 +11,7 @@ interface ViewModel {
 
 interface IMinibadgeScope extends IScope {
     vm: ViewModel;
-    setting: ISetting;
+    setting: Setting;
 }
 
 /**
@@ -29,21 +29,24 @@ class Controller implements ng.IController, ViewModel {
         this.$scope.vm = this;
 
         this.$route({
+            badgeReceived: () => {
+                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_RECEIVED;
+                template.open('main', `main`);
+            },
             badgeTypes: () => {
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_LIBRARY;
                 template.open('main', `badge-types`);
             },
-            badgeReceived: () => {
-                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_RECEIVED;
-                template.open('main', `main`);
+            badgeType: () => {
+                template.open('main', `badge-type`);
             }
         });
     }
 
     $onInit() {
         this.settingService.getGlobalSettings()
-            .then((res: ISetting) => this.$scope.setting = res)
-            .catch((err: AxiosError) => this.$scope.setting = {pageSize: 0});
+            .then((res: Setting) => this.$scope.setting = res)
+            .catch((err: AxiosError) => this.$scope.setting = new Setting({pageSize: 0}));
     }
 
     $onDestroy() {

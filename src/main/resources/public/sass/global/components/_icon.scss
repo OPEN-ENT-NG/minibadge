@@ -1,0 +1,11 @@
+i {
+  &.calendar-range::before {
+    font-family: 'material-icons';
+    content: "\F678";
+  }
+
+  &.user-circle::before {
+    font-family: 'material-icons';
+    content: "\F009";
+  }
+}
