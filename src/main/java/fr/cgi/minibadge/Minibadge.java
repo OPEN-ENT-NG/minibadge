@@ -1,8 +1,6 @@
 package fr.cgi.minibadge;
 
-import fr.cgi.minibadge.controller.BadgeTypeController;
-import fr.cgi.minibadge.controller.MinibadgeController;
-import fr.cgi.minibadge.controller.SettingController;
+import fr.cgi.minibadge.controller.*;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.mongodb.MongoDb;
 import org.entcore.common.http.BaseServer;
@@ -32,6 +30,8 @@ public class Minibadge extends BaseServer {
         addController(new MinibadgeController(serviceFactory));
         addController(new SettingController(serviceFactory));
         addController(new BadgeTypeController(serviceFactory));
+        addController(new BadgeAssignedController(serviceFactory));
+        addController(new UserController());
     }
 
 }

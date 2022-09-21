@@ -1,4 +1,4 @@
-export interface IPaginatedResponse<I> {
+export interface IPaginatedResponses<I> {
     page?: number;
     pageCount?: number;
     limit?: number;
@@ -7,13 +7,15 @@ export interface IPaginatedResponse<I> {
 }
 
 
-export interface ILimitOffsetPayload {
+export interface IQueryStringPayload {
     query?: string;
+}
+
+export interface ILimitOffsetPayload extends IQueryStringPayload {
     limit?: number;
     offset: number;
 }
 
-export interface IPaginatedSearchPayload {
-    query?: string;
+export interface IPaginatedPayload extends IQueryStringPayload {
     page: number;
 }

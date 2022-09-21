@@ -5,7 +5,7 @@ import {BadgeType, IBadgeTypesPayload} from "../models/badge-type.model";
 import {safeApply} from "../utils/safe-apply.utils";
 import {AxiosError} from "axios";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
-import {IScope} from "angular";
+import {ILocationService, IScope} from "angular";
 import {Setting} from "../models/setting.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 
@@ -13,12 +13,17 @@ import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 interface ViewModel {
     getBadgeTypes(): Promise<void>;
 
-    initBadgeTypes(query?: string): Promise<void>;
+    initBadgeTypes(): Promise<void>;
 
     onScroll(): Promise<void>;
 
+    redirectBadgeType(badgeType: BadgeType): void;
+
+    onOpenLightbox(badgeType: BadgeType): void;
+
     CARD_FOOTER: typeof CARD_FOOTER;
     badgeTypes: BadgeType[];
+    searchQuery: string;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -31,9 +36,10 @@ class Controller implements ng.IController, ViewModel {
 
     CARD_FOOTER: typeof CARD_FOOTER;
     badgeTypes: BadgeType[];
+    searchQuery: string;
 
     constructor(private $scope: IMinibadgeScope,
-                private $route: any,
+                private $location: ILocationService,
                 private badgeTypeService: IBadgeTypeService) {
         this.$scope.vm = this;
         this.CARD_FOOTER = CARD_FOOTER;
@@ -69,10 +75,19 @@ class Controller implements ng.IController, ViewModel {
         await this.getBadgeTypes();
     };
 
-    initBadgeTypes = async (query?: string): Promise<void> => {
-        this.payload.query = query;
+    initBadgeTypes = async (): Promise<void> => {
+        this.payload.query = this.searchQuery;
         this.resetBadgeTypes();
         await this.getBadgeTypes();
+    }
+
+    redirectBadgeType = (badgeType: BadgeType): void => {
+       this.$location.path(badgeType.getDetailPath());
+    }
+
+    onOpenLightbox = (badgeType: BadgeType): void => {
+        Behaviours.applicationsBehaviours[MINIBADGE_APP].snipletBadgeAssignService
+            .sendBadgeType(badgeType);
     }
 
 
@@ -81,4 +96,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const badgeTypesController = ng.controller('BadgeTypesController',
-    ['$scope', 'route', 'BadgeTypeService', Controller]);
+    ['$scope', '$location', 'BadgeTypeService', Controller]);

@@ -1,4 +1,4 @@
-import {ILimitOffsetPayload, IPaginatedResponse} from "./request.model";
+import {ILimitOffsetPayload, IPaginatedResponses} from "./request.model";
 import {IUserResponse, User} from "./user.model";
 import {MinibadgeModel} from "./model";
 
@@ -16,7 +16,7 @@ export interface IBadgeTypeResponse {
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
 }
 
-export interface IBadgeTypesResponses extends IPaginatedResponse<IBadgeTypeResponse> {
+export interface IBadgeTypesResponses extends IPaginatedResponses<IBadgeTypeResponse> {
 }
 
 

@@ -1,7 +1,16 @@
 <div ng-controller="BadgeTypeController as vm" class="minibadge-container flex-row f-column">
-    <h2><i18n>minibadge.badge</i18n>&nbsp;[[vm.badgeType.label]]</h2>
+    <div class="flex-row align-center">
+        <h2 class="flex-one">
+            <i18n>minibadge.badge</i18n>&nbsp;[[vm.badgeType.label]]
+        </h2>
+        <button class="minibadge-mobile-padding-x minibadge-margin-top no-margin-bottom"
+                ng-click="vm.onOpenLightbox()">
+            <i18n>minibadge.badge.assign</i18n>
+        </button>
+    </div>
     <div class="minibadge-type-container flex-row">
         <minibadge-id-type badge-type="vm.badgeType"></minibadge-id-type>
         <minibadge-description-type badge-type="vm.badgeType"></minibadge-description-type>
     </div>
+    <sniplet template="badge-assign" application="minibadge"></sniplet>
 </div>

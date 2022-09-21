@@ -2,7 +2,8 @@ $minibadge-blue-dark: #368daf;
 $minibadge-blue: #67add1;
 $minibadge-blue-light: #eff8fc;
 $minibadge-grey: #5b6472;
-$minibadge-grey-light: #ebebeb;
+$minibadge-grey-light: #d6d6d6;
+$minibadge-grey-lighter: #ebebeb;
 $minibadge-white: #fff;
 
 @mixin mobile {
@@ -41,4 +42,18 @@ $minibadge-white: #fff;
   padding-top: $size;
   border-bottom: solid $size;
   box-sizing: border-box;
+}
+
+.minibadge-mobile-padding-x {
+  @include mobile {
+    @include paddingX(10px);
+  }
+}
+
+.minibadge-margin-top {
+  margin-top: 10px;
+}
+
+.minibadge-delete-button {
+  background-color: $minibadge-grey-light;
 }

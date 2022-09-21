@@ -1,33 +1,41 @@
 import {ng} from "entcore";
 import {RootsConst} from "../../core/constants/roots.const";
-import {IDirective, ILocationService} from "angular";
+import {IDirective, IScope, isFunction} from "angular";
 import {BadgeType} from "../../models/badge-type.model";
 import {CARD_FOOTER} from "../../core/enum/card-footers.enum";
 
 interface IViewModel {
-    clickRedirect(): void;
+    bodyClick(): void;
 
     CARD_FOOTER: typeof CARD_FOOTER;
+
+}
+
+interface IDirectiveProperties {
+    onBodyClick?(badgeType: BadgeType): void;
+
+    onFooterClick?(badgeType: BadgeType): void;
+
     footer?: CARD_FOOTER;
     badgeType: BadgeType;
-    clickPath?: string;
+}
+
+interface IMinibadgeScope extends IScope {
+    vm: IDirectiveProperties;
 }
 
 class Controller implements ng.IController, IViewModel {
     CARD_FOOTER: typeof CARD_FOOTER;
-    footer?: CARD_FOOTER;
-    badgeType: BadgeType;
-    clickPath?: string;
 
-    constructor(private $location: ILocationService) {
+    constructor(private $scope: IMinibadgeScope) {
         this.CARD_FOOTER = CARD_FOOTER;
     }
 
     $onInit() {
     }
 
-    clickRedirect(): void {
-        if (this.clickPath) this.$location.path(this.clickPath);
+    bodyClick(): void {
+        if (isFunction(this.$scope.vm.onBodyClick)) this.$scope.vm.onBodyClick(this.$scope.vm.badgeType)
     }
 
     $onDestroy() {
@@ -43,12 +51,13 @@ function directive(): IDirective {
         templateUrl: `${RootsConst.directive}/card/card.html`,
         scope: {
             badgeType: '=',
-            clickPath: '=?',
-            footer: '=?'
+            footer: '=?',
+            onBodyClick: '&?',
+            onFooterClick: '&?'
         },
         controllerAs: 'vm',
         bindToController: true,
-        controller: ['$location', Controller],
+        controller: ['$scope', Controller],
         /* interaction DOM/element */
         link: function (scope: ng.IScope,
                         element: ng.IAugmentedJQuery,

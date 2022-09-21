@@ -1,10 +1,15 @@
 import {MinibadgeModel} from "./model";
+import {IPaginatedResponses, IQueryStringPayload} from "./request.model";
 
 export interface IUserResponse {
     id: string;
     firstName: string;
     lastName: string;
 }
+
+export interface IUsersResponses extends IPaginatedResponses<IUserResponse>{}
+
+export interface IUserPayload extends IQueryStringPayload{}
 
 export class User extends MinibadgeModel<User> {
     id: string;

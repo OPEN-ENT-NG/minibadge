@@ -1,0 +1,5 @@
+<div class="flex-row centered-text">
+    <search-input search-query="vm.searchQuery" on-search="vm.onSearch()" placeholder="[[vm.placeholder]]"></search-input>
+    <search-results results="vm.results" on-display-result="vm.onDisplayResult({result: result})"
+                    on-select-result="vm.onSelectResult({result: result})"></search-results>
+</div>

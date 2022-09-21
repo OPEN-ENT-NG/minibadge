@@ -8,4 +8,14 @@ i {
     font-family: 'material-icons';
     content: "\F009";
   }
+
+  &.close::before {
+    font-family: 'material-icons';
+    content: "\F156";
+  }
+
+  &.chevron-left::before {
+    font-family: 'material-icons';
+    content: "\F141";
+  }
 }

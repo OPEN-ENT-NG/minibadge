@@ -1,16 +1,22 @@
-import {ng} from "entcore";
-import {IDirective, IScope, isFunction} from "angular";
-import {RootsConst} from "../../../../core/constants/roots.const";
-import {BadgeType} from "../../../../models/badge-type.model";
+import {idiom as lang, ng} from 'entcore';
+import {IScope} from "angular";
+import {RootsConst} from "../../core/constants/roots.const";
 
 interface IViewModel {
-    click(): void;
+    lang: typeof lang;
+
 }
 
 interface IDirectiveProperties {
-    onClick?(badgeType: BadgeType): void;
+    onSearch(): void;
 
-    badgeType: BadgeType;
+    onDisplayResult(result: any): string;
+
+    onSelectResult(result: any): void;
+
+    placeholder?: string;
+    results: any[];
+    searchQuery: string;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -18,14 +24,13 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
+    lang: typeof lang;
+
     constructor(private $scope: IMinibadgeScope) {
     }
 
     $onInit() {
-    }
-
-    click() {
-        if (isFunction(this.$scope.vm.onClick)) this.$scope.vm.onClick(this.$scope.vm.badgeType)
+        this.lang = lang;
     }
 
     $onDestroy() {
@@ -33,15 +38,18 @@ class Controller implements ng.IController, IViewModel {
 
 }
 
-
-function directive(): IDirective {
+function directive() {
     return {
         replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/card/footer/award-badge/award-badge-footer.html`,
+        templateUrl: `${RootsConst.directive}/search/search.html`,
         scope: {
-            badgeType: '=',
-            onClick: '&?',
+            onSearch: '&',
+            onDisplayResult: '&',
+            onSelectResult: '&',
+            placeholder: '@?',
+            results: "=",
+            searchQuery: "=",
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -55,4 +63,4 @@ function directive(): IDirective {
     }
 }
 
-export const awardBadgeFooter = ng.directive('awardBadgeFooter', directive);
+export const minibadgeSearch = ng.directive('minibadgeSearch', directive)

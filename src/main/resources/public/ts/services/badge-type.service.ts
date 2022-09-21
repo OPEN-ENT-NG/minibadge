@@ -18,7 +18,7 @@ export const badgeTypeService: IBadgeTypeService = {
         http.get(`/minibadge/types?offset=${payload.offset}${payload.query ? `&query=${payload.query}` : ''}`)
             .then((res: AxiosResponse) => {
                 let badgeTypesResponses: IBadgeTypesResponses = res.data;
-                return new BadgeType().toList(badgeTypesResponses ? badgeTypesResponses.all : [])
+                return new BadgeType().toList(badgeTypesResponses ? badgeTypesResponses.all : []);
             }),
 
     /**

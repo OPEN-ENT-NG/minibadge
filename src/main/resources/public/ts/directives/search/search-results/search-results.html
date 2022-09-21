@@ -1,0 +1,21 @@
+<div data-drop-down class="drop-down minibadge-search-results" ng-class="{scroll: vm.results.length > 0, empty: vm.results.length === 0}">
+    <div ng-if="vm.results && vm.results.length > 0">
+        <ul class="ten cell right-magnet">
+            <li class="block-container" ng-repeat="result in vm.results" ng-model="result"
+                ng-click="vm.onSelectResult({result: result})">
+                <a class="cell right-spacing">
+                    [[vm.onDisplayResult({result: result})]]
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div ng-if="vm.results && vm.results.length === 0">
+        <ul class="ten cell right-magnet">
+            <li class="display-more block-container">
+                <a class="cell right-spacing">
+                    [[vm.lang.translate('minibadge.no.result')]]
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

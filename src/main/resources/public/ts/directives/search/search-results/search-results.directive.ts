@@ -1,16 +1,17 @@
-import {ng} from "entcore";
-import {IDirective, IScope, isFunction} from "angular";
-import {RootsConst} from "../../../../core/constants/roots.const";
-import {BadgeType} from "../../../../models/badge-type.model";
+import {idiom as lang, ng} from 'entcore';
+import {RootsConst} from "../../../core/constants/roots.const";
+import {IScope} from "angular";
 
 interface IViewModel {
-    click(): void;
+    lang: typeof lang;
 }
 
 interface IDirectiveProperties {
-    onClick?(badgeType: BadgeType): void;
+    onDisplayResult(result: any): string;
 
-    badgeType: BadgeType;
+    onSelectResult(result: any): void;
+
+    results: any[];
 }
 
 interface IMinibadgeScope extends IScope {
@@ -18,14 +19,13 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
+    lang: typeof lang;
+
     constructor(private $scope: IMinibadgeScope) {
     }
 
     $onInit() {
-    }
-
-    click() {
-        if (isFunction(this.$scope.vm.onClick)) this.$scope.vm.onClick(this.$scope.vm.badgeType)
+        this.lang = lang;
     }
 
     $onDestroy() {
@@ -33,15 +33,15 @@ class Controller implements ng.IController, IViewModel {
 
 }
 
-
-function directive(): IDirective {
+function directive() {
     return {
         replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/card/footer/award-badge/award-badge-footer.html`,
+        templateUrl: `${RootsConst.directive}/search/search-results/search-results.html`,
         scope: {
-            badgeType: '=',
-            onClick: '&?',
+            results: '=',
+            onDisplayResult: '&',
+            onSelectResult: '&'
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -55,4 +55,4 @@ function directive(): IDirective {
     }
 }
 
-export const awardBadgeFooter = ng.directive('awardBadgeFooter', directive);
+export const searchResults = ng.directive('searchResults', directive)

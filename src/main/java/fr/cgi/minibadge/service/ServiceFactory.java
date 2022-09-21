@@ -1,9 +1,6 @@
 package fr.cgi.minibadge.service;
 
-import fr.cgi.minibadge.service.impl.DefaultBadgeTypeService;
-import fr.cgi.minibadge.service.impl.DefaultEventBusService;
-import fr.cgi.minibadge.service.impl.DefaultMinibadgeService;
-import fr.cgi.minibadge.service.impl.DefaultSettingService;
+import fr.cgi.minibadge.service.impl.*;
 import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -38,8 +35,12 @@ public class ServiceFactory {
         return new DefaultBadgeTypeService(sql, this.eventBus());
     }
 
-    public EventBusService eventBusService() {
-        return new DefaultEventBusService(this.eventBus());
+    public BadgeService badgeService() {
+        return new DefaultBadgeService(sql);
+    }
+
+    public BadgeAssignedService badgeAssignedService() {
+        return new DefaultBadgeAssignedService(sql, this.badgeService());
     }
 
     // Helpers

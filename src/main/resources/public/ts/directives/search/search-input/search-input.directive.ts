@@ -1,5 +1,5 @@
 import {idiom as lang, ng} from 'entcore';
-import {RootsConst} from "../../core/constants/roots.const";
+import {RootsConst} from "../../../core/constants/roots.const";
 import {IScope, ITimeoutService} from "angular";
 
 interface IViewModel {
@@ -8,20 +8,25 @@ interface IViewModel {
 
     pausedTyping(): void;
 
-    searchQuery: string;
+
     lang: typeof lang,
 }
 
+interface IDirectiveProperties {
+    onSearch(): void;
+
+    searchQuery: string;
+    placeholder?: string;
+}
+
 interface IMinibadgeScope extends IScope {
-    vm: IViewModel;
+    vm: IDirectiveProperties;
 }
 
 class Controller implements ng.IController, IViewModel {
     private token: number;
     private typingTimeout: number;
-    private onSearch: () => (query: string) => void;
 
-    searchQuery: string;
     lang: typeof lang;
 
     constructor(private $scope: IMinibadgeScope, private $timeout: ITimeoutService) {
@@ -32,7 +37,7 @@ class Controller implements ng.IController, IViewModel {
     }
 
     private endTyping = (): void => {
-        this.onSearch()(this.searchQuery);
+        this.$scope.vm.onSearch();
         cancelAnimationFrame(this.token);
     }
 
@@ -55,8 +60,9 @@ function directive() {
     return {
         replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/search-input/search-input.html`,
+        templateUrl: `${RootsConst.directive}/search/search-input/search-input.html`,
         scope: {
+            searchQuery: '=',
             onSearch: '&',
             placeholder: '@?'
         },

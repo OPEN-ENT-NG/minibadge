@@ -8,7 +8,6 @@ import fr.cgi.minibadge.helper.SqlHelper;
 import fr.cgi.minibadge.model.BadgeType;
 import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.BadgeTypeService;
-import fr.cgi.minibadge.service.EventBusService;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -17,7 +16,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
-import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.util.Collections;

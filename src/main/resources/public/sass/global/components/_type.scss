@@ -6,7 +6,7 @@
 
   @include desktop {
     flex-direction: column;
-    border: solid $minibadge-grey-light 2px;
+    border: solid $minibadge-grey-lighter 2px;
     border-radius: 5px;
   }
 
@@ -36,6 +36,10 @@
       @include desktop {
         align-self: center;
         background-color: $minibadge-white !important;
+      }
+
+      &-full {
+        width: 100%;
       }
     }
   }

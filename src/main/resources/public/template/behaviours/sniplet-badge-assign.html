@@ -1,0 +1,36 @@
+<lightbox show="vm.isLightBoxOpened" on-close="vm.closeLightbox()" class="minibadge-assign">
+    <div class="minibadge-container minibadge-assign flex-row f-column">
+        <h2 class="minibadge-assign-title" ng-click="vm.closeLightbox()">
+            <span><i class="chevron-left"></i></span>&nbsp;<i18n>minibadge.badge.assign</i18n>&nbsp;[[vm.badgeType.label]]
+        </h2>
+        <div class="flex-row minibadge-assign-content">
+            <div class="minibadge-assign-content-card flex-one">
+                <minibadge-card-type badge-type="vm.badgeType" class="minibadge-card-simple-full"></minibadge-card-type>
+            </div>
+            <div class="minibadge-assign-content-search flex-row flex-one f-column justify-start align-start">
+                <h3>
+                    <i18n>minibadge.choose.users.to.assign</i18n>
+                </h3>
+                <minibadge-search class="search-user justify-start" search-query="vm.searchQuery"
+                                  on-search="vm.onSearchUser()"
+                                  on-display-result="vm.displayUser(result)"
+                                  on-select-result="vm.onSelectUser(result)"
+                                  results="vm.userSearchResults"></minibadge-search>
+                <h3>
+                    <i18n>minibadge.selected.persons</i18n>&nbsp;&#58;
+                </h3>
+                <minibadge-selected-list selected-list="vm.userSelected" on-display-item="vm.displayUser"
+                                         on-remove-item="vm.removeUser"></minibadge-selected-list>
+            </div>
+        </div>
+        <div class="minibadge-assign-footer flex-row justify-end">
+            <button class="minibadge-delete-button"
+                    ng-click="vm.closeLightbox()">
+                <i18n>minibadge.cancel</i18n>
+            </button>
+            <button ng-click="vm.assign()">
+                <i18n>minibadge.badge.assign</i18n>
+            </button>
+        </div>
+    </div>
+</lightbox>

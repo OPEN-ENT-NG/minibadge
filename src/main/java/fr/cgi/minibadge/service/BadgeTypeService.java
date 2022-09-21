@@ -19,7 +19,7 @@ public interface BadgeTypeService {
     Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset);
 
     /**
-     * Get list of general / structure based badge types
+     * Get badge type
      *
      * @param structureIds Structure identifiers
      * @param typeId Structure identifier
