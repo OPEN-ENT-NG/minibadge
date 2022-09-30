@@ -18,4 +18,24 @@ i {
     font-family: 'material-icons';
     content: "\F141";
   }
+
+  &.star::before {
+    font-family: 'material-icons';
+    content: "\F4CE";
+  }
+
+  &.icon-info::before {
+    font-family: 'material-icons';
+    content: "\F2FC";
+  }
+
+  &.earth::before {
+    font-family: 'material-icons';
+    content: "\F1E7";
+  }
+
+  &.dots-vertical::before {
+    font-family: 'material-icons';
+    content: "\F1D9";
+  }
 }

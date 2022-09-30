@@ -1,5 +1,4 @@
 .minibadge-assign {
-  //@include paddingX(15px);
 
   section.lightbox {
     @include mobile {
@@ -84,6 +83,7 @@
   .minibadge-card-simple-full {
     @include mobile {
       align-self: center;
+      border: solid $minibadge-shadow-light 1px;
       width: 100%;
     }
   }

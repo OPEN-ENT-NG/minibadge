@@ -6,10 +6,11 @@
     @include paddingY(15px);
   }
 
-  background: $minibadge-blue-light;
   height: 232px;
   width: 215px;
   border-radius: 10px;
+  background: $minibadge-blue-light;
+  border: solid $minibadge-shadow-light 1px;
 
   @include mobile {
     width: 170px;
@@ -18,22 +19,108 @@
 
   &-body {
     flex: 1;
+
+    &-icon {
+      @include paddingX(10px);
+      @include paddingY(5px);
+
+      @include mobile {
+        @include paddingX(5px);
+        @include paddingY(2px);
+      }
+    }
   }
 
   &-footer {
-    height: 48px;
+    border-radius: 0 0 10px 10px;
+  }
 
-    @include mobile {
-      height: 38px;
+  .minibadge-footer {
+    &-award-badge {
+      height: 48px;
+
+      @include mobile {
+        height: 38px;
+      }
+
+      background: $minibadge-blue;
+      color: $minibadge-white;
     }
 
-    border-radius: 0 0 10px 10px;
-    background: $minibadge-blue;
-    color: $minibadge-white;
+    &-badge-detail {
+      @include paddingX(10px);
+      background: $minibadge-white;
+      height: 80px;
+
+      @include mobile {
+        height: 100%;
+        line-height: 30px;
+        flex: 1;
+      }
+
+      .minibadge-more-info {
+        width: 100%;
+      }
+
+      .minibadge-actions {
+        align-self: flex-end;
+        margin-left: auto;
+        position: relative;
+
+        .dots-vertical {
+          &:hover {
+            color: $minibadge-orange;
+          }
+        }
+
+        .minibadge-action {
+          &-options {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 100%;
+            background: $minibadge-white;
+            border-radius: 2px;
+            box-shadow: 4px 8px 10px $minibadge-grey-light;
+            z-index: 1;
+
+            &.minibadge-reposition {
+              left: 0;
+              transform: translateX(-100%);
+            }
+          }
+
+          &-option {
+            @include paddingX(28px);
+            @include paddingY(6px);
+            white-space: nowrap;
+
+            &:first-child {
+              border-radius: 2px 2px 0 0;
+            }
+
+            &:last-child {
+              border-radius: 0 0 2px 2px;
+            }
+
+            &:hover {
+              background-color: $minibadge-orange;
+              color: $minibadge-white;
+            }
+          }
+        }
+      }
+
+      .star {
+        color: $minibadge-orange;
+      }
+    }
   }
 
   &-picture {
     flex: 1;
+
     img {
       max-height: 100%;
     }

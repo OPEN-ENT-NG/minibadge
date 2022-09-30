@@ -1,4 +1,5 @@
 export enum CARD_FOOTER {
     AWARD_BADGE = 'AWARD_BADGE',
+    BADGE_DETAIL = 'BADGE_DETAIL',
 }
 

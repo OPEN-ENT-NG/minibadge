@@ -2,7 +2,6 @@ package fr.cgi.minibadge.service;
 
 import fr.cgi.minibadge.model.BadgeType;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpServerRequest;
 
 import java.util.List;
 

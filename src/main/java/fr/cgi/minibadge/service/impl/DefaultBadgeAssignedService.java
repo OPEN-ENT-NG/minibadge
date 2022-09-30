@@ -19,6 +19,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     private final Sql sql;
     private final BadgeService badgeService;
     private static final String BADGE_ASSIGNED_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED);
+    public static final String BADGE_ASSIGNED_VALID_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_VALID);
 
     public DefaultBadgeAssignedService(Sql sql, BadgeService badgeService) {
         this.sql = sql;

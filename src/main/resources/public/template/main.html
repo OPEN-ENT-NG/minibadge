@@ -1,2 +1,20 @@
-<div ng-controller="MinibadgeController as vm">
+<div ng-controller="MinibadgeController as vm" class="minibadge-container flex-row f-column">
+    <h2>
+        <i18n>minibadge.my.badges.received</i18n>
+    </h2>
+    <search-input search-query="vm.searchQuery" on-search="vm.initBadge()" placeholder="minibadge.badge.search"></search-input>
+    <div class="minibadge-badge minibadge-badge-list minibadge-container flex-row f-column">
+        <h3>
+            <i18n>minibadge.badges.public</i18n>
+        </h3>
+        <div class="minibadge-badge-list-cards flex-row f-wrap">
+            <minibadge-card-type ng-repeat="badge in vm.badges"
+                                 badge-type="badge.badgeType"
+                                 badge="badge"
+                                 on-footer-click="vm.redirectBadgeType(badge.badgeType)"
+                                 footer="vm.CARD_FOOTER.BADGE_DETAIL"
+                                 body-icon="'earth'">
+            </minibadge-card-type>
+        </div>
+    </div>
 </div>

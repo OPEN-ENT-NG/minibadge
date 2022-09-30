@@ -3,6 +3,7 @@ import {RootsConst} from "../../core/constants/roots.const";
 import {IDirective, IScope, isFunction} from "angular";
 import {BadgeType} from "../../models/badge-type.model";
 import {CARD_FOOTER} from "../../core/enum/card-footers.enum";
+import {Badge} from "../../models/badge.model";
 
 interface IViewModel {
     bodyClick(): void;
@@ -17,7 +18,9 @@ interface IDirectiveProperties {
     onFooterClick?(badgeType: BadgeType): void;
 
     footer?: CARD_FOOTER;
+    bodyIcon?: string;
     badgeType: BadgeType;
+    badge?: Badge;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -51,7 +54,9 @@ function directive(): IDirective {
         templateUrl: `${RootsConst.directive}/card/card.html`,
         scope: {
             badgeType: '=',
+            badge: '=?',
             footer: '=?',
+            bodyIcon: '=?',
             onBodyClick: '&?',
             onFooterClick: '&?'
         },

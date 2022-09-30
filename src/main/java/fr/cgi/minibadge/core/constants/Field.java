@@ -2,10 +2,18 @@ package fr.cgi.minibadge.core.constants;
 
 public class Field {
     public static final String ID = "id";
+    public static final String ASSIGNED = "assigned";
+    public static final String COUNT_ASSIGNED = "count_assigned";
+    public static final String COUNTS = "counts";
     public static final String OWNER = "owner";
     public static final String OWNERID = "ownerId";
     public static final String OWNERIDS = "ownerIds";
     public static final String OWNER_ID = "owner_id";
+    public static final String BADGETYPE = "badgeType";
+    public static final String BADGE_TYPE_ID = "badge_type_id";
+    public static final String BADGETYPEID = "badgeTypeId";
+    public static final String BADGE_TYPE_LABEL = "badge_type_label";
+    public static final String BADGE_TYPE_PICTURE_ID = "badge_type_picture_id";
     public static final String PICTUREID = "pictureId";
     public static final String PICTURE_ID = "picture_id";
     public static final String LABEL = "label";

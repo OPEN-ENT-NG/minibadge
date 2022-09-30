@@ -17,4 +17,4 @@ export const badgeAssignedService: IBadgeAssignedService = {
         http.post(`/minibadge/types/${typeId}/assign`, params)
 };
 
-export const BadgeAssignedService = ng.service('BadgeTypeService', (): IBadgeAssignedService => badgeAssignedService);
+export const BadgeAssignedService = ng.service('BadgeAssignedService', (): IBadgeAssignedService => badgeAssignedService);

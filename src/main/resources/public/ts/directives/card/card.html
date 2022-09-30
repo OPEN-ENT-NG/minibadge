@@ -1,10 +1,19 @@
 <div class="minibadge-card flex-row f-column centered-text">
     <div class="minibadge-card-body flex-row f-column" ng-click="vm.bodyClick()">
+        <i ng-if="vm.bodyIcon"
+           ng-class="vm.bodyIcon"
+           class="minibadge-card-body-icon absolute-position bold">
+        </i>
         <div class="minibadge-card-picture flex-row justify-center">
             <img ng-src="/minibadge/public/img/[[vm.badgeType.pictureId]]"/>
         </div>
-        <div class="minibadge-card-title flex-row justify-center align-center bold">[[vm.badgeType.label]]</div>
+        <div ng-if="vm.CARD_FOOTER.BADGE_DETAIL != vm.footer"
+             class="minibadge-card-title flex-row justify-center align-center bold">[[vm.badgeType.label]]
+        </div>
     </div>
     <award-badge-footer ng-if="vm.CARD_FOOTER.AWARD_BADGE === vm.footer" on-click="vm.onFooterClick(vm.badgeType)"
                         badge-type="vm.badgeType"></award-badge-footer>
+    <badge-detail-footer ng-if="vm.CARD_FOOTER.BADGE_DETAIL === vm.footer" badge-type="vm.badgeType" badge="vm.badge"
+                         on-info-click="vm.onFooterClick(vm.badgeType)">
+    </badge-detail-footer>
 </div>

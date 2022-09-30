@@ -25,7 +25,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
     private final Sql sql;
     private final EventBus eb;
-    private static final String BADGE_TYPE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_TYPE);
+    public static final String BADGE_TYPE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_TYPE);
 
     public DefaultBadgeTypeService(Sql sql, EventBus eb) {
         this.sql = sql;

@@ -3,14 +3,18 @@ package fr.cgi.minibadge.service.impl;
 import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.helper.PromiseHelper;
+import fr.cgi.minibadge.helper.SqlHelper;
+import fr.cgi.minibadge.model.Badge;
 import fr.cgi.minibadge.service.BadgeService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +57,80 @@ public class DefaultBadgeService implements BadgeService {
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::createBadgesRequest] Fail to create badges",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<List<Badge>> getBadges(String ownerId, String query) {
+        Promise<List<Badge>> promise = Promise.promise();
+
+        getBadgesRequest(ownerId, query)
+                .onSuccess(badges -> promise.complete(new Badge().toList(badges)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> getBadgesRequest(String ownerId, String query) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray params = new JsonArray()
+                .add(ownerId);
+        String request = String.format("SELECT b.id, b.owner_id, b.badge_type_id, " +
+                        " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, " +
+                        " (SELECT COUNT(DISTINCT ba.id) FROM %s ba  WHERE ba.badge_id = b.id) as count_assigned " +
+                        " FROM %s b INNER JOIN %s bt ON b.badge_type_id = bt.id " +
+                        " WHERE b.owner_id = ? %s %s",
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
+                DefaultBadgeTypeService.BADGE_TYPE_TABLE,
+                (query != null && !query.isEmpty()) ? "AND" : "",
+                SqlHelper.searchQueryInColumns(query, Collections.singletonList(String.format("%s%s", "bt.", Database.LABEL)), params));
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getBadgesRequest] Fail to retrieve badges",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Void> privatizeBadge(String ownerId, long typeId) {
+        Promise<Void> promise = Promise.promise();
+
+        updateTimeProperty(ownerId, typeId, Database.PRIVATIZED_AT)
+                .onSuccess(badge -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Void> refuseBadge(String ownerId, long typeId) {
+        Promise<Void> promise = Promise.promise();
+
+        updateTimeProperty(ownerId, typeId, Database.REFUSED_AT)
+                .onSuccess(badge -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+
+    private Future<JsonObject> updateTimeProperty(String ownerId, long typeId, String timeProperty) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String request = String.format("UPDATE %s " +
+                " SET %s = now() " +
+                " WHERE owner_id = ? AND badge_type_id = ?", BADGE_TABLE, timeProperty);
+
+        JsonArray params = new JsonArray()
+                .add(ownerId)
+                .add(typeId);
+
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::updateTimeProperty] Fail to update badge",
                         this.getClass().getSimpleName()))));
 
         return promise.future();

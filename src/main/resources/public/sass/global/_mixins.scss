@@ -4,7 +4,10 @@ $minibadge-blue-light: #eff8fc;
 $minibadge-grey: #5b6472;
 $minibadge-grey-light: #d6d6d6;
 $minibadge-grey-lighter: #ebebeb;
+$minibadge-orange: #ffa834;
 $minibadge-white: #fff;
+
+$minibadge-shadow-light: rgba(214, 214, 214, 0.3);
 
 @mixin mobile {
   @media (max-width: 768px) {

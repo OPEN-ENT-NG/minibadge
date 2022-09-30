@@ -36,6 +36,7 @@
       @include desktop {
         align-self: center;
         background-color: $minibadge-white !important;
+        border: none !important;
       }
 
       &-full {
