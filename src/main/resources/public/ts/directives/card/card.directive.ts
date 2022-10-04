@@ -21,6 +21,7 @@ interface IDirectiveProperties {
     bodyIcon?: string;
     badgeType: BadgeType;
     badge?: Badge;
+    isDisabled?: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -57,6 +58,7 @@ function directive(): IDirective {
             badge: '=?',
             footer: '=?',
             bodyIcon: '=?',
+            isDisabled: '=?',
             onBodyClick: '&?',
             onFooterClick: '&?'
         },

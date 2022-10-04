@@ -39,6 +39,16 @@ public class BadgeController extends ControllerHelper {
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
 
+    @Put("/types/:typeId/badge/publish")
+    @ApiDoc("Publish badge from type and current user")
+    public void publishBadge(HttpServerRequest request) {
+        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+
+        UserUtils.getUserInfos(eb, request, user -> badgeService.publishBadge(user.getUserId(), typeId)
+                .onSuccess(badge -> renderJson(request, new JsonObject()))
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+    }
+
     @Put("/types/:typeId/badge/privatize")
     @ApiDoc("Privatize badge from type and current user")
     public void privatizeBadge(HttpServerRequest request) {

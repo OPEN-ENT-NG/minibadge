@@ -11,6 +11,9 @@ public class Badge implements Model<Badge> {
     private String structureId;
     private String ownerId;
     private Long typeId;
+    private String privatizedAt;
+    private String refusedAt;
+    private String disabledAt;
     private User owner;
     private BadgeCounts badgeCounts;
     private BadgeType badgeType;
@@ -27,6 +30,9 @@ public class Badge implements Model<Badge> {
         this.id = badge.getLong(Field.ID);
         this.typeId = badge.getLong(Field.BADGE_TYPE_ID, badge.getLong(Field.BADGETYPEID));
         this.ownerId = badge.getString(Field.OWNER_ID, badge.getString(Field.OWNERID));
+        this.privatizedAt = badge.getString(Field.PRIVATIZED_AT, badge.getString(Field.PRIVATIZEDAT));
+        this.refusedAt = badge.getString(Field.REFUSED_AT, badge.getString(Field.REFUSEDAT));
+        this.disabledAt = badge.getString(Field.DISABLED_AT, badge.getString(Field.DISABLEDAT));
         this.badgeCounts = new BadgeCounts(badge);
         this.badgeType = setBadgeType(badge.getString(Field.BADGE_TYPE_LABEL),
                 badge.getString(Field.BADGE_TYPE_PICTURE_ID));
@@ -81,6 +87,9 @@ public class Badge implements Model<Badge> {
                 .put(Database.STRUCTUREID, this.structureId)
                 .put(Field.BADGETYPEID, this.typeId)
                 .put(Field.OWNERID, this.ownerId)
+                .put(Field.PRIVATIZEDAT, this.privatizedAt)
+                .put(Field.REFUSEDAT, this.refusedAt)
+                .put(Field.DISABLEDAT, this.disabledAt)
                 .put(Field.COUNTS, this.badgeCounts.toJson())
                 .put(Field.BADGETYPE, this.badgeType.toJson());
 

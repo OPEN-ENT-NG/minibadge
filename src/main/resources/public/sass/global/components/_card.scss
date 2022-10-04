@@ -1,4 +1,8 @@
 .minibadge-card {
+  &.disabled {
+    opacity: 0.5;
+  }
+
   &-list {
     margin-top: 30px;
     background: $minibadge-white;

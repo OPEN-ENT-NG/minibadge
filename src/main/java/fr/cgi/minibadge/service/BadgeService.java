@@ -25,6 +25,15 @@ public interface BadgeService {
     Future<List<Badge>> getBadges(String ownerId, String query);
 
     /**
+     * Publish badge from type and current user
+     *
+     * @param ownerId owner identifier
+     * @param typeId  Type identifier
+     * @return return future ending process
+     */
+    Future<Void> publishBadge(String ownerId, long typeId);
+
+    /**
      * Privatize badge from type and current user
      *
      * @param ownerId owner identifier

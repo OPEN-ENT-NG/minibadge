@@ -13,6 +13,9 @@ export interface IBadgeResponse {
     id?: number;
     ownerId?: string;
     badgeTypeId?: number;
+    privatizedAt?: string;
+    refusedAt?: string;
+    disabledAt?: string;
     counts?: BadgeCounts;
     badgeType?: BadgeType;
     owner?: User;
@@ -20,9 +23,11 @@ export interface IBadgeResponse {
     actionOptions?: ActionOption[];
 }
 
-export interface IBadgesResponses extends IPaginatedResponses<IBadgeResponse>{}
+export interface IBadgesResponses extends IPaginatedResponses<IBadgeResponse> {
+}
 
-export interface IBadgePayload extends IQueryStringPayload {}
+export interface IBadgePayload extends IQueryStringPayload {
+}
 
 export class BadgeCounts extends MinibadgeModel<BadgeCounts> {
     assigned?: number;
@@ -46,6 +51,9 @@ export class Badge extends MinibadgeModel<Badge> {
     id?: number;
     ownerId?: string;
     badgeTypeId?: number;
+    privatizedAt?: string;
+    refusedAt?: string;
+    disabledAt?: string;
     counts?: BadgeCounts;
     badgeType?: BadgeType;
     owner?: User;
@@ -61,6 +69,9 @@ export class Badge extends MinibadgeModel<Badge> {
         this.id = data.id;
         this.ownerId = data.ownerId
         this.badgeTypeId = data.badgeTypeId
+        this.privatizedAt = data.privatizedAt;
+        this.refusedAt = data.refusedAt;
+        this.disabledAt = data.disabledAt;
         this.counts = new BadgeCounts(<IBadgeCountsResponse>data.counts)
         this.badgeType = new BadgeType(<IBadgeTypeResponse>data.badgeType)
         this.owner = new User(<IUserResponse>data.owner);
@@ -68,10 +79,16 @@ export class Badge extends MinibadgeModel<Badge> {
     }
 
     toModel(model: any): Badge {
-        return new Badge(model)
+        return new Badge(model);
     };
 
     setActionOptions(actionOptions: ActionOption[]): void {
         this.actionOptions = actionOptions;
     }
+
+    isPublic = (): boolean => !this.privatizedAt && !this.refusedAt && !this.disabledAt;
+
+    isPrivatized = (): boolean => !!this.privatizedAt && !this.refusedAt && !this.disabledAt;
+
+    isRefused = (): boolean => !!this.refusedAt || !!this.disabledAt;
 }

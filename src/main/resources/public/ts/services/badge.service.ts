@@ -8,6 +8,8 @@ export interface IBadgeService {
     privatizeBadgeType(typeId: number): Promise<AxiosPromise>;
 
     refuseBadgeType(typeId: number): Promise<AxiosPromise>;
+
+    publishBadgeType(typeId: number): Promise<AxiosPromise>;
 }
 
 export const badgeService: IBadgeService = {
@@ -37,7 +39,15 @@ export const badgeService: IBadgeService = {
      * @param typeId badge type identifier
      */
     refuseBadgeType: async (typeId: number): Promise<AxiosPromise> =>
-        http.put(`/minibadge/types/${typeId}/badge/refuse`)
+        http.put(`/minibadge/types/${typeId}/badge/refuse`),
+
+    /**
+     * (re)publish badge type for current user session
+     *
+     * @param typeId badge type identifier
+     */
+    publishBadgeType: async (typeId: number): Promise<AxiosPromise> =>
+        http.put(`/minibadge/types/${typeId}/badge/publish`)
 };
 
 export const BadgeService = ng.service('BadgeService', (): IBadgeService => badgeService);

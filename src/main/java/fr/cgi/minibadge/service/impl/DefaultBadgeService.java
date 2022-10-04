@@ -78,7 +78,7 @@ public class DefaultBadgeService implements BadgeService {
 
         JsonArray params = new JsonArray()
                 .add(ownerId);
-        String request = String.format("SELECT b.id, b.owner_id, b.badge_type_id, " +
+        String request = String.format("SELECT b.id, b.owner_id, b.badge_type_id, privatized_at, refused_at, disabled_at, " +
                         " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, " +
                         " (SELECT COUNT(DISTINCT ba.id) FROM %s ba  WHERE ba.badge_id = b.id) as count_assigned " +
                         " FROM %s b INNER JOIN %s bt ON b.badge_type_id = bt.id " +
@@ -96,10 +96,40 @@ public class DefaultBadgeService implements BadgeService {
     }
 
     @Override
+    public Future<Void> publishBadge(String ownerId, long typeId) {
+        Promise<Void> promise = Promise.promise();
+
+        resetTimePropertiesRequest(ownerId, typeId)
+                .onSuccess(badge -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> resetTimePropertiesRequest(String ownerId, long typeId) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String request = String.format("UPDATE %s " +
+                " SET privatized_at = null, refused_at = null, disabled_at = null" +
+                " WHERE owner_id = ? AND badge_type_id = ?", BADGE_TABLE);
+
+        JsonArray params = new JsonArray()
+                .add(ownerId)
+                .add(typeId);
+
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::updateTimeProperty] Fail to update badge",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+
+    @Override
     public Future<Void> privatizeBadge(String ownerId, long typeId) {
         Promise<Void> promise = Promise.promise();
 
-        updateTimeProperty(ownerId, typeId, Database.PRIVATIZED_AT)
+        updateTimePropertyRequest(ownerId, typeId, Database.PRIVATIZED_AT)
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -110,7 +140,7 @@ public class DefaultBadgeService implements BadgeService {
     public Future<Void> refuseBadge(String ownerId, long typeId) {
         Promise<Void> promise = Promise.promise();
 
-        updateTimeProperty(ownerId, typeId, Database.REFUSED_AT)
+        updateTimePropertyRequest(ownerId, typeId, Database.REFUSED_AT)
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -118,7 +148,7 @@ public class DefaultBadgeService implements BadgeService {
     }
 
 
-    private Future<JsonObject> updateTimeProperty(String ownerId, long typeId, String timeProperty) {
+    private Future<JsonObject> updateTimePropertyRequest(String ownerId, long typeId, String timeProperty) {
         Promise<JsonObject> promise = Promise.promise();
 
         String request = String.format("UPDATE %s " +

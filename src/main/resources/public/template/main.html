@@ -2,19 +2,16 @@
     <h2>
         <i18n>minibadge.my.badges.received</i18n>
     </h2>
-    <search-input search-query="vm.searchQuery" on-search="vm.initBadge()" placeholder="minibadge.badge.search"></search-input>
-    <div class="minibadge-badge minibadge-badge-list minibadge-container flex-row f-column">
-        <h3>
-            <i18n>minibadge.badges.public</i18n>
-        </h3>
-        <div class="minibadge-badge-list-cards flex-row f-wrap">
-            <minibadge-card-type ng-repeat="badge in vm.badges"
-                                 badge-type="badge.badgeType"
-                                 badge="badge"
-                                 on-footer-click="vm.redirectBadgeType(badge.badgeType)"
-                                 footer="vm.CARD_FOOTER.BADGE_DETAIL"
-                                 body-icon="'earth'">
-            </minibadge-card-type>
-        </div>
-    </div>
+    <search-input search-query="vm.searchQuery" on-search="vm.initBadges()"
+                  placeholder="minibadge.badge.search"></search-input>
+
+    <minibadge-badge-list label="'minibadge.badges.public'" card-icon="'earth'" badges="vm.publishedBadges">
+    </minibadge-badge-list>
+
+    <minibadge-badge-list label="'minibadge.badges.private'" card-icon="'lock'" badges="vm.privatizedBadges">
+    </minibadge-badge-list>
+
+    <minibadge-badge-list label="'minibadge.badges.refuse'" card-icon="'refused'" badges="vm.refusedBadges"
+                          is-default-opened-list="false" are-card-disabled="true">
+    </minibadge-badge-list>
 </div>

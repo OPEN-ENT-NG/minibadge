@@ -38,4 +38,9 @@ i {
     font-family: 'material-icons';
     content: "\F1D9";
   }
+
+  &.refused::before {
+    font-family: 'material-icons';
+    content: "\F697";
+  }
 }

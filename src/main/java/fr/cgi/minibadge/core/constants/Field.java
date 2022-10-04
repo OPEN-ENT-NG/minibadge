@@ -28,6 +28,14 @@ public class Field {
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
 
+    //BADGE
+    public static final String PRIVATIZED_AT = "privatized_at";
+    public static final String PRIVATIZEDAT = "privatizedAt";
+    public static final String REFUSED_AT = "refused_at";
+    public static final String REFUSEDAT = "refusedAt";
+    public static final String DISABLED_AT = "diasbled_at";
+    public static final String DISABLEDAT = "diasbledAt";
+
     private Field() {
         throw new IllegalStateException("Utility class");
     }

@@ -1,4 +1,4 @@
-<div class="minibadge-card flex-row f-column centered-text">
+<div class="minibadge-card flex-row f-column centered-text" ng-class="{ disabled: vm.isDisabled }">
     <div class="minibadge-card-body flex-row f-column" ng-click="vm.bodyClick()">
         <i ng-if="vm.bodyIcon"
            ng-class="vm.bodyIcon"
