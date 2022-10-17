@@ -27,6 +27,7 @@ class Controller implements ng.IController, ViewModel {
     private static privatizeOption: string = 'minibadge.privatize';
     private static refuseOption: string = 'minibadge.refuse';
     private static publicOption: string = 'minibadge.publish';
+    private static acceptOption: string = 'minibadge.accept';
     private payload: IBadgePayload;
 
     CARD_FOOTER: typeof CARD_FOOTER;
@@ -89,7 +90,7 @@ class Controller implements ng.IController, ViewModel {
     }
 
     private initRefuseActionOptions(badge: Badge): ActionOption[] {
-        return [this.publicOption(badge), this.privatizeOption(badge)];
+        return [this.acceptOption(badge)];
     }
 
     private privatizeOption(badge: Badge): ActionOption {
@@ -118,6 +119,16 @@ class Controller implements ng.IController, ViewModel {
                 .then(async () => await this.initBadges()),
         });
     }
+
+    private acceptOption(badge: Badge): ActionOption {
+        return new ActionOption(<IActionOptionResponse>{
+            label: Controller.acceptOption,
+            icon: 'check-circle',
+            action: () => this.badgeService.publishBadgeType(badge.badgeType.id)
+                .then(async () => await this.initBadges()),
+        });
+    }
+
 
     $onDestroy() {
     }
