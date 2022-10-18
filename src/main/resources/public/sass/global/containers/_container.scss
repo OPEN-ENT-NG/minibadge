@@ -19,5 +19,9 @@
       @include marginX(10px);
     }
   }
+
+  i.settings:hover {
+    color: $minibadge-orange;
+  }
 }
 

@@ -6,6 +6,9 @@ import org.entcore.common.user.UserInfos;
 
 
 public class User extends UserInfos implements Model<User> {
+
+    Chart permissions;
+
     public User() {
     }
 
@@ -18,6 +21,7 @@ public class User extends UserInfos implements Model<User> {
         this.setUserId(user.getString(Field.ID));
         this.setFirstName(user.getString(Field.FIRSTNAME));
         this.setLastName(user.getString(Field.LASTNAME));
+        this.permissions = new Chart(user);
         return this;
     }
 
@@ -32,5 +36,9 @@ public class User extends UserInfos implements Model<User> {
     @Override
     public User model(JsonObject user) {
         return new User(user);
+    }
+
+    public Chart permissions() {
+        return permissions;
     }
 }

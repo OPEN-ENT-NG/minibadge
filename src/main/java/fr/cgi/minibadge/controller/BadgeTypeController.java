@@ -3,15 +3,19 @@ package fr.cgi.minibadge.controller;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.helper.RequestHelper;
+import fr.cgi.minibadge.security.ViewRight;
 import fr.cgi.minibadge.service.BadgeTypeService;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
 public class BadgeTypeController extends ControllerHelper {
@@ -25,6 +29,8 @@ public class BadgeTypeController extends ControllerHelper {
 
     @Get("/types")
     @ApiDoc("Retrieve badge type list")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ViewRight.class)
     public void getBadgeTypes(HttpServerRequest request) {
         Integer offset = Integer.parseInt(request.params().get(Request.OFFSET));
         int limit = RequestHelper.cappingLimit(request.params());
@@ -37,6 +43,8 @@ public class BadgeTypeController extends ControllerHelper {
 
     @Get("/types/:typeId")
     @ApiDoc("Retrieve badge type")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ViewRight.class)
     public void getBadgeType(HttpServerRequest request) {
         long typeId = Long.parseLong(request.params().get(Database.TYPEID));
         String host = Renders.getHost(request);

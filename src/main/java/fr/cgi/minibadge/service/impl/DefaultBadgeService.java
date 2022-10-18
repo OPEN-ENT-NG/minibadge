@@ -165,4 +165,40 @@ public class DefaultBadgeService implements BadgeService {
 
         return promise.future();
     }
+
+    @Override
+    public Future<Void> disableBadges(String ownerId) {
+        Promise<Void> promise = Promise.promise();
+
+        changeDisableBadgesRequest(ownerId, Database.NOW_SQL_FUNCTION)
+                .onSuccess(badge -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Void> enableBadges(String ownerId) {
+        Promise<Void> promise = Promise.promise();
+
+        changeDisableBadgesRequest(ownerId, Database.NULL)
+                .onSuccess(badge -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> changeDisableBadgesRequest(String ownerId, String disableValue) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String request = String.format("UPDATE %s SET disabled_at = %s WHERE owner_id = ?", BADGE_TABLE, disableValue);
+
+        JsonArray params = new JsonArray().add(ownerId);
+
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::updateTimeProperty] Fail to update badge",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
 }

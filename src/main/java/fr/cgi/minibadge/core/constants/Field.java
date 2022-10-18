@@ -33,8 +33,14 @@ public class Field {
     public static final String PRIVATIZEDAT = "privatizedAt";
     public static final String REFUSED_AT = "refused_at";
     public static final String REFUSEDAT = "refusedAt";
-    public static final String DISABLED_AT = "diasbled_at";
-    public static final String DISABLEDAT = "diasbledAt";
+    public static final String DISABLED_AT = "disabled_at";
+    public static final String DISABLEDAT = "disabledAt";
+
+    // CHART
+    public static final String ACCEPTCHART = "acceptChart";
+    public static final String ACCEPTASSIGN = "acceptAssign";
+    public static final String ACCEPTRECEIVE = "acceptReceive";
+    public static final String PERMISSIONS = "permissions";
 
     private Field() {
         throw new IllegalStateException("Utility class");

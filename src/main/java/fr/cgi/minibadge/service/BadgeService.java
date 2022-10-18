@@ -51,5 +51,21 @@ public interface BadgeService {
      */
     Future<Void> refuseBadge(String ownerId, long typeId);
 
+    /**
+     * Disable badges from current user
+     *
+     * @param ownerId owner identifier
+     * @return return future ending process
+     */
+    Future<Void> disableBadges(String ownerId);
+
+    /**
+     * Enable badges from current user
+     *
+     * @param ownerId owner identifier
+     * @return return future ending process
+     */
+    Future<Void> enableBadges(String ownerId);
+
 
 }

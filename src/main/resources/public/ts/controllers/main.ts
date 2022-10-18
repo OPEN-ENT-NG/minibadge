@@ -1,9 +1,9 @@
 import {ng, template} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
-import {ISettingService} from "../services";
-import {AxiosError} from "axios";
+import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
 import {IScope} from "angular";
+import {Chart, IChartResponse} from "../models/chart.model";
 
 interface ViewModel {
     navbarViewSelected: NAVBAR_VIEWS;
@@ -25,7 +25,8 @@ class Controller implements ng.IController, ViewModel {
 
     constructor(private $scope: IMinibadgeScope,
                 private $route: any,
-                private settingService: ISettingService) {
+                private settingService: ISettingService,
+                private chartService: IChartService) {
         this.$scope.vm = this;
 
         this.$route({
@@ -44,9 +45,17 @@ class Controller implements ng.IController, ViewModel {
     }
 
     $onInit() {
-        this.settingService.getGlobalSettings()
-            .then((res: Setting) => this.$scope.setting = res)
-            .catch((err: AxiosError) => this.$scope.setting = new Setting({pageSize: 0}));
+        Promise.all([this.getSettings(), this.chartService.getUserChart()])
+            .then((data: [Setting, Chart]) => {
+                let setting: Setting = data[0];
+                setting.userPermissions = data[1];
+                this.$scope.setting = setting;
+            });
+    }
+
+    private async getSettings(): Promise<Setting> {
+        return this.settingService.getGlobalSettings()
+            .catch(() => new Setting({pageSize: 0}));
     }
 
     $onDestroy() {
@@ -54,4 +63,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const mainController = ng.controller('MainController',
-    ['$scope', 'route', 'SettingService', Controller]);
+    ['$scope', 'route', 'SettingService', 'ChartService', Controller]);

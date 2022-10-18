@@ -43,6 +43,10 @@ public class ServiceFactory {
         return new DefaultBadgeAssignedService(sql, this.badgeService());
     }
 
+    public UserService userService() {
+        return new DefaultUserService(this.eventBus());
+    }
+
     // Helpers
     public EventBus eventBus() {
         return this.vertx.eventBus();

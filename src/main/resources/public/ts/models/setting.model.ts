@@ -1,11 +1,15 @@
 import {MinibadgeModel} from "./model";
+import {Chart, IChartResponse} from "./chart.model";
 
 export interface ISettingResult {
     pageSize?: number;
+
+    userPermissions?: Chart;
 }
 
 export class Setting extends MinibadgeModel<Setting> {
     pageSize?: number;
+    userPermissions?: Chart;
 
     constructor(data: ISettingResult) {
         super();
@@ -14,6 +18,7 @@ export class Setting extends MinibadgeModel<Setting> {
 
     build(data: ISettingResult): Setting {
         this.pageSize = data.pageSize;
+        this.userPermissions = new Chart(<IChartResponse>data.userPermissions);
         return this;
     }
 

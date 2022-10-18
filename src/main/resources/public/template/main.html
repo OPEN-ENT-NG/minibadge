@@ -1,6 +1,6 @@
 <div ng-controller="MinibadgeController as vm" class="minibadge-container flex-row f-column">
     <h2>
-        <i18n>minibadge.my.badges.received</i18n>
+        <i18n>minibadge.my.badges.received</i18n>&nbsp;<i class="settings" ng-click="vm.openChartLightbox()"></i>
     </h2>
     <search-input search-query="vm.searchQuery" on-search="vm.initBadges()"
                   placeholder="minibadge.badge.search"></search-input>
@@ -14,4 +14,8 @@
     <minibadge-badge-list label="'minibadge.badges.refuse'" card-icon="'refused'" badges="vm.refusedBadges"
                           is-default-opened-list="false" >
     </minibadge-badge-list>
+    <minibadge-chart is-lightbox-opened="vm.isChartLightboxOpened"
+                     is-chart-accepted="vm.isChartAccepted"
+                     is-minibadge-accepted="vm.isMinibadgeAccepted"
+                     chart-validate="vm.chartValidate()"></minibadge-chart>
 </div>

@@ -43,4 +43,9 @@ i {
     font-family: 'material-icons';
     content: "\F697";
   }
+
+  &.settings::before {
+    font-family: 'material-icons';
+    content: "\F493";
+  }
 }

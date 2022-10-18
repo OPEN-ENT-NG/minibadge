@@ -15,7 +15,6 @@ public class Minibadge extends BaseServer {
 
     public static String dbSchema;
 
-
     @Override
     public void start() throws Exception {
         super.start();
@@ -32,7 +31,7 @@ public class Minibadge extends BaseServer {
         addController(new BadgeController(serviceFactory));
         addController(new BadgeTypeController(serviceFactory));
         addController(new BadgeAssignedController(serviceFactory));
-        addController(new UserController());
+        addController(new UserController(serviceFactory));
     }
 
 }

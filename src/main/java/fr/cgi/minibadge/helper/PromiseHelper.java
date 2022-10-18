@@ -6,6 +6,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -22,7 +23,12 @@ public class PromiseHelper {
     }
 
     public static <R> Handler<Either<String, R>> handler(Promise<R> promise, String errorMessage) {
+        return handler(promise, null, errorMessage);
+    }
+
+    public static <R> Handler<Either<String, R>> handler(Promise<R> promise, HttpServerRequest request, String errorMessage) {
         return event -> {
+            if (request != null) request.resume();
             if (event.isRight()) {
                 promise.complete(event.right().getValue());
                 return;

@@ -11,6 +11,11 @@ public class Request {
     public static final String STATUS = "status";
     public static final String RESULT = "result";
     public static final String RESULTS = "results";
+    public static final String USERIDS = "userIds";
+    public static final String CACHE = "cache";
+    public static final String PREFERENCE = "preference";
+    public static final String PREFERENCES = "preferences";
+    public static final String RIGHT = "right";
 
     private Request() {
         throw new IllegalStateException("Utility class");

@@ -7,12 +7,18 @@ import {AxiosError} from "axios";
 import {Badge, IBadgePayload} from "../models/badge.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
+import {IChartService} from "../services/chart.service";
 
 interface ViewModel {
     getBadges(): Promise<void>;
 
+    openChartLightbox(): void;
+
     badges: Badge[];
     searchQuery: string;
+    isChartLightboxOpened: boolean;
+    isChartAccepted: boolean;
+    isMinibadgeAccepted: boolean;
     publishedBadges: Badge[];
     privatizedBadges: Badge[];
     refusedBadges: Badge[];
@@ -36,11 +42,18 @@ class Controller implements ng.IController, ViewModel {
     privatizedBadges: Badge[];
     refusedBadges: Badge[];
 
-
     searchQuery: string;
+    isChartLightboxOpened: boolean;
+    isChartAccepted: boolean;
+    isMinibadgeAccepted: boolean;
 
-    constructor(private $scope: IMinibadgeScope, private $location: ILocationService, private badgeService: IBadgeService) {
+    constructor(private $scope: IMinibadgeScope, private $location: ILocationService,
+                private badgeService: IBadgeService, private chartService: IChartService) {
         this.$scope.vm = this;
+        this.isChartLightboxOpened = !this.$scope.setting.userPermissions.acceptChart;
+        this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
+        this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+            || !!this.$scope.setting.userPermissions.acceptReceive;
         this.payload = {};
     }
 
@@ -70,6 +83,20 @@ class Controller implements ng.IController, ViewModel {
             })
             .catch((err: AxiosError) => notify.error('minibadge.error.get.badges'))
     }
+
+    openChartLightbox = (): void => {
+        this.isChartLightboxOpened = true;
+    }
+
+    chartValidate = async (): Promise<void> => {
+        this.chartService.saveChart(this.isChartAccepted, this.isMinibadgeAccepted)
+            .then(async () => {
+                await this.initBadges();
+                this.$scope.setting.userPermissions = await this.chartService.getChart();
+            })
+            .catch((err: AxiosError) => notify.error('minibadge.error.chart.validate'));
+    }
+
 
     private setBadgeActionOptions(badges: Badge[]): void {
         badges.forEach((badge: Badge) => {
@@ -135,4 +162,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const minibadgeController = ng.controller('MinibadgeController',
-    ['$scope', '$location', 'BadgeService', Controller]);
+    ['$scope', '$location', 'BadgeService', 'ChartService', Controller]);

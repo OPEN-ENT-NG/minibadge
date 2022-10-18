@@ -12,6 +12,13 @@ public class Database {
     public static final String TYPEID = "typeId";
     public static final String PRIVATIZED_AT = "privatized_at";
     public static final String REFUSED_AT = "refused_at";
+    public static final String NOW_SQL_FUNCTION = "now()";
+    public static final String NULL = "null";
+
+    /*
+    Preferences
+     */
+    public static final String MINIBADGECHART = "minibadgechart";
 
     private Database() {
         throw new IllegalStateException("Utility class");
