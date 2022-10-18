@@ -99,7 +99,11 @@
             @include paddingX(28px);
             @include paddingY(6px);
             white-space: nowrap;
+            justify-content: flex-start;
 
+            & .lock{
+              @include icon-small();
+            }
             &:first-child {
               border-radius: 2px 2px 0 0;
             }

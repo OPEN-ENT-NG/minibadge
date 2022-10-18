@@ -1,10 +1,9 @@
 .minibadge-badge {
   &-list {
     margin-top: 30px;
+    row-gap: 8px;
     background: $minibadge-white;
-    padding-bottom: 15px;
-    @include paddingX(10px);
-
+    @include paddingXY(8px, 16px);
     &.disabled {
       opacity: 0.5;
     }

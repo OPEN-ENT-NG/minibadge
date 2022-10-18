@@ -6,6 +6,7 @@ $minibadge-grey-light: #d6d6d6;
 $minibadge-grey-lighter: #ebebeb;
 $minibadge-orange: #ffa834;
 $minibadge-white: #fff;
+$minibadge-small-icon: 16px;
 
 $minibadge-shadow-light: rgba(214, 214, 214, 0.3);
 
@@ -31,6 +32,10 @@ $minibadge-shadow-light: rgba(214, 214, 214, 0.3);
   padding-top: $size;
 }
 
+@mixin paddingXY($sizeX, $sizeY) {
+  padding: $sizeY $sizeX;
+}
+
 @mixin marginX($size) {
   margin-left: $size;
   margin-right: $size;
@@ -45,6 +50,10 @@ $minibadge-shadow-light: rgba(214, 214, 214, 0.3);
   padding-top: $size;
   border-bottom: solid $size;
   box-sizing: border-box;
+}
+
+@mixin icon-small() {
+  width: $minibadge-small-icon;
 }
 
 .minibadge-mobile-padding-x {

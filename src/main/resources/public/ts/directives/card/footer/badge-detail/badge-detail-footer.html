@@ -16,7 +16,7 @@
                ng-click="vm.changeActionsShowingStatus()"></i>
             <div ng-if="vm.badge.actionOptions" ng-show="vm.isActionOpened" class="minibadge-action-options">
                 <div ng-repeat="actionOption in vm.badge.actionOptions"
-                     class="minibadge-action-option flex-row justify-center"
+                     class="minibadge-action-option flex-row "
                      ng-click="vm.actionClick(actionOption);">
                     <i ng-class="actionOption.icon"></i>&nbsp;<span>[[vm.lang.translate(actionOption.label)]]</span>
                 </div>

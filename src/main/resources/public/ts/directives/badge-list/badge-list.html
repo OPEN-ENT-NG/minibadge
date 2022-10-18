@@ -1,9 +1,10 @@
 <div class="minibadge-badge minibadge-badge-list minibadge-container flex-row f-column"
      ng-class="{ disabled: !vm.badges || !vm.badges.length }">
     <h3 ng-click="vm.clickList()">
-        <i class="play" ng-class="{ opened: vm.isOpenedList && vm.badges && !!vm.badges.length }"></i>&nbsp;<i18n>
-        [[vm.lang.translate(vm.label)]]
-    </i18n>
+        <i class="play" ng-class="{ opened: vm.isOpenedList && vm.badges && !!vm.badges.length }"></i>&nbsp;
+        <span class="minibadge-badge-list-label">
+                 [[vm.lang.translate(vm.label)]]
+        </span>
     </h3>
     <div class="minibadge-badge-list-cards flex-row f-wrap" ng-show="vm.isOpenedList">
         <minibadge-card-type ng-repeat="badge in vm.badges"
