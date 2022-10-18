@@ -11,3 +11,4 @@ export * from './id-type/id-type.directive';
 export * from './description-type/description-type.directive';
 export * from './selected-list/selected-list.directive';
 export * from './badge-list/badge-list.directive';
+export * from './empty-statement/empty-statement.directive';

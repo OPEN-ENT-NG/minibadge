@@ -3,7 +3,7 @@
         <i18n>minibadge.navbar.badges.library</i18n>
     </h2>
     <search-input search-query="vm.searchQuery" on-search="vm.initBadgeTypes()" placeholder="minibadge.badge.search"></search-input>
-    <div class="minibadge-card-list flex-row f-wrap justify-center">
+    <div class="minibadge-card-list flex-row f-wrap justify-center" ng-show="!!vm.badgeTypes.length">
         <minibadge-card-type ng-repeat="badgeType in vm.badgeTypes" badge-type="badgeType"
                              on-body-click="vm.redirectBadgeType(badgeType)"
                              on-footer-click="vm.onOpenLightbox(badgeType)"
@@ -11,6 +11,11 @@
                              footer="vm.CARD_FOOTER.AWARD_BADGE">
         </minibadge-card-type>
     </div>
+<minibadge-empty-statement
+        is-displayed="!!!vm.badgeTypes.length"
+        empty-label="minibadge.badge.empty.statement"
+>
+</minibadge-empty-statement>
     <infinite-scroll scrolled="vm.onScroll()" loading-mode="true"></infinite-scroll>
     <sniplet template="badge-assign" application="minibadge"></sniplet>
 </div>
