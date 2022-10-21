@@ -23,6 +23,7 @@ public class Field {
     public static final String DISPLAYNAME = "displayName";
     public static final String FIRSTNAME = "firstName";
     public static final String LASTNAME = "lastName";
+    public static final String USERNAME = "username";
     public static final String IDUSERS = "idUsers";
     public static final String Q = "q";
     public static final String FIELDS = "fields";
@@ -41,6 +42,9 @@ public class Field {
     public static final String ACCEPTASSIGN = "acceptAssign";
     public static final String ACCEPTRECEIVE = "acceptReceive";
     public static final String PERMISSIONS = "permissions";
+
+    //USER
+    public static final String USERIDS = "userIds";
 
     private Field() {
         throw new IllegalStateException("Utility class");

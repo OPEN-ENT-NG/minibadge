@@ -1,28 +1,43 @@
 package fr.cgi.minibadge.service.impl;
 
+import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
+import fr.cgi.minibadge.core.constants.EventBusConst;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Rights;
 import fr.cgi.minibadge.helper.Neo4jHelper;
+import fr.cgi.minibadge.helper.PromiseHelper;
 import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.UserService;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static fr.cgi.minibadge.core.constants.Request.*;
+import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
 
 public class DefaultUserService implements UserService {
 
     private final EventBus eb;
+    private final Logger log = LoggerFactory.getLogger(PromiseHelper.class);
+    private final Sql sql;
+    private static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
 
-    public DefaultUserService(EventBus eb) {
+    public DefaultUserService(Sql sql, EventBus eb) {
+        this.sql = sql;
         this.eb = eb;
     }
 
@@ -60,5 +75,52 @@ public class DefaultUserService implements UserService {
                 customReturn, params, promise::complete);
 
         return promise.future();
+    }
+
+    @Override
+    public Future<List<User>> getUsers(List<String> userIds) {
+        Promise<List<User>> promise = Promise.promise();
+        getUsersRequest(userIds)
+                .onFailure(promise::fail)
+                .onSuccess(users -> promise.complete(new User().toList(users)));
+        return promise.future();
+    }
+
+    private Future<JsonArray> getUsersRequest(List<String> userIds) {
+        Promise<JsonArray> promise = Promise.promise();
+        JsonObject action = new JsonObject()
+                .put(EventBusConst.ACTION, EventBusConst.LIST_USERS)
+                .put(Field.USERIDS, userIds);
+        eb.request(EventBusConst.DIRECTORY, action, PromiseHelper.messageHandler(promise,
+                "[Minibadge@%s::getUsersRequest] Fail to retrieve users from eventBus"));
+        return promise.future();
+    }
+
+    @Override
+    public Future<Void> upsert(List<String> usersIds) {
+        Promise<Void> promise = Promise.promise();
+        Set<String> distinctUsersIds = new HashSet<>(usersIds);
+        usersIds = new ArrayList<>(distinctUsersIds);
+
+        getUsers(usersIds).onSuccess(users -> {
+            JsonArray statements = new JsonArray(users.stream().map(this::upsertStatement).collect(Collectors.toList()));
+            sql.transaction(statements, PromiseHelper.messageToPromise(promise));
+        });
+        return promise.future();
+    }
+
+    private JsonObject upsertStatement(User user) {
+        String statement = String.format(" INSERT INTO %s (id , display_name ) " +
+                " VALUES ( ? , ?) ON CONFLICT (id) DO UPDATE SET display_name = ?" +
+                "  WHERE %s.id = EXCLUDED.id ;", USER_TABLE, USER_TABLE);
+        JsonArray params = new JsonArray()
+                .add(user.getUserId())
+                .add(user.getUsername())
+                .add(user.getUsername());
+
+        return new JsonObject()
+                .put("statement", statement)
+                .put("values", params)
+                .put("action", "prepared");
     }
 }

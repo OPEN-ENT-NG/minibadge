@@ -21,7 +21,6 @@ public class Minibadge extends BaseServer {
 
         dbSchema = config.getString("db-schema");
 
-
         Storage storage = new StorageFactory(vertx, config).getStorage();
 
         ServiceFactory serviceFactory = new ServiceFactory(vertx, storage, Neo4j.getInstance(), Sql.getInstance(), MongoDb.getInstance());

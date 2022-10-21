@@ -16,4 +16,7 @@ public interface UserService {
      */
     Future<List<User>> search(HttpServerRequest request, String query);
 
+    Future<List<User>> getUsers(List<String> userIds);
+
+    Future<Void> upsert(List<String> usersIds);
 }

@@ -21,6 +21,7 @@ public class User extends UserInfos implements Model<User> {
         this.setUserId(user.getString(Field.ID));
         this.setFirstName(user.getString(Field.FIRSTNAME));
         this.setLastName(user.getString(Field.LASTNAME));
+        this.setUsername(user.getString(Field.USERNAME));
         this.permissions = new Chart(user);
         return this;
     }

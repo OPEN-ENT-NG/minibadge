@@ -14,6 +14,8 @@ public class Database {
     public static final String REFUSED_AT = "refused_at";
     public static final String NOW_SQL_FUNCTION = "now()";
     public static final String NULL = "null";
+    public static final String USER = "user";
+
 
     /*
     Preferences
