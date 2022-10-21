@@ -16,6 +16,7 @@ interface IViewModel {
     CARD_FOOTER: typeof CARD_FOOTER;
     lang: typeof lang;
     isOpenedList: boolean;
+    isOpenedOption: boolean;
 }
 
 interface IDirectiveProperties {
@@ -23,6 +24,7 @@ interface IDirectiveProperties {
     cardIcon: string;
     badges: Badge[];
     isDefaultOpenedList: boolean;
+    isOpenedOption: boolean;
     areCardDisabled: boolean;
 }
 
@@ -34,6 +36,7 @@ class Controller implements ng.IController, IViewModel {
     CARD_FOOTER: typeof CARD_FOOTER;
     lang: typeof lang;
     isOpenedList: boolean;
+    isOpenedOption: boolean;
 
     constructor(private $scope: IMinibadgeScope,
                 private $location: ILocationService) {
@@ -43,6 +46,7 @@ class Controller implements ng.IController, IViewModel {
 
     $onInit() {
         if (this.$scope.vm.isDefaultOpenedList) this.isOpenedList = this.$scope.vm.isDefaultOpenedList;
+        this.isOpenedOption = !!this.$scope.vm.isOpenedOption;
         this.$scope.$watch((): Badge[] => this.$scope.vm.badges, (newBadges: Badge[], oldBadges: Badge[]): void => {
             this.checkOpenedListStatus(newBadges, oldBadges);
         });
@@ -86,6 +90,7 @@ function directive(): IDirective {
             label: '=',
             cardIcon: '=',
             isDefaultOpenedList: '=?',
+            isOpenedOption: '=?',
             areCardDisabled: '=?',
         },
         controllerAs: 'vm',

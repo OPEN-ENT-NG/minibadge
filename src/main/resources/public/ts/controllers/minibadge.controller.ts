@@ -41,7 +41,7 @@ class Controller implements ng.IController, ViewModel {
     publishedBadges: Badge[];
     privatizedBadges: Badge[];
     refusedBadges: Badge[];
-
+    isOpenedOption:boolean = false;
     searchQuery: string;
     isChartLightboxOpened: boolean;
     isChartAccepted: boolean;
@@ -79,6 +79,7 @@ class Controller implements ng.IController, ViewModel {
                     this.refusedBadges = this.badges ? this.badges.filter((badge: Badge) => badge.isRefused()) : [];
                 }
 
+                this.isOpenedOption = this.payload.query && !!this.payload.query.trim().length;
                 safeApply(this.$scope);
             })
             .catch((err: AxiosError) => notify.error('minibadge.error.get.badges'))
