@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class DefaultBadgeService implements BadgeService {
 
     private final Sql sql;
-    private static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
+    public static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
     public static final String BADGE_ASSIGNABLE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNABLE);
     private final UserService userService;
 

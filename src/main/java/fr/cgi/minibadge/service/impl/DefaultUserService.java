@@ -34,7 +34,7 @@ public class DefaultUserService implements UserService {
     private final EventBus eb;
     private final Logger log = LoggerFactory.getLogger(PromiseHelper.class);
     private final Sql sql;
-    private static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
+    public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
 
     public DefaultUserService(Sql sql, EventBus eb) {
         this.sql = sql;
@@ -85,7 +85,6 @@ public class DefaultUserService implements UserService {
                 .onSuccess(users -> promise.complete(new User().toList(users)));
         return promise.future();
     }
-
     private Future<JsonArray> getUsersRequest(List<String> userIds) {
         Promise<JsonArray> promise = Promise.promise();
         JsonObject action = new JsonObject()

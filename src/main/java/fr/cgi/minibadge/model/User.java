@@ -31,7 +31,8 @@ public class User extends UserInfos implements Model<User> {
         return new JsonObject()
                 .put(Field.ID, this.getUserId())
                 .put(Field.FIRSTNAME, this.getFirstName())
-                .put(Field.LASTNAME, this.getLastName());
+                .put(Field.LASTNAME, this.getLastName())
+                .put(Field.DISPLAYNAME, this.getUsername());
     }
 
     @Override

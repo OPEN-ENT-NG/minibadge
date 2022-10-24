@@ -5,6 +5,7 @@ export interface IUserResponse {
     id: string;
     firstName: string;
     lastName: string;
+    displayName: string;
 }
 
 export interface IUsersResponses extends IPaginatedResponses<IUserResponse>{}
@@ -15,6 +16,7 @@ export class User extends MinibadgeModel<User> {
     id: string;
     firstName: string;
     lastName: string;
+    displayName: string;
 
     constructor(data?: IUserResponse) {
         super();
@@ -25,6 +27,7 @@ export class User extends MinibadgeModel<User> {
         this.id = data.id;
         this.firstName = data.firstName;
         this.lastName = data.lastName;
+        this.displayName = data.displayName;
         return this;
     }
 
@@ -32,6 +35,6 @@ export class User extends MinibadgeModel<User> {
         return new User(model)
     };
 
-    displayName = (): string => `${this.firstName} ${this.lastName}`
+    getDisplayName = (): string => !!this.displayName ? this.displayName : `${this.firstName} ${this.lastName}`;
 
 }

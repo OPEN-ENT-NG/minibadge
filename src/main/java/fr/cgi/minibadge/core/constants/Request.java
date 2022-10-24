@@ -17,6 +17,11 @@ public class Request {
     public static final String PREFERENCES = "preferences";
     public static final String RIGHT = "right";
 
+    public static final String START_DATE = "startDate";
+    public static final String END_DATE = "endDate";
+    public static final String SORTBY = "sortBy";
+    public static final String SORTASC = "sortAsc";
+
     private Request() {
         throw new IllegalStateException("Utility class");
     }

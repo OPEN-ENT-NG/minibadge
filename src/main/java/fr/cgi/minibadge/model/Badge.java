@@ -16,6 +16,11 @@ public class Badge implements Model<Badge> {
     private String disabledAt;
     private User owner;
     private BadgeCounts badgeCounts;
+
+    public BadgeType badgeType() {
+        return badgeType;
+    }
+
     private BadgeType badgeType;
 
     public Badge() {
@@ -36,7 +41,13 @@ public class Badge implements Model<Badge> {
         this.badgeCounts = new BadgeCounts(badge);
         this.badgeType = setBadgeType(badge.getString(Field.BADGE_TYPE_LABEL),
                 badge.getString(Field.BADGE_TYPE_PICTURE_ID));
+        this.owner = setOwner(badge.getString(Field.OWNER_ID,badge.getString(Field.OWNERID)),
+                       badge.getString(Field.DISPLAYNAME, badge.getString(Field.DISPLAY_NAME)));
         return this;
+    }
+
+    private User setOwner(String ownerId, String displayName) {
+        return new User(new JsonObject().put(Field.ID,ownerId).put(Field.USERNAME,displayName));
     }
 
     public BadgeType setBadgeType(String typeLabel, String pictureId) {

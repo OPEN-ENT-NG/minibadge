@@ -38,6 +38,10 @@ class Controller implements ng.IController, ViewModel {
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_LIBRARY;
                 template.open('main', `badge-types`);
             },
+            badgeGiven: () => {
+                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_GIVEN;
+                template.open('main', `badges-given`);
+            },
             badgeType: () => {
                 template.open('main', `badge-type`);
             }

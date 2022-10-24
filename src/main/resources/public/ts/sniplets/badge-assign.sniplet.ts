@@ -120,7 +120,7 @@ class ViewModel implements IViewModel {
     }
 
     displayUser = (user: User): string => {
-        return user.displayName();
+        return user.getDisplayName();
     }
 
     removeUser = (userA: User): void => {

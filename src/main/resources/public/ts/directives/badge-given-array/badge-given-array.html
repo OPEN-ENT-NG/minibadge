@@ -1,0 +1,51 @@
+<div class="given-array">
+    <div class="flex-row align-center given-array-head" >
+        <div class="given-array-cell flex-row flex-one justify-center " ng-click="vm.onClick('minibadge.given.sort.label')" >
+            <i18n>minibadge.given.array.label</i18n>
+            <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.label'"  class="sort-arrow-down"></i>
+            <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.label'" class="sort-arrow-up"></i>
+        </div>
+        <div class="given-array-cell flex-row flex-one  justify-center"    ng-click="vm.onClick('minibadge.given.sort.owner.displayName')" >
+            <i18n>minibadge.given.array.owner</i18n>
+            <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.owner.displayName'"  class="sort-arrow-down"></i>
+            <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.owner.displayName'" class="sort-arrow-up"></i>
+        </div>
+        <div class="mobile-disabled given-array-cell flex-row flex-one  justify-center"
+             ng-click="vm.onClick('minibadge.given.sort.date')" >
+            <i18n>minibadge.given.array.date</i18n>
+
+            <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.date'"  class="sort-arrow-down"></i>
+            <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.date'" class="sort-arrow-up"></i>
+        </div>
+        <div class="given-array-cell flex-row flex-one  justify-center"  ng-click="vm.onClick('minibadge.given.sort.revoked')" >
+            <i18n>minibadge.given.array.revoked</i18n>
+
+
+            <i ng-show="vm.isAsc && vm.label === 'minibadge.given.sort.revoked'"  class="sort-arrow-down"></i>
+            <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.revoked'" class="sort-arrow-up"></i>
+        </div>
+    </div>
+    <div class="given-array-row flex-row align-center"  ng-repeat="badgeGiven in vm.badgesGiven">
+        <div class="given-array-cell flex-row flex-one  justify-center" >
+            <div class="flex-row align-center given-array-img">
+                <img ng-src="/minibadge/public/img/[[badgeGiven.badge.badgeType.pictureId]]" />
+            </div>
+            <div class="flex-row align-center given-array-label">
+                [[badgeGiven.badge.badgeType.label]]
+            </div>
+        </div>
+        <div class="given-array-cell flex-row flex-one justify-center" >
+            [[badgeGiven.badge.owner.getDisplayName()]]
+
+
+        </div>
+        <div class="mobile-disabled given-array-cell flex-row flex-one justify-center given-array-elem">
+            <span ng-bind="badgeGiven.createdAt | date:vm.DATE_FORMAT.DAY_MONTH_YEAR_KEBAB"></span>
+        </div>
+        <div class="given-array-cell flex-row flex-one justify-center" >
+            <span ng-show="badgeGiven.revokedAt"><i18n>minibadge.revoked</i18n></span>
+            <span ng-show="!badgeGiven.revokedAt"><i18n>minibadge.not.revoked</i18n></span>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+<div ng-controller="BadgesGivenController as vm" class="minibadge-container flex-row f-column">
+    <h2>
+        <i18n>minibadge.badges.given</i18n>
+    </h2>
+    <div class="flex badge-given-filter">
+        <minibadge-periode-picker
+                label="vm.labelFrom"
+                date="vm.startDate"
+                on-change="vm.initBadgeGiven()">
+        </minibadge-periode-picker>
+        <minibadge-periode-picker
+                label="vm.labelTo"
+                date="vm.endDate"
+                on-change="vm.initBadgeGiven()"
+        >
+        </minibadge-periode-picker>
+
+        <search-input search-query="vm.searchQuery" class="badge-given-search mobile-disabled" on-search="vm.initBadgeGiven()"
+                      placeholder="minibadge.badge.given.search"></search-input>
+    </div>
+    <minibadge-badge-given-array badges-given="vm.badgesGiven"
+                                 filter-function="vm.filterBadges(filterType, filterAsc)"
+                                 >
+
+    </minibadge-badge-given-array>
+</div>

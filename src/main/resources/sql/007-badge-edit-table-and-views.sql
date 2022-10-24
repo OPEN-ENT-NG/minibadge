@@ -1,7 +1,7 @@
 ALTER TABLE minibadge.badge
     DROP CONSTRAINT IF EXISTS unique_structure_owner_type,
     ADD CONSTRAINT unique_owner_type UNIQUE (owner_id, badge_type_id),
-    ADD COLUMN IF NOT EXISTS refused_at timestamp without time zone;
+    ADD COLUMN refused_at timestamp without time zone;
 
 
 DROP VIEW minibadge.badge_public;

@@ -1,0 +1,11 @@
+.badge-given{
+  &-filter{
+    display: flex;
+    column-gap: 1%;
+    align-items: center;
+    margin: 1em 0;
+  }
+  &-search{
+    margin: 0;
+  }
+}
