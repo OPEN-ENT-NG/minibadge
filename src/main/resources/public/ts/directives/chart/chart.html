@@ -10,9 +10,7 @@
             <p class="flex-row align-center">
                 <span><i18n>minibadge.chart.receive.accept</i18n></span>&nbsp;
                 <span>
-                    <switch ng-change="vm.changeMinibadgeAcceptationStatus()"
-                            ng-model="vm.isMinibadgeAccepted"
-                            ng-class="{disabled: !vm.isChartAccepted}">
+                    <switch ng-model="vm.isMinibadgeAccepted">
                         <label class="switch"> </label>
                     </switch>
                 </span>
@@ -41,7 +39,7 @@
             </label>
 
             <div class="minibadge-chart-footer flex-row justify-end">
-                <button ng-click="vm.validChart()">
+                <button ng-click="vm.validChart()" ng-disabled="vm.isMinibadgeAccepted && !vm.isChartAccepted">
                     <i18n>minibadge.validate</i18n>
                 </button>
             </div>

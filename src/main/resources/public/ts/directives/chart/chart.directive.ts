@@ -8,8 +8,6 @@ interface IViewModel {
 
     changeChartAcceptationStatus(): void;
 
-    changeMinibadgeAcceptationStatus(): void;
-
     validChart(): void;
 }
 
@@ -37,11 +35,6 @@ class Controller implements ng.IController, IViewModel {
 
     closeLightbox(): void {
         this.$scope.vm.isLightboxOpened = false;
-        safeApply(this.$scope);
-    }
-
-    changeMinibadgeAcceptationStatus(): void {
-        if (!this.$scope.vm.isChartAccepted) this.$scope.vm.isMinibadgeAccepted = false;
         safeApply(this.$scope);
     }
 
