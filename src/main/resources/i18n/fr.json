@@ -1,6 +1,7 @@
 {
   "minibadge.admin": "Administrateur",
   "minibadge.accept": "Accepter",
+  "minibadge.assignable.by" : "Décernable par",
   "minibadge.badge": "Badge",
   "minibadge.badge.assign": "Décerner le badge",
   "minibadge.badge.empty.statement": "Aucun badge ne correspond à votre recherche",
@@ -32,6 +33,7 @@
   "minibadge.error.get.badge.types": "Une erreur est survenue à la récupération de la bibliothèque de badges",
   "minibadge.error.get.global.settings": "Une erreur est survenue à la récupération de la configuration",
   "minibadge.error.search.users": "Une erreur est survenue à la recherche d'utilisateurs",
+  "minibadge.gave.level": "Badge pour",
   "minibadge.given.array.label": "Badge décerné",
   "minibadge.given.array.owner":"Destinataire" ,
   "minibadge.given.array.date": "Date",
@@ -56,6 +58,7 @@
   "minibadge.search": "Rechercher",
   "minibadge.selected.persons": "Personnes sélectionnées",
   "minibadge.success.assign": "Assignation du badge réussi",
+  "minibadge.student": "Élève",
   "minibadge.the": "le",
   "minibadge.title": "Minibadge",
   "minibadge.validate": "Valider"

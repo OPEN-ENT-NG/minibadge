@@ -9,4 +9,5 @@ export abstract class MinibadgeModel<I extends MinibadgeModel<I>> {
             return dataList.map((data: any) => this.toModel(data))
         return [];
     }
+
 }

@@ -51,7 +51,8 @@ public class Field {
     public static final String REFUSEDAT = "refusedAt";
     public static final String DISABLED_AT = "disabled_at";
     public static final String DISABLEDAT = "disabledAt";
-
+    public static final String LEVEL = "level";
+    public static final String ASSIGNABLEBY = "assignableBy";
     // CHART
     public static final String ACCEPTCHART = "acceptChart";
     public static final String ACCEPTASSIGN = "acceptAssign";
@@ -60,6 +61,16 @@ public class Field {
 
     //USER
     public static final String USERIDS = "userIds";
+
+    //Protagonist
+    public static final String TYPE = "type";
+    public static final String TYPEID = "typeId";
+    public static final String ISSELFASSIGNABLE = "isSelfAssignable";
+    public static final String ASSIGNORTYPE = "assignorType";
+    public static final String RECEIVERTYPE = "receiverType";
+    public static final String SETTINGS = "settings";
+    public static final String SETTING = "setting";
+    public static final String RELATIONS = "relations";
 
     private Field() {
         throw new IllegalStateException("Utility class");

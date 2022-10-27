@@ -31,7 +31,14 @@ i {
     font-family: 'material-icons';
     content: "\F141";
   }
-
+  &.target::before{
+    font-family: "material-icons";
+    content: "\F8C8";
+  }
+  &.human-arrow::before{
+    font-family: "material-icons";
+    content: "\FB2F";
+  }
   &.star::before {
     font-family: 'material-icons';
     content: "\F4CE";

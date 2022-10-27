@@ -8,5 +8,14 @@
             <i class="calendar-range"></i>
             <i18n>minibadge.the</i18n>&Tab;<span
                 ng-bind="vm.badgeType.createdAt | date:vm.DATE_FORMAT.DAY_MONTH_YEAR_KEBAB"></span></div>
+        <div>
+            <i class="target"></i>
+            <i18n>minibadge.gave.level</i18n>&nbsp;:&nbsp;<span
+                ng-bind="vm.badgeType.displayReceivers()"></span></div>
+        <div>
+            <i class="human-arrow"></i>
+            <i18n>minibadge.assignable.by</i18n>&Tab;:
+            <span
+                    ng-bind=" vm.badgeType.displayAssignors()"></span></div>
     </div>
 </div>

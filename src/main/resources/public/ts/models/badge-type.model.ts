@@ -1,6 +1,7 @@
 import {ILimitOffsetPayload, IPaginatedResponses} from "./request.model";
 import {IUserResponse, User} from "./user.model";
 import {MinibadgeModel} from "./model";
+import {BadgeSettings, IBadgeSettingResponse} from "./badge-settings.model";
 
 export interface IBadgeTypeResponse {
     id?: number;
@@ -11,6 +12,7 @@ export interface IBadgeTypeResponse {
     description: string;
     createdAt?: string;
     owner?: User;
+    setting?: BadgeSettings;
 }
 
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
@@ -29,6 +31,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
     description: string;
     createdAt?: string;
     owner?: User;
+    setting?: BadgeSettings;
 
     constructor(data?: IBadgeTypeResponse) {
         super();
@@ -44,6 +47,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
         this.description = data.description;
         this.createdAt = data.createdAt;
         this.owner = new User(<IUserResponse>data.owner);
+        this.setting = new BadgeSettings(<IBadgeSettingResponse>data.setting);
         return this;
     }
 
@@ -51,6 +55,12 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
         return new BadgeType(model)
     };
 
+    displayAssignors = (): string => {
+        return this.setting.relations.map((relation) => relation.assignorType.type).join(", ")
+    }
+    displayReceivers = (): string => {
+        return this.setting.relations.map((relation) => relation.receiverType.type).join(", ")
+    }
     getDetailPath = (): string => `/badge-types/${this.id}`;
 
 }
