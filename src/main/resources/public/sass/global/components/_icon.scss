@@ -81,4 +81,14 @@ i {
     font-family: 'material-icons';
     content: "\F493";
   }
+
+  &.check-decagram::before {
+    font-family: 'material-icons';
+    content: "\F790";
+  }
+
+  &.chevron::before {
+    font-family: 'material-icons';
+    content: "\F142";
+  }
 }

@@ -18,4 +18,5 @@ export interface ILimitOffsetPayload extends IQueryStringPayload {
 
 export interface IPaginatedPayload extends IQueryStringPayload {
     page: number;
+    pageCount?: number;
 }

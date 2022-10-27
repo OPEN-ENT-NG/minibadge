@@ -10,7 +10,25 @@
     </div>
     <div class="minibadge-type-container flex-row">
         <minibadge-id-type badge-type="vm.badgeType"></minibadge-id-type>
-        <minibadge-description-type badge-type="vm.badgeType"></minibadge-description-type>
+        <div class="minibadge-type-detail flex-row f-column">
+            <minibadge-description-type badge-type="vm.badgeType"></minibadge-description-type>
+            <div class="minibadge-type-container minibadge-type-user-lists flex-row">
+                <minibadge-user-list class="minibadge-type" ng-show="vm.assigners && vm.assigners.length"
+                                     users-paging="vm.assignersPayload"
+                                     page-change="vm.getBadgeTypeAssigners()"
+                                     users="vm.assigners"
+                                     label="'minibadge.badges.received.from.users'"
+                                     list-distinction="'minibadge.badges.assigned.by'"
+                                     user-precision="vm.displayProfile(user)"></minibadge-user-list>
+                <minibadge-user-list class="minibadge-type" ng-show="vm.receivers && vm.receivers.length"
+                                     users-paging="vm.receiversPayload"
+                                     page-change="vm.getBadgeTypeReceivers()"
+                                     users="vm.receivers"
+                                     label="'minibadge.badges.received.by.users'"
+                                     list-distinction="'minibadge.badges.assigned.to'"
+                                     user-precision="vm.displayTotalAssigned(user)"></minibadge-user-list>
+            </div>
+        </div>
     </div>
     <sniplet template="badge-assign" application="minibadge"></sniplet>
 </div>

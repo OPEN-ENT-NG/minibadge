@@ -1,0 +1,9 @@
+<div class="minibadge-paging flex-row">
+    <button ng-click="vm.decreasePage()" ng-disabled="!vm.paging.page">
+        <i class="chevron-left"></i>
+    </button>
+    &nbsp;
+    <button ng-click="vm.increasePage()" ng-disabled="vm.paging.page >= vm.paging.pageCount">
+        <i class="chevron"></i>
+    </button>
+</div>

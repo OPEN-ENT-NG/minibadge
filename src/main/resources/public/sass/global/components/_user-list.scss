@@ -1,0 +1,37 @@
+.minibadge-user-list {
+  flex: 1;
+  height: auto;
+
+  h3 {
+    font-weight: bolder;
+  }
+
+  &-items {
+    column-count: 2;
+  }
+
+  &-item {
+    display: flex;
+    align-items: center;
+
+    &-avatar {
+      margin-top: 0;
+      padding: 5px 0;
+      border-radius: 50%;
+      border: 1px solid transparent;
+      width: 30px;
+      height: 30px;
+      vertical-align: middle;
+    }
+
+    &-precision {
+      font-style: italic;
+    }
+
+  }
+
+  .minibadge-paging {
+    justify-content: flex-end;
+  }
+}
+

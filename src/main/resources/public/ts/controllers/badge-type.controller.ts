@@ -1,18 +1,34 @@
-import {Behaviours, ng, notify} from 'entcore';
+import {Behaviours, idiom as lang, ng, notify} from 'entcore';
 
 import {IBadgeTypeService} from "../services";
 import {BadgeType} from "../models/badge-type.model";
 import {safeApply} from "../utils/safe-apply.utils";
-import {AxiosError} from "axios";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {IScope} from "angular";
 import {Setting} from "../models/setting.model";
 import {Subscription} from "rxjs";
+import {User} from "../models/user.model";
+import {Paging} from "../models/paging.model";
 
 
 interface ViewModel {
-    badgeType: BadgeType;
     onOpenLightbox(): void;
+
+    displayTotalAssigned(user: User): string;
+
+    displayProfile(user: User): string;
+
+    getBadgeTypeAssigners(): Promise<void>;
+
+    getBadgeTypeReceivers(): Promise<void>;
+
+    typeId: number;
+    badgeType: BadgeType;
+    assigners: User[];
+    receivers: User[];
+    assignersPayload: Paging;
+    receiversPayload: Paging;
+    lang: typeof lang;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -21,7 +37,13 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, ViewModel {
+    typeId: number;
     badgeType: BadgeType;
+    assigners: User[];
+    receivers: User[];
+    assignersPayload: Paging;
+    receiversPayload: Paging;
+    lang: typeof lang;
 
     subscriptions: Subscription = new Subscription();
 
@@ -29,10 +51,18 @@ class Controller implements ng.IController, ViewModel {
                 private $route: any,
                 private badgeTypeService: IBadgeTypeService) {
         this.$scope.vm = this;
+        this.typeId = this.$route.current.params.typeId;
+        this.lang = lang;
     }
 
     $onInit() {
-        this.getBadgeType(this.$route.current.params.typeId);
+        this.assignersPayload = new Paging({page: 0});
+        this.receiversPayload = new Paging({page: 0});
+        Promise.all([
+            this.getBadgeType(),
+            this.getBadgeTypeAssigners(),
+            this.getBadgeTypeReceivers(),
+        ]);
     }
 
     onOpenLightbox = (): void => {
@@ -40,13 +70,35 @@ class Controller implements ng.IController, ViewModel {
             .sendBadgeType(this.badgeType);
     }
 
-    private getBadgeType = async (typeId: number): Promise<void> => {
-        this.badgeTypeService.getBadgeType(typeId)
+    displayTotalAssigned = (user: User): string => user.badgeAssignedTotal ? user.badgeAssignedTotal.toString() : null;
+
+    displayProfile = (user: User): string => this.lang.translate(user.profileToI18n());
+
+    getBadgeTypeAssigners = async (): Promise<void> => {
+        this.badgeTypeService.getBadgeTypeAssigners(this.typeId, this.assignersPayload)
+            .then((data: User[]) => {
+                if (data) this.assigners = data;
+                safeApply(this.$scope);
+            })
+            .catch(() => notify.error('minibadge.error.get.badge.type'));
+    }
+
+    getBadgeTypeReceivers = async (): Promise<void> => {
+        this.badgeTypeService.getBadgeReceivers(this.typeId, this.receiversPayload)
+            .then((data: User[]) => {
+                if (data) this.receivers = data;
+                safeApply(this.$scope);
+            })
+            .catch(() => notify.error('minibadge.error.get.badge.type'));
+    }
+
+    private getBadgeType = async (): Promise<void> => {
+        this.badgeTypeService.getBadgeType(this.typeId)
             .then((data: BadgeType) => {
                 if (data) this.badgeType = data;
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.get.badge.type'));
+            .catch(() => notify.error('minibadge.error.get.badge.type'));
     }
 
 
