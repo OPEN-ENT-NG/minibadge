@@ -91,9 +91,11 @@ public class DefaultBadgeService implements BadgeService {
                         " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, " +
                         " (SELECT COUNT(DISTINCT ba.id) FROM %s ba  WHERE ba.badge_id = b.id) as count_assigned " +
                         " FROM %s b INNER JOIN %s bt ON b.badge_type_id = bt.id " +
-                        " WHERE b.owner_id = ? %s %s",
+                        " WHERE b.owner_id = ? AND (SELECT COUNT(DISTINCT ba.id)FROM %s ba  WHERE ba.badge_id = b.id )   > 0  " +
+                        " %s %s " ,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
                 (query != null && !query.isEmpty()) ? "AND" : "",
                 SqlHelper.searchQueryInColumns(query, Collections.singletonList(String.format("%s%s", "bt.", Database.LABEL)), params));
 
