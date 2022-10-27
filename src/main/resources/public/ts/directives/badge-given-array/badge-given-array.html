@@ -42,10 +42,29 @@
         <div class="mobile-disabled given-array-cell flex-row flex-one justify-center given-array-elem">
             <span ng-bind="badgeGiven.createdAt | date:vm.DATE_FORMAT.DAY_MONTH_YEAR_KEBAB"></span>
         </div>
-        <div class="given-array-cell flex-row flex-one justify-center" >
-            <span ng-show="badgeGiven.revokedAt"><i18n>minibadge.revoked</i18n></span>
-            <span ng-show="!badgeGiven.revokedAt"><i18n>minibadge.not.revoked</i18n></span>
-
+        <div class="given-array-cell flex-row flex-one justify-center">
+            <span ng-show="badgeGiven.revokedAt" class="given-array-revoked"><i18n>minibadge.revoked</i18n></span>
+            <span ng-show="!badgeGiven.revokedAt" class="given-array-trash"
+                  ng-click="vm.openRevokeLightbox(badgeGiven)"><i class="trash"></i></span>
         </div>
     </div>
+    <lightbox show="vm.isOpenLightbox" on-close="vm.closeLightbox()" class="given-array-lightbox">
+        <div class="minibadge-container flex-row f-column">
+            <h2 class="given-array-lightbox-title" ng-click="vm.closeLightbox()">
+                <i18n>minibadge.given.lightbox.title</i18n>
+            </h2>
+            <div class="given-array-lightbox-label flex-row">
+                <i18n>minibadge.given.lightbox.label</i18n>
+            </div>
+            <div class="given-array-lightbox-footer flex-row justify-end">
+                <button class="minibadge-delete-button"
+                        ng-click="vm.closeLightbox()">
+                    <i18n>minibadge.cancel</i18n>
+                </button>
+                <button ng-click="vm.validRevoke()">
+                    <i18n>minibadge.given.lightbox.confirm</i18n>
+                </button>
+            </div>
+        </div>
+    </lightbox>
 </div>

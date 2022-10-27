@@ -21,6 +21,7 @@
 
   &-img {
     padding-right: 1em;
+    max-width: 85%;
     @include mobile {
       padding-right: 0;
     }
@@ -42,6 +43,30 @@
     padding: 1em;
     @include mobile {
       padding: 0;
+    }
+  }
+
+  &-trash{
+    font-size: 1.5em;
+    color: $minibadge-orange;
+  }
+
+  &-revoked{
+    font-weight: bold;
+    color: $minibadge-red;
+  }
+  &-lightbox{
+    .content{
+      margin-top: 10em;
+      @include mobile {
+        position: fixed;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+    }
+    &-label{
+      padding: 0.5em;
     }
   }
 }

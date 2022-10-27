@@ -2,31 +2,26 @@ package fr.cgi.minibadge.service.impl;
 
 import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
-import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.helper.PromiseHelper;
-import fr.cgi.minibadge.helper.SqlHelper;
 import fr.cgi.minibadge.model.BadgeAssigned;
-import fr.cgi.minibadge.model.User;
+import fr.cgi.minibadge.helper.SqlHelper;
 import fr.cgi.minibadge.service.BadgeAssignedService;
 import fr.cgi.minibadge.service.BadgeService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
-import org.entcore.common.user.UserUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static fr.cgi.minibadge.core.constants.Field.*;
 import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
 import static fr.cgi.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
+
+import static fr.cgi.minibadge.core.constants.Field.*;
 import static fr.cgi.minibadge.service.impl.DefaultUserService.USER_TABLE;
 
 public class DefaultBadgeAssignedService implements BadgeAssignedService {
@@ -121,6 +116,24 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                 String.format("[Minibadge@%s::createBadgeAssignedRequest] Fail to create badge assigned",
                         this.getClass().getSimpleName()))));
 
+        return promise.future();
+    }
+
+    @Override
+    public Future<JsonArray> revoke(String userId, long badgeId) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray params = new JsonArray();
+        params.add(badgeId)
+        .add(userId);
+
+        String request = "UPDATE " + BADGE_ASSIGNED_TABLE +
+                " SET revoked_at = NOW ()"+
+                " WHERE id = ? and assignor_id = ? ; ";
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getBadgesTypesRequest] Fail to revoke badge",
+                        this.getClass().getSimpleName()))));
         return promise.future();
     }
 }

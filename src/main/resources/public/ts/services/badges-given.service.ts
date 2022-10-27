@@ -5,10 +5,15 @@ import {IBadgeTypesResponses} from "../models/badge-type.model";
 
 export interface IBadgesGivenService {
     getBadgeGiven(payload: IBadgeGivenPayload): Promise<BadgeAssigned[]>;
+
+    revokeBadgeGiven(badgeGiven: BadgeAssigned): Promise<AxiosResponse>;
 }
 
 
 export const badgesGivenService: IBadgesGivenService = {
+    revokeBadgeGiven: async (badgeGiven: BadgeAssigned) => {
+        return http.put(`/minibadge/revoked/given/${badgeGiven.id}`);
+    },
 
     /**
      * Get badge type

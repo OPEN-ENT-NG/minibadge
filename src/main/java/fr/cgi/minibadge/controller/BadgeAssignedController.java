@@ -6,11 +6,14 @@ import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.model.Model;
 import fr.cgi.minibadge.security.UsersAssignRight;
 import fr.cgi.minibadge.security.ViewRight;
+import fr.cgi.minibadge.model.BadgeAssigned;
+import fr.cgi.minibadge.model.Model;
 import fr.cgi.minibadge.service.BadgeAssignedService;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -32,6 +35,19 @@ public class BadgeAssignedController extends ControllerHelper {
         super();
         this.badgeAssignedService = serviceFactory.badgeAssignedService();
     }
+
+    @Put("/revoked/given/:badgeId")
+    @ApiDoc("revoke a badge the user has given")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ViewRight.class)
+    public void revoke(HttpServerRequest request){
+        long idBadge = Long.parseLong(request.params().get(Database.BADGEID));
+        UserUtils.getUserInfos(eb, request, user ->  badgeAssignedService.revoke(user.getUserId(),idBadge)
+                .onSuccess(event -> request.response().setStatusCode(200).end())
+                .onFailure(error-> badRequest(request, error.getMessage())));
+
+    }
+
 
     @Get("/assigned/given")
     @ApiDoc("get all the badge the user has given")
