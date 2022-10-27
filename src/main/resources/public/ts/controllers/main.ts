@@ -3,7 +3,7 @@ import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
 import {IScope} from "angular";
-import {Chart, IChartResponse} from "../models/chart.model";
+import {Chart} from "../models/chart.model";
 
 interface ViewModel {
     navbarViewSelected: NAVBAR_VIEWS;
@@ -30,26 +30,33 @@ class Controller implements ng.IController, ViewModel {
         this.$scope.vm = this;
 
         this.$route({
-            badgeReceived: () => {
+            badgeReceived: async () => {
+                await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_RECEIVED;
                 template.open('main', `main`);
             },
-            badgeTypes: () => {
+            badgeTypes: async () => {
+                await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_LIBRARY;
                 template.open('main', `badge-types`);
             },
-            badgeGiven: () => {
+            badgeGiven: async () => {
+                await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_GIVEN;
                 template.open('main', `badges-given`);
             },
-            badgeType: () => {
+            badgeType: async () => {
+                await this.initInfos();
                 template.open('main', `badge-type`);
             }
         });
     }
 
     $onInit() {
-        Promise.all([this.getSettings(), this.chartService.getUserChart()])
+    }
+
+    private async initInfos() {
+        await Promise.all([this.getSettings(), this.chartService.getUserChart()])
             .then((data: [Setting, Chart]) => {
                 let setting: Setting = data[0];
                 setting.userPermissions = data[1];
