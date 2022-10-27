@@ -2,7 +2,7 @@ package fr.cgi.minibadge.controller;
 
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Request;
-import fr.cgi.minibadge.model.Model;
+import fr.cgi.minibadge.helper.RequestHelper;
 import fr.cgi.minibadge.security.ViewRight;
 import fr.cgi.minibadge.service.BadgeService;
 import fr.cgi.minibadge.service.ServiceFactory;
@@ -12,13 +12,10 @@ import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
-
-import java.util.stream.Collectors;
 
 public class BadgeController extends ControllerHelper {
 
@@ -37,8 +34,7 @@ public class BadgeController extends ControllerHelper {
         String query = request.params().get(Request.QUERY);
 
         UserUtils.getUserInfos(eb, request, user -> badgeService.getBadges(user.getUserId(), query)
-                .onSuccess(badges -> renderJson(request, new JsonObject()
-                        .put(Request.ALL, new JsonArray(badges.stream().map(Model::toJson).collect(Collectors.toList()))))
+                .onSuccess(badges -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), badges))
                 )
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

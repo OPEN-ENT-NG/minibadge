@@ -4,7 +4,9 @@ import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.helper.PromiseHelper;
 import fr.cgi.minibadge.helper.SqlHelper;
+import fr.cgi.minibadge.helper.UserHelper;
 import fr.cgi.minibadge.model.Badge;
+import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.BadgeService;
 import fr.cgi.minibadge.service.UserService;
 import io.vertx.core.Future;
@@ -13,7 +15,9 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -21,10 +25,11 @@ import java.util.stream.Collectors;
 
 public class DefaultBadgeService implements BadgeService {
 
-    private final Sql sql;
-    public static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
+    public static final String BADGE_PUBLIC_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_PUBLIC);
     public static final String BADGE_ASSIGNABLE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNABLE);
+    public static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
     private final UserService userService;
+    private final Sql sql;
 
     public DefaultBadgeService(Sql sql, UserService userService) {
         this.sql = sql;
@@ -201,6 +206,78 @@ public class DefaultBadgeService implements BadgeService {
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::updateTimeProperty] Fail to update badge",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Future<List<User>> getBadgeTypeReceivers(long typeId, int limit, Integer offset) {
+        Promise<List<User>> promise = Promise.promise();
+
+        List<User> receivers = new ArrayList<>();
+        getBadgeTypeReceiverIdsRequest(typeId, limit, offset)
+                .compose(users -> {
+                    receivers.addAll(new User().toList(users));
+                    return userService.getUsers(receivers.stream().map(UserInfos::getUserId)
+                            .collect(Collectors.toList()));
+                })
+                .onSuccess(users -> promise.complete(UserHelper.mergeUsernamesAndProfiles(users, receivers)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> getBadgeTypeReceiverIdsRequest(long typeId, Integer limit, Integer offset) {
+        Promise<JsonArray> promise = Promise.promise();
+        JsonArray params = new JsonArray()
+                .add(typeId);
+
+        String request = String.format(" SELECT DISTINCT(owner_id) as id, " +
+                        " COUNT(bav.id) over (partition by owner_id) as badge_assigned_total, " +
+                        " max(bav.created_at) over (partition by owner_id) as last_created_at " +
+                        " FROM %s bp " +
+                        " INNER JOIN %s bav on bav.badge_id = bp.id " +
+                        " WHERE badge_type_id = ? " +
+                        " GROUP BY owner_id, bav.created_at, bav.id " +
+                        " ORDER BY last_created_at DESC %s ",
+                BADGE_PUBLIC_TABLE, DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
+                SqlHelper.addLimitOffset(limit, offset, params));
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getBadgeTypeReceiverIdsRequest] Fail to retrieve badge types receivers",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    @Override
+    public Future<Integer> countBadgeTypeReceivers(long typeId) {
+        Promise<Integer> promise = Promise.promise();
+
+        countBadgeTypeReceiverIdsRequest(typeId)
+                .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+
+    }
+
+    private Future<JsonObject> countBadgeTypeReceiverIdsRequest(long typeId) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        JsonArray params = new JsonArray()
+                .add(typeId);
+
+        String request = String.format(" SELECT COUNT(DISTINCT(owner_id)) " +
+                        " FROM %s bp " +
+                        " INNER JOIN %s bav on bav.badge_id = bp.id " +
+                        " WHERE badge_type_id = ? ",
+                BADGE_PUBLIC_TABLE, DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE);
+
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::countBadgeTypeReceiverIdsRequest] Fail to count badge types receivers",
                         this.getClass().getSimpleName()))));
 
         return promise.future();

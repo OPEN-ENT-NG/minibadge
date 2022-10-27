@@ -26,6 +26,7 @@ public class Field {
     public static final String LASTNAME = "lastName";
     public static final String USERNAME = "username";
     public static final String IDUSERS = "idUsers";
+    public static final String COUNT = "count";
     public static final String Q = "q";
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
@@ -61,9 +62,11 @@ public class Field {
 
     //USER
     public static final String USERIDS = "userIds";
+    public static final String BADGE_ASSIGNED_TOTAL = "badge_assigned_total";
+    public static final String BADGEASSIGNEDTOTAL = "badgeAssignedTotal";
+    public static final String TYPE = "type";
 
     //Protagonist
-    public static final String TYPE = "type";
     public static final String TYPEID = "typeId";
     public static final String ISSELFASSIGNABLE = "isSelfAssignable";
     public static final String ASSIGNORTYPE = "assignorType";

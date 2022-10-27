@@ -1,5 +1,6 @@
 package fr.cgi.minibadge.service;
 
+import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.model.BadgeAssigned;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.EventBus;
@@ -12,7 +13,7 @@ public interface BadgeAssignedService {
     /**
      * Create badge assigned with badge creation if not exists
      *
-     * @param typeId   type identifier
+     * @param typeId type identifier
      * @param ownerIds list of badge owners identifier
      * @param assignor user that is assigning
      * @return return future
@@ -41,4 +42,24 @@ public interface BadgeAssignedService {
      * @return
      */
     Future<JsonArray> revoke(String userId, long badgeId);
+
+    /**
+     * Get users that gave me this (:typeId) badge typed
+     *
+     * @param typeId type identifier
+     * @param badgeOwner owner that received this id typed badge
+     * @param limit max number of occurrences
+     * @param offset position from where getting occurrences
+     * @return return future containing list of users
+     */
+    Future<List<User>> getBadgeTypeAssigners(long typeId, UserInfos badgeOwner, int limit, Integer offset);
+
+    /**
+     * Count users that gave me this (:typeId) badge typed
+     *
+     * @param typeId type identifier
+     * @param badgeOwner owner that received this id typed badge
+     * @return return future containing assigners count
+     */
+    Future<Integer> countBadgeTypeAssigners(long typeId, UserInfos badgeOwner);
 }

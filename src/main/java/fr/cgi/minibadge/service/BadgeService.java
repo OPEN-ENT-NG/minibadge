@@ -1,6 +1,7 @@
 package fr.cgi.minibadge.service;
 
 import fr.cgi.minibadge.model.Badge;
+import fr.cgi.minibadge.model.User;
 import io.vertx.core.Future;
 
 import java.util.List;
@@ -67,5 +68,21 @@ public interface BadgeService {
      */
     Future<Void> enableBadges(String ownerId);
 
+    /**
+     * Get users that received this (:typeId) badge typed
+     *
+     * @param typeId type identifier
+     * @param limit max number of occurrences
+     * @param offset position from where getting occurrences
+     * @return return future containing list of users
+     */
+    Future<List<User>> getBadgeTypeReceivers(long typeId, int limit, Integer offset);
 
+    /**
+     * Count users that received this (:typeId) badge typed
+     *
+     * @param typeId type identifier
+     * @return return future containing receivers count
+     */
+    Future<Integer> countBadgeTypeReceivers(long typeId);
 }

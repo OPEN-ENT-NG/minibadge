@@ -41,9 +41,9 @@ public class Neo4jHelper {
     public static String filterUsersFromIds(List<String> userIds, String userAlias, JsonObject params) {
         if (userIds == null || userIds.isEmpty()) return "";
 
-        params.put(Request.USERIDS, userIds);
+        params.put(Field.USERIDS, userIds);
         String columnId = userAlias != null ? String.format("%s.%s", userAlias, Field.ID) : Field.ID;
-        return String.format("%s IN {%s}", columnId, Request.USERIDS);
+        return String.format("%s IN {%s}", columnId, Field.USERIDS);
     }
 
     public static String matchUsersWithPreferences(String userAlias, String prefAlias, String prefKey) {

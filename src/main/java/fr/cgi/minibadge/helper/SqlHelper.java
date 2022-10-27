@@ -1,6 +1,8 @@
 package fr.cgi.minibadge.helper;
 
+import fr.cgi.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.entcore.common.sql.Sql;
 
@@ -52,5 +54,9 @@ public class SqlHelper {
                         })
                         .collect(Collectors.joining(" OR "))
         );
+    }
+
+    public static Integer getResultCount(JsonObject result) {
+        return result.getInteger(Field.COUNT);
     }
 }

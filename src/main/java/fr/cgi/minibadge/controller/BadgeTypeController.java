@@ -3,7 +3,11 @@ package fr.cgi.minibadge.controller;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.helper.RequestHelper;
+import fr.cgi.minibadge.model.User;
+import fr.cgi.minibadge.security.ReceiveRight;
 import fr.cgi.minibadge.security.ViewRight;
+import fr.cgi.minibadge.service.BadgeAssignedService;
+import fr.cgi.minibadge.service.BadgeService;
 import fr.cgi.minibadge.service.BadgeTypeService;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
@@ -12,19 +16,28 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
+import java.util.List;
+
 public class BadgeTypeController extends ControllerHelper {
 
     private final BadgeTypeService badgeTypeService;
+    private final BadgeAssignedService badgeAssignedService;
+    private final BadgeService badgeService;
 
     public BadgeTypeController(ServiceFactory serviceFactory) {
         super();
         this.badgeTypeService = serviceFactory.badgeTypeService();
+        this.badgeAssignedService = serviceFactory.badgeAssignedService();
+        this.badgeService = serviceFactory.badgeService();
     }
 
     @Get("/types")
@@ -54,4 +67,47 @@ public class BadgeTypeController extends ControllerHelper {
                 .onSuccess(badgeType -> renderJson(request, badgeType.toJson()))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
+
+    @Get("/types/:typeId/assigners")
+    @ApiDoc("Get users that gave me this (:typeId) badge typed")
+    @ResourceFilter(ReceiveRight.class)
+    public void getBadgeTypeAssigners(HttpServerRequest request) {
+        MultiMap params = request.params();
+        int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
+        int limit = RequestHelper.cappingLimit(params);
+        int offset = RequestHelper.pageToOffset(page, limit);
+        long typeId = Long.parseLong(params.get(Database.TYPEID));
+
+        UserUtils.getUserInfos(eb, request, user -> {
+            Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
+            Future<Integer> countAssignersFuture = badgeAssignedService.countBadgeTypeAssigners(typeId, user);
+
+            CompositeFuture.all(assignersFuture, countAssignersFuture)
+                    .onSuccess(users -> renderJson(request,
+                            RequestHelper.formatResponse(page, countAssignersFuture.result(), limit, assignersFuture.result())))
+                    .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
+        });
+
+    }
+
+    @Get("/types/:typeId/receivers")
+    @ApiDoc("Get users that received this (:typeId) badge typed")
+    @ResourceFilter(ViewRight.class)
+    public void getBadgeTypeReceivers(HttpServerRequest request) {
+        MultiMap params = request.params();
+        int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
+        int limit = RequestHelper.cappingLimit(params);
+        int offset = RequestHelper.pageToOffset(page, limit);
+        long typeId = Long.parseLong(params.get(Database.TYPEID));
+
+        Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
+        Future<Integer> countReceiversFuture = badgeService.countBadgeTypeReceivers(typeId);
+
+        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture)
+                .onSuccess(users -> renderJson(request,
+                        RequestHelper.formatResponse(page, countReceiversFuture.result(), limit, receiversFuture.result())))
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+    }
+
+
 }

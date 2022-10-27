@@ -40,7 +40,7 @@ public class ServiceFactory {
     }
 
     public BadgeAssignedService badgeAssignedService() {
-        return new DefaultBadgeAssignedService(sql, this.badgeService());
+        return new DefaultBadgeAssignedService(sql, this.badgeService(), this.userService());
     }
 
     public UserService userService() {

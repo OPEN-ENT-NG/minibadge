@@ -21,7 +21,7 @@ public interface BadgeTypeService {
      * Get badge type
      *
      * @param structureIds Structure identifiers
-     * @param typeId Structure identifier
+     * @param typeId Type identifier
      * @param host Host
      * @param language accepted language
      * @return return list of badge type (model)

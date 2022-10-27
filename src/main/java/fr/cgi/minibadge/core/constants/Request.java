@@ -4,6 +4,8 @@ public class Request {
     public static final String ALL = "all";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String PAGE = "page";
+    public static final String PAGECOUNT = "pageCount";
     public static final String QUERY = "query";
     public static final String PAGESIZE = "pageSize";
     public static final String MESSAGE = "message";
@@ -11,7 +13,6 @@ public class Request {
     public static final String STATUS = "status";
     public static final String RESULT = "result";
     public static final String RESULTS = "results";
-    public static final String USERIDS = "userIds";
     public static final String CACHE = "cache";
     public static final String PREFERENCE = "preference";
     public static final String PREFERENCES = "preferences";
