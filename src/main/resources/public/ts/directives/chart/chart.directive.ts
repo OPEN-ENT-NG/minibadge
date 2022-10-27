@@ -40,7 +40,6 @@ class Controller implements ng.IController, IViewModel {
 
     changeChartAcceptationStatus(): void {
         if (!this.$scope.vm.isChartAccepted) this.$scope.vm.isMinibadgeAccepted = false;
-        if (!!this.$scope.vm.isChartAccepted) this.$scope.vm.isMinibadgeAccepted = true;
         safeApply(this.$scope);
     }
 
