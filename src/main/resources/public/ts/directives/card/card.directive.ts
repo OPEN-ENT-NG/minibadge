@@ -39,7 +39,7 @@ class Controller implements ng.IController, IViewModel {
     }
 
     bodyClick(): void {
-        if (isFunction(this.$scope.vm.onBodyClick)) this.$scope.vm.onBodyClick(this.$scope.vm.badgeType)
+        if (!this.$scope.vm.isDisabled && isFunction(this.$scope.vm.onBodyClick)) this.$scope.vm.onBodyClick(this.$scope.vm.badgeType)
     }
 
     $onDestroy() {

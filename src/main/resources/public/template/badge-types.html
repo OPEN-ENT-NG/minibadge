@@ -8,7 +8,9 @@
                              on-body-click="vm.redirectBadgeType(badgeType)"
                              on-footer-click="vm.onOpenLightbox(badgeType)"
                              click-path="badgeType.getDetailPath()"
-                             footer="vm.CARD_FOOTER.AWARD_BADGE">
+                             footer="vm.CARD_FOOTER.AWARD_BADGE"
+                             is-disabled="!vm.isMinibadgeAccepted"
+        >
         </minibadge-card-type>
     </div>
 <minibadge-empty-statement

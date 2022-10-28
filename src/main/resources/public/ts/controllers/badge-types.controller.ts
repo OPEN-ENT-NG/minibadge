@@ -37,6 +37,7 @@ class Controller implements ng.IController, ViewModel {
     CARD_FOOTER: typeof CARD_FOOTER;
     badgeTypes: BadgeType[];
     searchQuery: string;
+    isMinibadgeAccepted: boolean;
 
     constructor(private $scope: IMinibadgeScope,
                 private $location: ILocationService,
@@ -46,6 +47,8 @@ class Controller implements ng.IController, ViewModel {
         this.payload = {
             offset: 0,
         };
+        this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+            || !!this.$scope.setting.userPermissions.acceptReceive;
     }
 
     $onInit() {
