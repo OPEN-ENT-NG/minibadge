@@ -1,10 +1,13 @@
 package fr.cgi.minibadge.helper;
 
 import fr.cgi.minibadge.core.constants.Field;
+import fr.cgi.minibadge.model.ThresholdSetting;
+import fr.cgi.minibadge.service.impl.DefaultBadgeAssignedService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.entcore.common.sql.Sql;
+import org.entcore.common.user.UserInfos;
 
 import java.util.Arrays;
 import java.util.List;
@@ -58,5 +61,34 @@ public class SqlHelper {
 
     public static Integer getResultCount(JsonObject result) {
         return result.getInteger(Field.COUNT);
+    }
+
+    public static String getPartitionsThresholdsReachedRequests(List<ThresholdSetting> thresholdSettings, UserInfos user,
+                                                                JsonArray params) {
+        return thresholdSettings.stream()
+                .map(badgeSetting -> {
+                    String formatDate = DateHelper.getFormatFromConstant(badgeSetting.thresholdPeriodAssignable());
+                    String request = String.format("((%s) >= ?)", getCTEThreshold(formatDate, user, params));
+                    params.add(badgeSetting.thresholdMaxAssignable());
+                    return request;
+                })
+                .collect(Collectors.joining(" OR "));
+    }
+
+    public static String getCTEThresholdsRequests(List<ThresholdSetting> thresholdSettings, UserInfos user, JsonArray params) {
+        return thresholdSettings.stream()
+                .map(badgeSetting -> {
+                    String formatDate = DateHelper.getFormatFromConstant(badgeSetting.thresholdPeriodAssignable());
+                    return String.format("(%s) as %s",
+                            getCTEThreshold(formatDate, user, params), badgeSetting.thresholdPeriodAssignable());
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    public static String getCTEThreshold(String formatDate, UserInfos user, JsonArray params) {
+        params.add(user.getUserId());
+        return String.format("SELECT COUNT(id) FROM %s " +
+                        " WHERE to_char(now(), '%s') = to_char(created_at, '%s') AND assignor_id = ?",
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, formatDate, formatDate);
     }
 }

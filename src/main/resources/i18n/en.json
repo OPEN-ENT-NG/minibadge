@@ -49,5 +49,6 @@
   "minibadge.success.assign": "Badge assignment successful",
   "minibadge.the": "",
   "minibadge.title": "Minibadge",
+  "minibadge.threshold.remaining": "Quota of badges to be awarded remaining",
   "minibadge.validate": "Validate"
 }

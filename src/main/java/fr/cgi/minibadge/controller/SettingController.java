@@ -1,5 +1,6 @@
 package fr.cgi.minibadge.controller;
 
+import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.security.ViewRight;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.cgi.minibadge.service.SettingService;
@@ -8,8 +9,10 @@ import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserUtils;
 
 public class SettingController extends ControllerHelper {
     private final SettingService settingService;
@@ -23,6 +26,8 @@ public class SettingController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ViewRight.class)
     public void getGlobalSettings(HttpServerRequest request) {
-        renderJson(request, settingService.getGlobalSettings().toJson());
+        UserUtils.getUserInfos(eb, request, user -> settingService.getGlobalSettings(user)
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())))
+                .onSuccess(globalSettings -> renderJson(request, globalSettings.toJson())));
     }
 }

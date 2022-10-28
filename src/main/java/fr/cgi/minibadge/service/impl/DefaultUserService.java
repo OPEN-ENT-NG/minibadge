@@ -47,7 +47,7 @@ public class DefaultUserService implements UserService {
                                         && queriedUser.permissions().acceptReceive() != null
                                         // We currently consider that all types have default setting
                                         && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
-                                        SettingHelper.getDefaultBadgeSetting())
+                                        SettingHelper.getDefaultTypeSetting())
                         )
                         .collect(Collectors.toList())));
 

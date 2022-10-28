@@ -1,7 +1,7 @@
 import {ILimitOffsetPayload, IPaginatedResponses} from "./request.model";
 import {IUserResponse, User} from "./user.model";
 import {MinibadgeModel} from "./model";
-import {BadgeSettings, IBadgeSettingResponse} from "./badge-settings.model";
+import {TypeSettings, ITypeSettingResponse} from "./type-settings.model";
 import {BadgeProtagonistSettingRelation} from "./badge-protagonist-setting.model";
 import {idiom as lang} from "entcore";
 
@@ -14,7 +14,7 @@ export interface IBadgeTypeResponse {
     description: string;
     createdAt?: string;
     owner?: User;
-    setting?: BadgeSettings;
+    setting?: TypeSettings;
 }
 
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
@@ -33,7 +33,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
     description: string;
     createdAt?: string;
     owner?: User;
-    setting?: BadgeSettings;
+    setting?: TypeSettings;
 
     constructor(data?: IBadgeTypeResponse) {
         super();
@@ -49,7 +49,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
         this.description = data.description;
         this.createdAt = data.createdAt;
         this.owner = new User(<IUserResponse>data.owner);
-        this.setting = new BadgeSettings(<IBadgeSettingResponse>data.setting);
+        this.setting = new TypeSettings(<ITypeSettingResponse>data.setting);
         return this;
     }
 

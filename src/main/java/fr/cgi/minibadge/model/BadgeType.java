@@ -2,15 +2,7 @@ package fr.cgi.minibadge.model;
 
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Field;
-import fr.wseduc.webutils.I18n;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 
 public class BadgeType implements Model<BadgeType> {
@@ -23,7 +15,7 @@ public class BadgeType implements Model<BadgeType> {
     private String description;
     private String createdAt;
     private User owner;
-    private BadgeSetting setting = new BadgeSetting();
+    private TypeSetting setting = new TypeSetting();
 
     public BadgeType() {
     }
@@ -100,7 +92,7 @@ public class BadgeType implements Model<BadgeType> {
         this.owner = owner;
     }
 
-    public void setSetting(BadgeSetting setting) {
+    public void setSetting(TypeSetting setting) {
         this.setting = setting;
     }
 

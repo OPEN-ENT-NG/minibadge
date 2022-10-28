@@ -77,7 +77,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                 })
                 .onSuccess(user -> {
                     badgeType.setOwner(user);
-                    badgeType.setSetting(SettingHelper.getDefaultBadgeSetting());
+                    badgeType.setSetting(SettingHelper.getDefaultTypeSetting());
                     promise.complete(badgeType);
                 })
                 .onFailure(promise::fail);

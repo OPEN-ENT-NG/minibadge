@@ -47,9 +47,17 @@
       justify-content: center;
     }
 
-    button:not(:last-child) {
-      margin-right: 20px;
-      min-width: 148px;
+    &-warning {
+      color: $minibadge-red;
+    }
+
+    &-buttons {
+      margin-left: auto;
+
+      button:not(:last-child) {
+        margin-right: 20px;
+        min-width: 148px;
+      }
     }
   }
 
@@ -76,6 +84,7 @@
         align-items: center;
       }
       margin-left: 1em;
+
       .search-user {
         margin-bottom: 1em;
         width: 100%;

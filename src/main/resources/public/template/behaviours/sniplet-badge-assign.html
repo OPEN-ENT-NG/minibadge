@@ -23,14 +23,21 @@
                                          on-remove-item="vm.removeUser"></minibadge-selected-list>
             </div>
         </div>
-        <div class="minibadge-assign-footer flex-row justify-end">
-            <button class="minibadge-delete-button"
-                    ng-click="vm.closeLightbox()">
-                <i18n>minibadge.cancel</i18n>
-            </button>
-            <button ng-click="vm.assign()">
-                <i18n>minibadge.badge.assign</i18n>
-            </button>
+
+        <div class="minibadge-assign-footer flex-row">
+            <span ng-class="{'minibadge-assign-footer-warning': setting.areThresholdsReached(vm.userSelected.length)}">
+                <i18n>minibadge.threshold.remaining</i18n>&nbsp;&#58;&nbsp;
+                [[setting.assignableNumbers(vm.userSelected.length)]]
+            </span>
+            <div class="minibadge-assign-footer-buttons flex-row">
+                <button class="minibadge-delete-button"
+                        ng-click="vm.closeLightbox()">
+                    <i18n>minibadge.cancel</i18n>
+                </button>
+                <button ng-click="vm.assign()" ng-disabled="setting.areThresholdsOutmoded(vm.userSelected.length)">
+                    <i18n>minibadge.badge.assign</i18n>
+                </button>
+            </div>
         </div>
     </div>
 </lightbox>

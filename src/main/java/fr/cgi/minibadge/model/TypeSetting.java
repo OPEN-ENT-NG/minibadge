@@ -9,21 +9,21 @@ import java.util.List;
 
 import static fr.cgi.minibadge.core.constants.Database.STRUCTUREID;
 
-public class BadgeSetting implements Model<BadgeSetting> {
+public class TypeSetting implements Model<TypeSetting> {
     //A changer des que la bdd sera opérationnelle
     List<BadgeProtagonistSettingRelation> relations = new ArrayList<>();
     boolean isSelfAssignable;
     String structureId;
 
-    public BadgeSetting() {
+    public TypeSetting() {
         //A changer des que la bdd sera opérationnelle
     }
 
-    public BadgeSetting(JsonObject badgeSetting) {
-        this.set(badgeSetting);
+    public TypeSetting(JsonObject typeSetting) {
+        this.set(typeSetting);
     }
 
-    public BadgeSetting(List<BadgeProtagonistSettingRelation> relations) {
+    public TypeSetting(List<BadgeProtagonistSettingRelation> relations) {
         this.setRelations(relations);
     }
 
@@ -60,11 +60,11 @@ public class BadgeSetting implements Model<BadgeSetting> {
     }
 
     @Override
-    public BadgeSetting model(JsonObject model) {
-        return new BadgeSetting(model);
+    public TypeSetting model(JsonObject model) {
+        return new TypeSetting(model);
     }
 
-    public BadgeSetting set(BadgeSetting model) {
+    public TypeSetting set(TypeSetting model) {
         this.relations = model.relations();
         this.isSelfAssignable = model.isSelfAssignable();
         this.structureId = model.structureId();
@@ -72,7 +72,7 @@ public class BadgeSetting implements Model<BadgeSetting> {
     }
 
     @Override
-    public BadgeSetting set(JsonObject model) {
+    public TypeSetting set(JsonObject model) {
         this.isSelfAssignable = model.getBoolean(Field.ISSELFASSIGNABLE, false);
         this.structureId = model.getString(STRUCTUREID);
         this.relations = new BadgeProtagonistSettingRelation()

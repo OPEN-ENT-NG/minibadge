@@ -75,6 +75,13 @@ public class Field {
     public static final String SETTING = "setting";
     public static final String RELATIONS = "relations";
 
+    // Badge Setting
+    public static final String MAXASSIGNABLE = "maxAssignable";
+    public static final String PERIODASSIGNABLE = "periodAssignable";
+    public static final String ARE_THRESHOLDS_REACHED = "are_thresholds_reached";
+    public static final String THRESHOLDSETTINGS = "thresholdSettings";
+    public static final String ASSIGNATIONSNUMBER = "assignationsNumber";
+
     private Field() {
         throw new IllegalStateException("Utility class");
     }

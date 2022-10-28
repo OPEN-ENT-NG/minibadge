@@ -4,12 +4,10 @@ import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.core.constants.Rights;
-import fr.cgi.minibadge.helper.Neo4jHelper;
-import fr.cgi.minibadge.helper.PromiseHelper;
-import fr.cgi.minibadge.helper.SettingHelper;
-import fr.cgi.minibadge.helper.WorkflowHelper;
-import fr.cgi.minibadge.model.BadgeSetting;
+import fr.cgi.minibadge.helper.*;
 import fr.cgi.minibadge.model.Chart;
+import fr.cgi.minibadge.model.ThresholdSetting;
+import fr.cgi.minibadge.model.TypeSetting;
 import fr.cgi.minibadge.model.User;
 import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Binding;
@@ -23,6 +21,8 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.http.filter.ResourcesProvider;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.neo4j.Neo4jResult;
+import org.entcore.common.sql.Sql;
+import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
@@ -49,13 +49,17 @@ public class UsersAssignRight implements ResourcesProvider {
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();
 
             Future<JsonObject> cachedPermissionsFuture = getUserCachedPermissions(request);
-            Future<BadgeSetting> badgeSettingFuture = getBadgeSetting();
+            Future<TypeSetting> badgeSettingFuture = getTypeSetting();
+            Future<Boolean> areReachedThresholdsFuture = areReachedThresholds(userInfos,
+                    SettingHelper.getDefaultBadgeSettings());
 
-            BadgeSetting badgeSetting = new BadgeSetting();
+            TypeSetting typeSetting = new TypeSetting();
 
-            CompositeFuture.all(cachedPermissionsFuture, badgeSettingFuture)
+            CompositeFuture.all(cachedPermissionsFuture, badgeSettingFuture, areReachedThresholdsFuture)
                     .compose(futures -> {
-                        badgeSetting.set(badgeSettingFuture.result());
+                        if (areReachedThresholdsFuture.result())
+                            return Future.failedFuture("[Minibadge@%s::authorize] Maximum assignations reached.");
+                        typeSetting.set(badgeSettingFuture.result());
                         return getUserPermissions(cachedPermissionsFuture.result(), userInfos, request);
                     })
                     .compose(permissions -> {
@@ -69,7 +73,7 @@ public class UsersAssignRight implements ResourcesProvider {
                     .onSuccess(usersArray -> {
                         List<User> users = new User().toList(usersArray);
                         boolean isAuthorizedToAssign = SettingHelper
-                                .isAuthorizedToAssign(new User(userInfos), users, badgeSetting);
+                                .isAuthorizedToAssign(new User(userInfos), users, typeSetting);
                         boolean canUsersReceive = users.stream()
                                 .allMatch(user ->
                                         user.permissions().acceptChart() != null
@@ -92,8 +96,31 @@ public class UsersAssignRight implements ResourcesProvider {
         return promise.future();
     }
 
-    private Future<BadgeSetting> getBadgeSetting() {
-        return Future.succeededFuture(SettingHelper.getDefaultBadgeSetting());
+    private Future<TypeSetting> getTypeSetting() {
+        return Future.succeededFuture(SettingHelper.getDefaultTypeSetting());
+    }
+
+    private Future<Boolean> areReachedThresholds(UserInfos user, List<ThresholdSetting> thresholdSettings) {
+        Promise<Boolean> promise = Promise.promise();
+        areReachedThresholdsRequest(user, thresholdSettings)
+                .onSuccess(thresholds -> promise.complete(thresholds.getBoolean(Field.ARE_THRESHOLDS_REACHED, false)))
+                .onFailure(promise::fail);
+        return promise.future();
+    }
+
+
+    private Future<JsonObject> areReachedThresholdsRequest(UserInfos user, List<ThresholdSetting> thresholdSettings) {
+        Promise<JsonObject> promise = Promise.promise();
+        JsonArray params = new JsonArray();
+        String request = String.format(" SELECT %s as are_thresholds_reached ",
+                SqlHelper.getPartitionsThresholdsReachedRequests(thresholdSettings, user, params)
+        );
+
+        Sql.getInstance().prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::areReachedThresholdsRequest] Fail to get threshold status",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
     }
 
     private Future<Chart> getUserPermissions(JsonObject cachePermission, final UserInfos user, final HttpServerRequest request) {

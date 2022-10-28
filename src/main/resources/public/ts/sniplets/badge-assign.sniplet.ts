@@ -1,15 +1,21 @@
 import {Behaviours, idiom as lang, notify} from "entcore"
-import {badgeTypeService, IBadgeTypeService} from "../services";
+import {
+    badgeAssignedService,
+    badgeTypeService,
+    IBadgeAssignedService,
+    IBadgeTypeService,
+    IUserService,
+    userService
+} from "../services";
 import {safeApply} from "../utils/safe-apply.utils";
 import {AxiosError} from "axios";
 import {IScope} from "angular";
-import {IUserService, userService} from "../services/user.service";
 import {IUserPayload, User} from "../models/user.model";
 import {Subscription} from "rxjs";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {IBadgeAssignedPayload} from "../models/badge-assigned.model";
-import {badgeAssignedService, IBadgeAssignedService} from "../services/badge-assigned.service";
 import {BadgeType} from "../models/badge-type.model";
+import {Setting} from "../models/setting.model";
 
 interface IViewModel {
     closeLightbox(): void;
@@ -37,6 +43,7 @@ interface IViewModel {
 
 interface IMinibadgeScope extends IScope {
     vm: IViewModel;
+    setting: Setting;
 }
 
 class ViewModel implements IViewModel {
@@ -140,6 +147,7 @@ class ViewModel implements IViewModel {
             this.badgeAssignedPayload.ownerIds = this.userSelected.map((user: User) => user.id);
             this.badgeAssignedService.assign(this.badgeType.id, this.badgeAssignedPayload)
                 .then(() => {
+                    this.$scope.setting.incrementAssignationsNumbers(this.userSelected.length);
                     notify.success('minibadge.success.assign')
                     this.closeLightbox();
                     safeApply(this.$scope);
