@@ -20,7 +20,7 @@ public interface BadgeService {
      * Creates badges if not exists
      *
      * @param ownerId owner identifier
-     * @param query to filter on badge type label
+     * @param query   to filter on badge type label
      * @return return badge list of current user
      */
     Future<List<Badge>> getBadges(String ownerId, String query);
@@ -55,10 +55,12 @@ public interface BadgeService {
     /**
      * Disable badges from current user
      *
-     * @param ownerId owner identifier
+     * @param ownerId  owner identifier
+     * @param host
+     * @param language
      * @return return future ending process
      */
-    Future<Void> disableBadges(String ownerId);
+    Future<Void> disableBadges(String ownerId, String host, String language);
 
     /**
      * Enable badges from current user
@@ -72,7 +74,7 @@ public interface BadgeService {
      * Get users that received this (:typeId) badge typed
      *
      * @param typeId type identifier
-     * @param limit max number of occurrences
+     * @param limit  max number of occurrences
      * @param offset position from where getting occurrences
      * @return return future containing list of users
      */

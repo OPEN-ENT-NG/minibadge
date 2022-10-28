@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DefaultBadgeService implements BadgeService {
@@ -178,10 +179,10 @@ public class DefaultBadgeService implements BadgeService {
     }
 
     @Override
-    public Future<Void> disableBadges(String ownerId) {
+    public Future<Void> disableBadges(String ownerId, String host, String language) {
         Promise<Void> promise = Promise.promise();
-
-        changeDisableBadgesRequest(ownerId, Database.NOW_SQL_FUNCTION)
+        userService.anonimyzeUser(ownerId, host, language)
+                .compose(event -> changeDisableBadgesRequest(ownerId, Database.NOW_SQL_FUNCTION))
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -191,8 +192,8 @@ public class DefaultBadgeService implements BadgeService {
     @Override
     public Future<Void> enableBadges(String ownerId) {
         Promise<Void> promise = Promise.promise();
-
-        changeDisableBadgesRequest(ownerId, Database.NULL)
+        userService.upsert(Collections.singletonList(ownerId))
+                .compose(event -> changeDisableBadgesRequest(ownerId, Database.NULL))
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 

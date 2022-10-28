@@ -10,6 +10,8 @@ import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
@@ -52,7 +54,9 @@ public class MinibadgeController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ReceiveRight.class)
     public void refuseMinibadge(HttpServerRequest request) {
-        UserUtils.getUserInfos(eb, request, user -> badgeService.disableBadges(user.getUserId())
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        UserUtils.getUserInfos(eb, request, user -> badgeService.disableBadges(user.getUserId(),host,language)
                 .onSuccess(badge -> renderJson(request, new JsonObject()))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

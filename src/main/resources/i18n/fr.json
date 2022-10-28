@@ -31,6 +31,7 @@
   "minibadge.created.by": "Créé par",
   "minibadge.default.empty.statement": "Aucun résultat",
   "minibadge.description": "Description",
+  "minibadge.disable.user": "Utilisateur désactivé",
   "minibadge.error.assign": "Une erreur est survenue à l'assignation du badge",
   "minibadge.error.chart.validate": "Une erreur est survenue à la validation de la charte",
   "minibadge.error.get.badges": "Une erreur est survenue à la récupération des badges",

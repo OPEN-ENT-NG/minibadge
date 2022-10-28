@@ -9,6 +9,7 @@ import fr.cgi.minibadge.helper.Neo4jHelper;
 import fr.cgi.minibadge.helper.PromiseHelper;
 import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.UserService;
+import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -85,6 +86,7 @@ public class DefaultUserService implements UserService {
                 .onSuccess(users -> promise.complete(new User().toList(users)));
         return promise.future();
     }
+
     private Future<JsonArray> getUsersRequest(List<String> userIds) {
         Promise<JsonArray> promise = Promise.promise();
         JsonObject action = new JsonObject()
@@ -105,6 +107,22 @@ public class DefaultUserService implements UserService {
             JsonArray statements = new JsonArray(users.stream().map(this::upsertStatement).collect(Collectors.toList()));
             sql.transaction(statements, PromiseHelper.messageToPromise(promise));
         });
+        return promise.future();
+    }
+
+    @Override
+    public Future<JsonArray> anonimyzeUser(String userId, String host, String language) {
+        Promise<JsonArray> promise = Promise.promise();
+        String query = String.format("UPDATE %s set display_name = ?" +
+                " WHERE id = ? ; ", USER_TABLE);
+        JsonArray params = new JsonArray();
+        params.add(I18n.getInstance().translate("minibadge.disable.user", host, language))
+                .add(userId);
+
+        sql.prepared(query, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::createBadgeAssignedRequest] Fail to create badge assigned",
+                        this.getClass().getSimpleName()))));
+
         return promise.future();
     }
 
