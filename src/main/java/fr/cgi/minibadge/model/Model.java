@@ -18,4 +18,8 @@ public interface Model<I extends Model<I>> {
         return ((List<JsonObject>) results.getList()).stream().map(this::model).collect(Collectors.toList());
     }
 
+    default JsonArray toArray(List<I> models) {
+        return new JsonArray(models.stream().map(Model::toJson).collect(Collectors.toList()));
+    }
+
 }

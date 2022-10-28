@@ -17,6 +17,14 @@ public class User extends UserInfos implements Model<User> {
         this.set(user);
     }
 
+    public User(UserInfos user) {
+        this.setUserId(user.getUserId());
+        this.setFirstName(user.getFirstName());
+        this.setLastName(user.getLastName());
+        this.setUsername(user.getUsername());
+        this.setType(user.getType());
+    }
+
     @Override
     public User set(JsonObject user) {
         this.setUserId(user.getString(Field.ID));

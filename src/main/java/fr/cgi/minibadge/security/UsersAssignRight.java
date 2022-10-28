@@ -6,16 +6,15 @@ import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.core.constants.Rights;
 import fr.cgi.minibadge.helper.Neo4jHelper;
 import fr.cgi.minibadge.helper.PromiseHelper;
+import fr.cgi.minibadge.helper.SettingHelper;
 import fr.cgi.minibadge.helper.WorkflowHelper;
+import fr.cgi.minibadge.model.BadgeSetting;
 import fr.cgi.minibadge.model.Chart;
 import fr.cgi.minibadge.model.User;
 import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Binding;
 import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -48,8 +47,17 @@ public class UsersAssignRight implements ResourcesProvider {
         RequestUtils.bodyToJson(request, body -> {
             request.resume();
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();
-            getUserCachedPermissions(request)
-                    .compose(cachedPermissions -> getUserPermissions(cachedPermissions, userInfos, request))
+
+            Future<JsonObject> cachedPermissionsFuture = getUserCachedPermissions(request);
+            Future<BadgeSetting> badgeSettingFuture = getBadgeSetting();
+
+            BadgeSetting badgeSetting = new BadgeSetting();
+
+            CompositeFuture.all(cachedPermissionsFuture, badgeSettingFuture)
+                    .compose(futures -> {
+                        badgeSetting.set(badgeSettingFuture.result());
+                        return getUserPermissions(cachedPermissionsFuture.result(), userInfos, request);
+                    })
                     .compose(permissions -> {
                         if (permissions.acceptChart() == null)
                             return Future.failedFuture(
@@ -60,11 +68,13 @@ public class UsersAssignRight implements ResourcesProvider {
                     })
                     .onSuccess(usersArray -> {
                         List<User> users = new User().toList(usersArray);
+                        boolean isAuthorizedToAssign = SettingHelper
+                                .isAuthorizedToAssign(new User(userInfos), users, badgeSetting);
                         boolean canUsersReceive = users.stream()
                                 .allMatch(user ->
                                         user.permissions().acceptChart() != null
                                                 && user.permissions().acceptReceive() != null);
-                        handler.handle(ownerIds.size() == users.size() && canUsersReceive);
+                        handler.handle(ownerIds.size() == users.size() && isAuthorizedToAssign && canUsersReceive);
                     })
                     .onFailure(err -> handler.handle(false));
         });
@@ -80,6 +90,10 @@ public class UsersAssignRight implements ResourcesProvider {
                     .getString(Database.MINIBADGECHART, "{}")));
         });
         return promise.future();
+    }
+
+    private Future<BadgeSetting> getBadgeSetting() {
+        return Future.succeededFuture(SettingHelper.getDefaultBadgeSetting());
     }
 
     private Future<Chart> getUserPermissions(JsonObject cachePermission, final UserInfos user, final HttpServerRequest request) {
@@ -101,7 +115,8 @@ public class UsersAssignRight implements ResourcesProvider {
 
         String userAlias = "visibles";
         String prefAlias = "uac";
-        String customReturn = String.format(" %s RETURN distinct %s.id as id, %s.%s as permissions ",
+
+        String customReturn = String.format(" %s RETURN distinct %s.id as id, %s.%s as permissions, profile.name as type ",
                 Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias, Database.MINIBADGECHART,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 userAlias, prefAlias, Database.MINIBADGECHART);

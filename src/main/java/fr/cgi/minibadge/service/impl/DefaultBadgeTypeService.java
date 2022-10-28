@@ -4,8 +4,10 @@ import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.helper.PromiseHelper;
+import fr.cgi.minibadge.helper.SettingHelper;
 import fr.cgi.minibadge.helper.SqlHelper;
-import fr.cgi.minibadge.model.*;
+import fr.cgi.minibadge.model.BadgeType;
+import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.BadgeTypeService;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
@@ -75,25 +77,12 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                 })
                 .onSuccess(user -> {
                     badgeType.setOwner(user);
-                    setSettings(host, language, badgeType);
+                    badgeType.setSetting(SettingHelper.getDefaultBadgeSetting());
                     promise.complete(badgeType);
                 })
                 .onFailure(promise::fail);
 
         return promise.future();
-    }
-
-    private void setSettings(String host, String language, BadgeType badgeType) {
-        BadgeSetting badgeSetting = new BadgeSetting();
-        BadgeProtagonistSettingRelation relation = new BadgeProtagonistSettingRelation();
-        BadgeProtagonistSetting assignor = new BadgeProtagonistSetting();
-        assignor.setType(I18n.getInstance().translate("minibadge.student",host,language));
-        BadgeProtagonistSetting receiver = new BadgeProtagonistSetting();
-        receiver.setType(I18n.getInstance().translate("minibadge.student",host,language));
-        relation.setAssignor(assignor);
-        relation.setReceiver(receiver);
-        badgeSetting.addRelation(relation);
-        badgeType.setSetting(badgeSetting);
     }
 
     private Future<JsonObject> getBadgeTypeRequest(List<String> structureIds, long typeId) {

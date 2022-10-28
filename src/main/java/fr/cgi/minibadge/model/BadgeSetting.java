@@ -6,20 +6,25 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static fr.cgi.minibadge.core.constants.Database.STRUCTUREID;
 
 public class BadgeSetting implements Model<BadgeSetting> {
     //A changer des que la bdd sera opérationnelle
     List<BadgeProtagonistSettingRelation> relations = new ArrayList<>();
-
-
-    boolean is_self_assignable;
+    boolean isSelfAssignable;
     String structureId;
 
     public BadgeSetting() {
         //A changer des que la bdd sera opérationnelle
+    }
+
+    public BadgeSetting(JsonObject badgeSetting) {
+        this.set(badgeSetting);
+    }
+
+    public BadgeSetting(List<BadgeProtagonistSettingRelation> relations) {
+        this.setRelations(relations);
     }
 
     public List<BadgeProtagonistSettingRelation> relations() {
@@ -34,12 +39,8 @@ public class BadgeSetting implements Model<BadgeSetting> {
         this.relations.add(relation);
     }
 
-    public boolean is_self_assignable() {
-        return is_self_assignable;
-    }
-
-    public void is_self_assignable(boolean is_self_assignable) {
-        this.is_self_assignable = is_self_assignable;
+    public boolean isSelfAssignable() {
+        return isSelfAssignable;
     }
 
     public String structureId() {
@@ -52,21 +53,30 @@ public class BadgeSetting implements Model<BadgeSetting> {
 
     @Override
     public JsonObject toJson() {
-        JsonArray relationsList = new JsonArray(relations.stream().map(BadgeProtagonistSettingRelation::toJson).collect(Collectors.toList()));
-
         return new JsonObject()
-                .put(Field.RELATIONS, relationsList)
-                .put(Field.ISSELFASSIGNABLE, is_self_assignable)
+                .put(Field.RELATIONS, new BadgeProtagonistSettingRelation().toArray(relations))
+                .put(Field.ISSELFASSIGNABLE, isSelfAssignable)
                 .put(STRUCTUREID, structureId);
     }
 
     @Override
     public BadgeSetting model(JsonObject model) {
-        return null;
+        return new BadgeSetting(model);
+    }
+
+    public BadgeSetting set(BadgeSetting model) {
+        this.relations = model.relations();
+        this.isSelfAssignable = model.isSelfAssignable();
+        this.structureId = model.structureId();
+        return this;
     }
 
     @Override
     public BadgeSetting set(JsonObject model) {
-        return null;
+        this.isSelfAssignable = model.getBoolean(Field.ISSELFASSIGNABLE, false);
+        this.structureId = model.getString(STRUCTUREID);
+        this.relations = new BadgeProtagonistSettingRelation()
+                .toList(model.getJsonArray(Field.RELATIONS, new JsonArray()));
+        return this;
     }
 }

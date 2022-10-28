@@ -12,6 +12,14 @@ public class BadgeProtagonistSettingRelation implements Model<BadgeProtagonistSe
 
     public BadgeProtagonistSettingRelation() {
     }
+    public BadgeProtagonistSettingRelation(JsonObject badgeProtagonistSettingRelation) {
+        this.set(badgeProtagonistSettingRelation);
+    }
+
+    public BadgeProtagonistSettingRelation(BadgeProtagonistSetting assignor, BadgeProtagonistSetting receiver) {
+        this.setAssignor(assignor);
+        this.setReceiver(receiver);
+    }
 
     @Override
     public JsonObject toJson() {
@@ -37,11 +45,13 @@ public class BadgeProtagonistSettingRelation implements Model<BadgeProtagonistSe
 
     @Override
     public BadgeProtagonistSettingRelation model(JsonObject model) {
-        return null;
+        return new BadgeProtagonistSettingRelation(model);
     }
 
     @Override
     public BadgeProtagonistSettingRelation set(JsonObject model) {
-        return null;
+        this.assignor = new BadgeProtagonistSetting(model.getJsonObject(Field.ASSIGNORTYPE, new JsonObject()));
+        this.receiver = new BadgeProtagonistSetting(model.getJsonObject(Field.RECEIVERTYPE, new JsonObject()));
+        return this;
     }
 }

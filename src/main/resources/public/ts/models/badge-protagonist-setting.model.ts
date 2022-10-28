@@ -3,7 +3,8 @@ import {MinibadgeModel} from "./model";
 
 export interface IBadgeProtagonistSettingResponse {
     type: string;
-    typeId: string;
+    typeValue: string;
+    label?: string;
 }
 
 
@@ -33,8 +34,9 @@ export class BadgeProtagonistSettingRelation extends MinibadgeModel<BadgeProtago
 }
 
 export class BadgeProtagonistSetting extends MinibadgeModel<BadgeProtagonistSetting> {
-    typeId: string;
     type: string;
+    typeValue: string;
+    label?: string;
 
     constructor(data?: IBadgeProtagonistSettingResponse) {
         super();
@@ -43,7 +45,8 @@ export class BadgeProtagonistSetting extends MinibadgeModel<BadgeProtagonistSett
 
     build(data: IBadgeProtagonistSettingResponse): BadgeProtagonistSetting {
         this.type = data.type;
-        this.typeId = data.typeId;
+        this.typeValue = data.typeValue;
+        this.label = data.label;
         return this;
     }
 

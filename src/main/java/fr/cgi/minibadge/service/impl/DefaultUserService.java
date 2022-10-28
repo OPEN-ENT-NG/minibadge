@@ -7,18 +7,16 @@ import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Rights;
 import fr.cgi.minibadge.helper.Neo4jHelper;
 import fr.cgi.minibadge.helper.PromiseHelper;
+import fr.cgi.minibadge.helper.SettingHelper;
 import fr.cgi.minibadge.model.User;
 import fr.cgi.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
@@ -27,15 +25,11 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static fr.cgi.minibadge.core.constants.Request.*;
-import static fr.wseduc.webutils.Utils.handlerToAsyncHandler;
-
 public class DefaultUserService implements UserService {
 
-    private final EventBus eb;
-    private final Logger log = LoggerFactory.getLogger(PromiseHelper.class);
-    private final Sql sql;
     public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
+    private final EventBus eb;
+    private final Sql sql;
 
     public DefaultUserService(Sql sql, EventBus eb) {
         this.sql = sql;
@@ -43,14 +37,19 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Future<List<User>> search(HttpServerRequest request, String query) {
+    public Future<List<User>> search(HttpServerRequest request, UserInfos user, String query) {
         Promise<List<User>> promise = Promise.promise();
         searchRequest(request, query)
                 .onFailure(promise::fail)
-                .onSuccess(users -> promise.complete(new User().toList(users)
-                        .stream().filter(user -> user.permissions().acceptChart() != null
-                                && user.permissions().acceptReceive() != null).collect(Collectors.toList())));
+                .onSuccess(queriedUsers -> promise.complete(new User().toList(queriedUsers)
+                        .stream().filter(queriedUser ->
+                                queriedUser.permissions().acceptChart() != null
+                                        && queriedUser.permissions().acceptReceive() != null
+                                        // We currently consider that all types have default setting
+                                        && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
+                                        SettingHelper.getDefaultBadgeSetting())
+                        )
+                        .collect(Collectors.toList())));
 
         return promise.future();
     }
@@ -66,7 +65,7 @@ public class DefaultUserService implements UserService {
         String userAlias = "visibles";
         String prefAlias = "uac";
         String customReturn = String.format(" %s RETURN distinct visibles.id as id, visibles.lastName as lastName, " +
-                        "visibles.firstName as firstName, uac.%s as permissions ",
+                        "visibles.firstName as firstName, uac.%s as permissions, profile.name as type  ",
                 Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias, Database.MINIBADGECHART,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 Database.MINIBADGECHART);
@@ -127,9 +126,9 @@ public class DefaultUserService implements UserService {
     }
 
     private JsonObject upsertStatement(User user) {
-        String statement = String.format(" INSERT INTO %s (id , display_name ) " +
-                " VALUES ( ? , ?) ON CONFLICT (id) DO UPDATE SET display_name = ?" +
-                "  WHERE %s.id = EXCLUDED.id ;", USER_TABLE, USER_TABLE);
+        String statement = String.format(" INSERT INTO %s (id , display_name) " +
+                " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ? " +
+                "  WHERE %s.id = EXCLUDED.id;", USER_TABLE, USER_TABLE);
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())

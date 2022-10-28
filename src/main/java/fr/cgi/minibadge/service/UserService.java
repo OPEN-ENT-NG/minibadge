@@ -4,6 +4,7 @@ import fr.cgi.minibadge.model.User;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
+import org.entcore.common.user.UserInfos;
 
 import java.util.List;
 
@@ -12,10 +13,11 @@ public interface UserService {
      * Search users that are visible for me from query
      *
      * @param request request from which we need to retrieve users
+     * @param user    current user that query search
      * @param query   to filter on user firstName/lastName
      * @return return future containing list of users
      */
-    Future<List<User>> search(HttpServerRequest request, String query);
+    Future<List<User>> search(HttpServerRequest request, UserInfos user, String query);
 
     /**
      * get users from ids

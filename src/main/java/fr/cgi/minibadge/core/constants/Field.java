@@ -67,7 +67,7 @@ public class Field {
     public static final String TYPE = "type";
 
     //Protagonist
-    public static final String TYPEID = "typeId";
+    public static final String TYPEVALUE = "typeValue";
     public static final String ISSELFASSIGNABLE = "isSelfAssignable";
     public static final String ASSIGNORTYPE = "assignorType";
     public static final String RECEIVERTYPE = "receiverType";

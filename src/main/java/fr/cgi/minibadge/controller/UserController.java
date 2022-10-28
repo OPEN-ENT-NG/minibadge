@@ -13,6 +13,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.user.UserUtils;
 
 public class UserController extends ControllerHelper {
 
@@ -31,8 +32,8 @@ public class UserController extends ControllerHelper {
     public void searchUsers(HttpServerRequest request) {
         String query = request.params().get(Request.QUERY);
 
-        userService.search(request, query)
+        UserUtils.getUserInfos(eb, request, user -> userService.search(request, user, query)
                 .onSuccess(users -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), users)))
-                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
 }
