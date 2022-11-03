@@ -1,17 +1,18 @@
 import {MinibadgeModel} from "./model";
-import {BadgeProtagonistSettingRelation} from "./badge-protagonist-setting.model";
+import {RelationSetting} from "./protagonist-setting.model";
+import {User} from "./user.model";
 
 export interface ITypeSettingResponse {
     isSelfAssignable: boolean;
     structureId: string;
-    relations: BadgeProtagonistSettingRelation[];
+    relations: RelationSetting[];
 }
 
 
 export class TypeSettings extends MinibadgeModel<TypeSettings> {
     isSelfAssignable: boolean;
     structureId: string;
-    relations: BadgeProtagonistSettingRelation[];
+    relations: RelationSetting[];
 
     constructor(data?: ITypeSettingResponse) {
         super();
@@ -21,8 +22,13 @@ export class TypeSettings extends MinibadgeModel<TypeSettings> {
     build(data: ITypeSettingResponse): TypeSettings {
         this.isSelfAssignable = data.isSelfAssignable;
         this.structureId = data.structureId;
-        this.relations = new BadgeProtagonistSettingRelation().toList(data.relations);
+        this.relations = new RelationSetting().toList(data.relations);
         return this;
+    }
+
+    isMatchingAnyRelation(assignor: User, receivers: User[]): boolean {
+        return !!assignor && !!receivers && receivers
+            .some((receiver: User) => this.relations.some((relation: RelationSetting) => relation.isValid(assignor, receiver)));
     }
 
     toModel(model: any): TypeSettings {

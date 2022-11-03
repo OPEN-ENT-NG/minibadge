@@ -24,9 +24,9 @@ import java.util.List;
 
 public class DefaultBadgeTypeService implements BadgeTypeService {
 
+    public static final String BADGE_TYPE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_TYPE);
     private final Sql sql;
     private final EventBus eb;
-    public static final String BADGE_TYPE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_TYPE);
 
     public DefaultBadgeTypeService(Sql sql, EventBus eb) {
         this.sql = sql;
@@ -38,7 +38,11 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
         Promise<List<BadgeType>> promise = Promise.promise();
 
         getBadgesTypesRequest(structureIds, query, limit, offset)
-                .onSuccess(badgeTypes -> promise.complete(new BadgeType().toList(badgeTypes)))
+                .onSuccess(badgeTypesArray -> {
+                    List<BadgeType> badgeTypes = new BadgeType().toList(badgeTypesArray);
+                    badgeTypes.forEach(badgeType -> badgeType.setSetting(SettingHelper.getDefaultTypeSetting()));
+                    promise.complete(badgeTypes);
+                })
                 .onFailure(promise::fail);
 
         return promise.future();
@@ -107,7 +111,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
         if (badgeType.ownerId() != null) {
             Promise<User> promise = Promise.promise();
-            UserUtils.getUserInfos(eb, badgeType.ownerId(), user -> promise.complete((User)user));
+            UserUtils.getUserInfos(eb, badgeType.ownerId(), user -> promise.complete((User) user));
             return promise.future();
         }
 

@@ -1,4 +1,4 @@
-import {Behaviours, idiom as lang, notify} from "entcore"
+import {Behaviours, idiom as lang, model, notify} from "entcore"
 import {
     badgeAssignedService,
     badgeTypeService,
@@ -30,6 +30,8 @@ interface IViewModel {
 
     assign(): Promise<void>;
 
+    isNotAssignable(): boolean;
+
     $scope: IMinibadgeScope;
     userService: IUserService;
     userPayload: IUserPayload;
@@ -44,6 +46,7 @@ interface IViewModel {
 interface IMinibadgeScope extends IScope {
     vm: IViewModel;
     setting: Setting;
+    me: User;
 }
 
 class ViewModel implements IViewModel {
@@ -154,6 +157,11 @@ class ViewModel implements IViewModel {
                 })
                 .catch((err: AxiosError) => notify.error('minibadge.error.assign'))
         }
+    }
+
+    isNotAssignable(): boolean {
+        return !this.userSelected.length || this.$scope.setting.areThresholdsOutmoded(this.userSelected.length) ||
+            !this.badgeType.setting.isMatchingAnyRelation(this.$scope.me, this.userSelected);
     }
 }
 

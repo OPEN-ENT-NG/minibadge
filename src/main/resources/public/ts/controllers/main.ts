@@ -1,9 +1,10 @@
-import {ng, template} from 'entcore';
+import {model, ng, template} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
 import {IScope} from "angular";
 import {Chart} from "../models/chart.model";
+import {IUserResponse, User} from "../models/user.model";
 
 interface ViewModel {
     navbarViewSelected: NAVBAR_VIEWS;
@@ -12,6 +13,7 @@ interface ViewModel {
 interface IMinibadgeScope extends IScope {
     vm: ViewModel;
     setting: Setting;
+    me: User;
 }
 
 /**
@@ -56,6 +58,7 @@ class Controller implements ng.IController, ViewModel {
     }
 
     private async initInfos() {
+        this.$scope.me = new User(<IUserResponse>model.me);
         await Promise.all([this.getSettings(), this.chartService.getUserChart()])
             .then((data: [Setting, Chart]) => {
                 let setting: Setting = data[0];

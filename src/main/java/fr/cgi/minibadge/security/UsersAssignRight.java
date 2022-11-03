@@ -57,7 +57,7 @@ public class UsersAssignRight implements ResourcesProvider {
 
             CompositeFuture.all(cachedPermissionsFuture, badgeSettingFuture, areReachedThresholdsFuture)
                     .compose(futures -> {
-                        if (areReachedThresholdsFuture.result())
+                        if (Boolean.TRUE.equals(areReachedThresholdsFuture.result()))
                             return Future.failedFuture("[Minibadge@%s::authorize] Maximum assignations reached.");
                         typeSetting.set(badgeSettingFuture.result());
                         return getUserPermissions(cachedPermissionsFuture.result(), userInfos, request);
