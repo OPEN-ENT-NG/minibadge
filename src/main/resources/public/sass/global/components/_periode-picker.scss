@@ -1,4 +1,4 @@
-.periode-picker{
+.periode-picker {
   &-container {
     position: relative;
     float: left;
@@ -17,6 +17,9 @@
     color: $minibadge-grey;
     border: none;
     border-radius: 3px;
+    @include mobile {
+      width: 128px;
+    }
   }
 
   &-open-button {

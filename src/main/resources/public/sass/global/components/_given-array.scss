@@ -17,6 +17,9 @@
   &-row {
     border-top: 1px solid $minibadge-grey-light;
     justify-content: space-between;
+    @include mobile{
+      padding: 1em 0;
+    }
   }
 
   &-img {
@@ -25,7 +28,6 @@
     @include mobile {
       padding-right: 0;
     }
-    max-width: 70%;
   }
 
   &-label {
