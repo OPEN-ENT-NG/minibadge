@@ -7,12 +7,14 @@ import {AxiosError} from "axios";
 import {Badge, IBadgePayload} from "../models/badge.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
-import {IChartService} from "../services/chart.service";
+import {IChartService} from "../services";
 
 interface ViewModel {
     getBadges(): Promise<void>;
 
     openChartLightbox(): void;
+
+    resetChartValues(): void;
 
     badges: Badge[];
     searchQuery: string;
@@ -41,7 +43,7 @@ class Controller implements ng.IController, ViewModel {
     publishedBadges: Badge[];
     privatizedBadges: Badge[];
     refusedBadges: Badge[];
-    isOpenedOption:boolean = false;
+    isOpenedOption: boolean = false;
     searchQuery: string;
     isChartLightboxOpened: boolean;
     isChartAccepted: boolean;
@@ -82,11 +84,17 @@ class Controller implements ng.IController, ViewModel {
                 this.isOpenedOption = this.payload.query && !!this.payload.query.trim().length;
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.get.badges'))
+            .catch(() => notify.error('minibadge.error.get.badges'))
     }
 
     openChartLightbox = (): void => {
         this.isChartLightboxOpened = true;
+    }
+
+    resetChartValues = (): void => {
+        this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
+        this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+            || !!this.$scope.setting.userPermissions.acceptReceive;
     }
 
     chartValidate = async (): Promise<void> => {
@@ -94,8 +102,9 @@ class Controller implements ng.IController, ViewModel {
             .then(async () => {
                 await this.initBadges();
                 this.$scope.setting.userPermissions = await this.chartService.getChart();
+                this.resetChartValues();
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.chart.validate'));
+            .catch(() => notify.error('minibadge.error.chart.validate'));
     }
 
 

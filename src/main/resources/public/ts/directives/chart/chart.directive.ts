@@ -1,5 +1,5 @@
 import {ng} from "entcore";
-import {IDirective, IScope} from "angular";
+import {IDirective, IScope, isFunction} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
 import {safeApply} from "../../utils/safe-apply.utils";
 
@@ -8,11 +8,14 @@ interface IViewModel {
 
     changeChartAcceptationStatus(): void;
 
-    validChart(): void;
+    validChart(): Promise<void>;
+
 }
 
 interface IDirectiveProperties {
-    chartValidate(): void;
+    chartValidate(): Promise<void>;
+
+    onClose?(): void;
 
     isLightboxOpened: boolean;
     isMinibadgeAccepted: boolean;
@@ -34,6 +37,7 @@ class Controller implements ng.IController, IViewModel {
     }
 
     closeLightbox(): void {
+        if (isFunction(this.$scope.vm.onClose)) this.$scope.vm.onClose();
         this.$scope.vm.isLightboxOpened = false;
         safeApply(this.$scope);
     }
@@ -43,9 +47,9 @@ class Controller implements ng.IController, IViewModel {
         safeApply(this.$scope);
     }
 
-    validChart(): void {
-        this.$scope.vm.chartValidate();
-        this.closeLightbox();
+    async validChart(): Promise<void> {
+        this.$scope.vm.chartValidate()
+            .then(() => this.closeLightbox());
     }
 
     $onDestroy() {
@@ -63,6 +67,7 @@ function directive(): IDirective {
             isChartAccepted: '=',
             isMinibadgeAccepted: '=',
             chartValidate: '&',
+            onClose: '&?',
         },
         controllerAs: 'vm',
         bindToController: true,
