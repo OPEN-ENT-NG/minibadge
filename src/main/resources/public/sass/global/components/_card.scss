@@ -75,6 +75,7 @@
         position: relative;
 
         .dots-vertical {
+          font-size: 1.3rem;
           &:hover {
             color: $minibadge-orange;
           }
