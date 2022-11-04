@@ -26,12 +26,19 @@
     @include mobile {
       flex-direction: column;
     }
+    @include tablet {
+      flex-direction: column;
+    }
   }
 
   &-id {
     @include desktop {
       width: 420px;
       height: auto;
+    }
+
+    @include desktop {
+      width: auto;
     }
 
     .minibadge-card-simple {
@@ -51,6 +58,9 @@
     @include desktop {
       margin-left: 30px;
       flex: 1;
+    }
+    @include tablet {
+      margin-left: 0;
     }
   }
 

@@ -23,6 +23,12 @@ $minibadge-shadow-light: rgba(214, 214, 214, 0.3);
   }
 }
 
+@mixin tablet {
+  @media (min-width: 769px) and (max-width:992px) {
+    @content;
+  }
+}
+
 @mixin paddingX($size) {
   padding-left: $size;
   padding-right: $size;
