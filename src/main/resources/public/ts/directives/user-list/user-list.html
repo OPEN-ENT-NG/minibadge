@@ -1,9 +1,9 @@
 <div class="minibadge-container minibadge-user-list flex-row f-column">
-    <h2 ng-if="vm.label">[[vm.lang.translate(vm.label)]]</h2>
-    <h3 ng-if="vm.listDistinction">
+    <h3 ng-if="vm.label">[[vm.lang.translate(vm.label)]]</h3>
+    <h4 ng-if="vm.listDistinction">
         <i class="check-decagram"></i>&nbsp;
         [[vm.lang.translate(vm.listDistinction)]]&nbsp;&#58;
-    </h3>
+    </h4>
     <ul class="minibadge-user-list-items">
         <li class="minibadge-user-list-item" ng-repeat="user in vm.users">
             <img class="minibadge-user-list-item-avatar"

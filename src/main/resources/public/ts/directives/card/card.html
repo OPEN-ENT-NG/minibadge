@@ -8,7 +8,7 @@
             <img ng-src="/minibadge/public/img/[[vm.badgeType.pictureId]]"/>
         </div>
         <div ng-if="vm.CARD_FOOTER.BADGE_DETAIL != vm.footer"
-             class="minibadge-card-title flex-row justify-center align-center bold">[[vm.badgeType.label]]
+             class="minibadge-card-title flex-row justify-center align-center">[[vm.badgeType.label]]
         </div>
     </div>
     <award-badge-footer ng-if="vm.CARD_FOOTER.AWARD_BADGE === vm.footer && !vm.isDisabled" on-click="vm.onFooterClick(vm.badgeType)"
