@@ -1,5 +1,6 @@
 package fr.cgi.minibadge.controller;
 
+import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.helper.RequestHelper;
 import fr.cgi.minibadge.security.AssignRight;
@@ -25,14 +26,15 @@ public class UserController extends ControllerHelper {
         this.userService = serviceFactory.userService();
     }
 
-    @Get("/users-search")
+    @Get("type/:typeId/users-search")
     @ApiDoc("Get users from query")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(AssignRight.class)
     public void searchUsers(HttpServerRequest request) {
         String query = request.params().get(Request.QUERY);
+        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
 
-        UserUtils.getUserInfos(eb, request, user -> userService.search(request, user, query)
+        UserUtils.getUserInfos(eb, request, user -> userService.search(request, user, typeId, query)
                 .onSuccess(users -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), users)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

@@ -25,6 +25,8 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
+
 public class DefaultUserService implements UserService {
 
     public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
@@ -37,19 +39,18 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Future<List<User>> search(HttpServerRequest request, UserInfos user, String query) {
+    public Future<List<User>> search(HttpServerRequest request, UserInfos user, Long typeId, String query) {
         Promise<List<User>> promise = Promise.promise();
+
+        List<User> users = new ArrayList<>();
         searchRequest(request, query)
+                .compose(queriedUsers -> {
+                    users.addAll(mapToAuthorizedAssignUsers(user, queriedUsers));
+                    return getAlreadyTypedAssignedFromUser(typeId, user,
+                            users.stream().map(User::getUserId).collect(Collectors.toList()));
+                })
                 .onFailure(promise::fail)
-                .onSuccess(queriedUsers -> promise.complete(new User().toList(queriedUsers)
-                        .stream().filter(queriedUser ->
-                                queriedUser.permissions().acceptChart() != null
-                                        && queriedUser.permissions().acceptReceive() != null
-                                        // We currently consider that all types have default setting
-                                        && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
-                                        SettingHelper.getDefaultTypeSetting())
-                        )
-                        .collect(Collectors.toList())));
+                .onSuccess(receivedUsers -> promise.complete(filterUsersNotAssignedYet(users, receivedUsers)));
 
         return promise.future();
     }
@@ -75,6 +76,61 @@ public class DefaultUserService implements UserService {
                 customReturn, params, promise::complete);
 
         return promise.future();
+    }
+
+    private List<User> mapToAuthorizedAssignUsers(UserInfos user, JsonArray users) {
+        return new User().toList(users)
+                .stream().filter(queriedUser ->
+                        queriedUser.permissions().acceptChart() != null
+                                && queriedUser.permissions().acceptReceive() != null
+                                // We currently consider that all types have default setting
+                                && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
+                                SettingHelper.getDefaultTypeSetting())
+                )
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Future<List<User>> getAlreadyTypedAssignedFromUser(long typeId, UserInfos assigner,
+                                                              List<String> receiverIds) {
+        Promise<List<User>> promise = Promise.promise();
+
+        getAlreadyTypedAssignedFromUserRequest(typeId, assigner, receiverIds)
+                .onSuccess(users -> promise.complete(new User().toList(users)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> getAlreadyTypedAssignedFromUserRequest(long typeId, UserInfos assigner,
+                                                                     List<String> receiverIds) {
+        if (receiverIds == null || receiverIds.isEmpty()) return Future.succeededFuture(new JsonArray());
+
+        Promise<JsonArray> promise = Promise.promise();
+        JsonArray params = new JsonArray()
+                .add(assigner.getUserId())
+                .add(typeId)
+                .addAll(new JsonArray(receiverIds));
+
+        String request = String.format(" SELECT DISTINCT(owner_id) as id " +
+                        " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
+                        " WHERE assignor_id = ? AND badge_type_id = ?  AND owner_id IN %s",
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE, Sql.listPrepared(receiverIds));
+
+        sql.prepared(request, params,
+                SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                        String.format("[Minibadge@%s::getAlreadyTypedAssignedFromUserRequest] " +
+                                        "Fail to retrieve already assigned users",
+                                this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    private List<User> filterUsersNotAssignedYet(List<User> allUsers, List<User> receivedUsers) {
+        return allUsers.stream().filter(queriedUser ->
+                receivedUsers.stream()
+                        .noneMatch(receivedUser -> queriedUser.getUserId().equals(receivedUser.getUserId()))
+        ).collect(Collectors.toList());
     }
 
     @Override

@@ -1,4 +1,4 @@
-import {Behaviours, idiom as lang, model, notify} from "entcore"
+import {Behaviours, idiom as lang, notify} from "entcore"
 import {
     badgeAssignedService,
     badgeTypeService,
@@ -116,7 +116,7 @@ class ViewModel implements IViewModel {
     onSearchUser = async (): Promise<void> => {
         this.userPayload.query = this.searchQuery;
         if (this.searchQuery && this.searchQuery.trim() != '')
-            this.userService.searchUsers(this.userPayload)
+            this.userService.searchUsers(this.badgeType.id, this.userPayload)
                 .then((data: User[]) => {
                     if (data) this.userSearchResults = data
                         .filter((user: User) => !this.isUserSelected(user));

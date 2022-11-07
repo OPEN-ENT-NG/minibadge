@@ -14,10 +14,11 @@ public interface UserService {
      *
      * @param request request from which we need to retrieve users
      * @param user    current user that query search
+     * @param typeId  badge type identifier on which we currently search users.
      * @param query   to filter on user firstName/lastName
      * @return return future containing list of users
      */
-    Future<List<User>> search(HttpServerRequest request, UserInfos user, String query);
+    Future<List<User>> search(HttpServerRequest request, UserInfos user, Long typeId, String query);
 
     /**
      * get users from ids
@@ -43,4 +44,14 @@ public interface UserService {
      * @return
      */
     Future<JsonArray> anonimyzeUser(String userId, String host, String language);
+
+    /**
+     * Count users that gave me this (:typeId) badge typed
+     *
+     * @param typeId type identifier
+     * @param assigner assigner that assigned this id typed badge
+     * @param  receiverIds that potentially received this typed badge by current assigner
+     * @return return future containing list of users that received the typed badge from current assigner
+     */
+    Future<List<User>> getAlreadyTypedAssignedFromUser(long typeId, UserInfos assigner, List<String> receiverIds);
 }
