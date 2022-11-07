@@ -5,11 +5,13 @@ $minibadge-grey: #5b6472;
 $minibadge-grey-light: #d6d6d6;
 $minibadge-grey-lighter: #ebebeb;
 $minibadge-orange: #ffa834;
-$minibadge-red: #e00227;
+$minibadge-red: #E13A3A;
 $minibadge-white: #fff;
 $minibadge-small-icon: 16px;
 
 $minibadge-shadow-light: rgba(214, 214, 214, 0.3);
+
+$minibadge-font-secondary: 'Comfortaa', cursive;
 
 @mixin mobile {
   @media (max-width: 768px) {

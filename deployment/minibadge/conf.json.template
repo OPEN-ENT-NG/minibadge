@@ -5,7 +5,7 @@
         "port" : 8131,
         "app-name" : "MiniBadge",
     	"app-address" : "/minibadge",
-    	"app-icon" : "Minibadge-large",
+    	"app-icon" : "${host}/minibadge/public/img/uni-minibadge.svg",
         "host": "${host}",
         "ssl" : $ssl,
         "sql": true,

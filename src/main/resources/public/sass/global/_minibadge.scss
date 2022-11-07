@@ -18,6 +18,15 @@ body.minibadge, .sniplet.minibadge {
     }
   }
 
+  .minibadge-main-title {
+    font-family: $minibadge-font-secondary;
+    color: $minibadge-red;
+
+    img {
+      width: 34px;
+    }
+  }
+
 
   @import "containers/index";
   @import "components/index";
