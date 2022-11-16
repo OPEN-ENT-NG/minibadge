@@ -1,7 +1,8 @@
 .minibadge-card {
   &.disabled {
     opacity: 0.5;
-    & *{
+
+    & * {
       cursor: default;
     }
   }
@@ -28,12 +29,16 @@
     flex: 1;
 
     &-icon {
-      @include paddingX(10px);
-      @include paddingY(5px);
+      padding: 10px;
+      font-size: 24px;
 
       @include mobile {
-        @include paddingX(5px);
-        @include paddingY(2px);
+        padding: 5px;
+      }
+
+      &.minibadge-icon-right {
+        right: 0;
+        color: $minibadge-blue-dark;
       }
     }
   }
@@ -52,6 +57,11 @@
 
       background: $minibadge-blue;
       color: $minibadge-white;
+
+      &:hover {
+        background: $minibadge-orange;
+      }
+
     }
 
     &-badge-detail {
@@ -76,6 +86,7 @@
 
         .dots-vertical {
           font-size: 1.3rem;
+
           &:hover {
             color: $minibadge-orange;
           }
@@ -105,9 +116,10 @@
             white-space: nowrap;
             justify-content: flex-start;
 
-            & .lock{
+            & .lock {
               @include icon-small();
             }
+
             &:first-child {
               border-radius: 2px 2px 0 0;
             }
