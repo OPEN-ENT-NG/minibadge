@@ -71,14 +71,14 @@ public class UsersAssignRight implements ResourcesProvider {
                         return this.getUsers(request, ownerIds);
                     })
                     .onSuccess(usersArray -> {
-                        List<User> users = new User().toList(usersArray);
+                        List<User> receivers = new User().toList(usersArray);
                         boolean isAuthorizedToAssign = SettingHelper
-                                .isAuthorizedToAssign(new User(userInfos), users, typeSetting);
-                        boolean canUsersReceive = users.stream()
+                                .isAuthorizedToAssign(new User(userInfos), receivers, typeSetting);
+                        boolean canUsersReceive = receivers.stream()
                                 .allMatch(user ->
-                                        user.permissions().acceptChart() != null
-                                                && user.permissions().acceptReceive() != null);
-                        handler.handle(ownerIds.size() == users.size() && isAuthorizedToAssign && canUsersReceive);
+                                        user.permissions().acceptChart() == null
+                                                || user.permissions().acceptReceive() != null);
+                        handler.handle(ownerIds.size() == receivers.size() && isAuthorizedToAssign && canUsersReceive);
                     })
                     .onFailure(err -> handler.handle(false));
         });
