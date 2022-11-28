@@ -1,5 +1,5 @@
     {
-      "name": "fr.cgi~minibadge~1.0.0-rc+1",
+      "name": "fr.cgi~minibadge~0.1-SNAPSHOT",
       "config": {
         "main" : "fr.cgi.minibadge.Minibadge",
         "port" : 8131,
