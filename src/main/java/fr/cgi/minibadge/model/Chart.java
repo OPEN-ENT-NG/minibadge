@@ -18,7 +18,8 @@ public class Chart implements Model<Chart> {
 
     @Override
     public Chart set(JsonObject chart) {
-        JsonObject permissions = new JsonObject(chart.getString(Field.PERMISSIONS, "{}"));
+        String stringPermissions = chart.getString(Field.PERMISSIONS, "{}");
+        JsonObject permissions = new JsonObject(stringPermissions != null ? stringPermissions : "{}");
         this.acceptChart = permissions.getString(Field.ACCEPTCHART, chart.getString(Field.ACCEPTCHART)) ;
         this.acceptAssign = permissions.getString(Field.ACCEPTASSIGN, chart.getString(Field.ACCEPTASSIGN)) ;
         this.acceptReceive = permissions.getString(Field.ACCEPTRECEIVE, chart.getString(Field.ACCEPTRECEIVE));

@@ -30,8 +30,11 @@ public class Field {
     public static final String Q = "q";
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
+    public static final String STRUCTUREIDS = "structureIds";
 
     //BadgeAssigned
+    public static final String BADGE_ASSIGNED_ID = "badge_assigned_id";
+
     public static final String ASSIGNOR = "assignor";
     public static final String ASSIGNOR_ID = "assignor_id";
     public static final String ASSIGNORID = "assignorId";
@@ -42,8 +45,13 @@ public class Field {
     public static final String UPDATEDAT = "updatedAt";
     public static final String UPDATED_AT = "updated_at";
     public static final String BADGE_ID = "badge_id";
-    public static final String BADGEID = "badgeid";
+    public static final String BADGEID = "badgeId";
     public static final String BADGE = "badge";
+
+    //BadgeAssignedStructure
+    public static final String IS_STRUCTURE_ASSIGNER = "is_structure_assigner";
+    public static final String IS_STRUCTURE_RECEIVER = "is_structure_receiver";
+
 
     //BADGE
     public static final String PRIVATIZED_AT = "privatized_at";
@@ -54,6 +62,7 @@ public class Field {
     public static final String DISABLEDAT = "disabledAt";
     public static final String LEVEL = "level";
     public static final String ASSIGNABLEBY = "assignableBy";
+
     // CHART
     public static final String ACCEPTCHART = "acceptChart";
     public static final String ACCEPTASSIGN = "acceptAssign";

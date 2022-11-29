@@ -144,7 +144,7 @@ public class UsersAssignRight implements ResourcesProvider {
         String prefAlias = "uac";
 
         String customReturn = String.format(" %s RETURN distinct %s.id as id, %s.%s as permissions, profile.name as type ",
-                Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias, Database.MINIBADGECHART,
+                Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 userAlias, prefAlias, Database.MINIBADGECHART);
 

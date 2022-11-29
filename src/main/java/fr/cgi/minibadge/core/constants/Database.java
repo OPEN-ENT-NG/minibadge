@@ -6,6 +6,7 @@ public class Database {
     public static final String BADGE_ASSIGNABLE = "badge_assignable";
     public static final String BADGE_ASSIGNED = "badge_assigned";
     public static final String BADGE_ASSIGNED_VALID = "badge_assigned_valid";
+    public static final String BADGE_ASSIGNED_STRUCTURE = "badge_assigned_structure";
     public static final String BADGE_TYPE = "badge_type";
     public static final String LABEL = "label";
     public static final String STRUCTUREID = "structureId";

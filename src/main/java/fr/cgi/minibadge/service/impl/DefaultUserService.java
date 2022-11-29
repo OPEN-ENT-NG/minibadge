@@ -2,7 +2,6 @@ package fr.cgi.minibadge.service.impl;
 
 import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
-import fr.cgi.minibadge.core.constants.EventBusConst;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Rights;
 import fr.cgi.minibadge.helper.Neo4jHelper;
@@ -17,6 +16,8 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.neo4j.Neo4jResult;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
@@ -32,9 +33,11 @@ public class DefaultUserService implements UserService {
     public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
     private final EventBus eb;
     private final Sql sql;
+    private final Neo4j neo;
 
-    public DefaultUserService(Sql sql, EventBus eb) {
+    public DefaultUserService(Sql sql, Neo4j neo, EventBus eb) {
         this.sql = sql;
+        this.neo = neo;
         this.eb = eb;
     }
 
@@ -67,7 +70,7 @@ public class DefaultUserService implements UserService {
         String prefAlias = "uac";
         String customReturn = String.format(" %s RETURN distinct visibles.id as id, visibles.lastName as lastName, " +
                         "visibles.firstName as firstName, uac.%s as permissions, profile.name as type  ",
-                Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias, Database.MINIBADGECHART,
+                Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 Database.MINIBADGECHART);
 
@@ -144,11 +147,20 @@ public class DefaultUserService implements UserService {
 
     private Future<JsonArray> getUsersRequest(List<String> userIds) {
         Promise<JsonArray> promise = Promise.promise();
-        JsonObject action = new JsonObject()
-                .put(EventBusConst.ACTION, EventBusConst.LIST_USERS)
-                .put(Field.USERIDS, userIds);
-        eb.request(EventBusConst.DIRECTORY, action, PromiseHelper.messageHandler(promise,
-                "[Minibadge@%s::getUsersRequest] Fail to retrieve users from eventBus"));
+
+        String query = " MATCH (u:User) " +
+                " WHERE u.id IN {userIds} " +
+                " OPTIONAL MATCH u-[:IN]->(pg:ProfileGroup)-[:HAS_PROFILE]->(profile:Profile) " +
+                " OPTIONAL MATCH pg-[:DEPENDS]->(s:Structure) " +
+                " RETURN distinct u.id as id, u.login as login," +
+                " u.displayName as username, profile.name as type, COLLECT(distinct s.id) as structureIds " +
+                " ORDER BY username ";
+        JsonObject params = new JsonObject();
+        params.put("userIds", userIds);
+        neo.execute(query, params, Neo4jResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getUsersRequest] Fail to create badge assigned",
+                        this.getClass().getSimpleName()))));
+
         return promise.future();
     }
 

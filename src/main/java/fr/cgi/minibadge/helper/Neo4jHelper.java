@@ -46,14 +46,13 @@ public class Neo4jHelper {
         return String.format("%s IN {%s}", columnId, Field.USERIDS);
     }
 
-    public static String matchUsersWithPreferences(String userAlias, String prefAlias, String prefKey) {
-        return matchUsersWithPreferences(userAlias, prefAlias, prefKey, null);
+    public static String matchUsersWithPreferences(String userAlias, String prefAlias) {
+        return matchUsersWithPreferences(userAlias, prefAlias, null);
     }
 
-    public static String matchUsersWithPreferences(String userAlias, String prefAlias, String prefKey,
-                                                   String userNodeComplement) {
-        return String.format("MATCH (%s:UserAppConf)<-[:PREFERS]-(%s)%s WHERE EXISTS(%s.%s)", prefAlias, userAlias,
-                (userNodeComplement != null ? userNodeComplement : ""), prefAlias, prefKey);
+    public static String matchUsersWithPreferences(String userAlias, String prefAlias, String userNodeComplement) {
+        return String.format("MATCH (%s:UserAppConf)<-[:PREFERS]-(%s)%s", prefAlias, userAlias,
+                (userNodeComplement != null ? userNodeComplement : ""));
     }
 
     public static String usersNodeHasRight(String right, JsonObject params) {

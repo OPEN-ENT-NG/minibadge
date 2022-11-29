@@ -1,6 +1,7 @@
 package fr.cgi.minibadge.model;
 
 import fr.cgi.minibadge.core.constants.Field;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
@@ -26,12 +27,14 @@ public class User extends UserInfos implements Model<User> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public User set(JsonObject user) {
         this.setUserId(user.getString(Field.ID));
         this.setFirstName(user.getString(Field.FIRSTNAME));
         this.setLastName(user.getString(Field.LASTNAME));
         this.setUsername(user.getString(Field.USERNAME));
         this.setType(user.getString(Field.TYPE));
+        this.setStructures(user.getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList());
         this.badgeAssignedTotal = user.getInteger(Field.BADGE_ASSIGNED_TOTAL);
         this.permissions = new Chart(user);
         return this;

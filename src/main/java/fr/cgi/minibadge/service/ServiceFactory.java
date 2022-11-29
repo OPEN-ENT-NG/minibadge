@@ -44,7 +44,7 @@ public class ServiceFactory {
     }
 
     public UserService userService() {
-        return new DefaultUserService(sql, this.eventBus());
+        return new DefaultUserService(sql, neo4j, this.eventBus());
     }
 
     // Helpers
