@@ -36,10 +36,9 @@ DECLARE
 countSlugs int;
     newSlug    character varying;
 BEGIN
-    --
+
 SELECT minibadge.slugify(NEW.label) INTO newSlug;
 
---
 SELECT COUNT(id)::INTEGER
 FROM minibadge.badge_type
 WHERE (slug LIKE CONCAT(newSlug, '_')
