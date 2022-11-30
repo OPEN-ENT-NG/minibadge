@@ -1,20 +1,26 @@
-<div class="minibadge-badge minibadge-badge-list minibadge-container flex-row f-column"
-     ng-class="{ disabled: !vm.badges || !vm.badges.length }">
-    <h3 ng-click="vm.clickList()">
-        <i class="play" ng-class="{ opened: (vm.isOpenedList || vm.isOpenedOption) && vm.badges && !!vm.badges.length }"></i>&nbsp;
-        <span class="minibadge-badge-list-label">
-                 [[vm.lang.translate(vm.label)]]
-        </span>
-    </h3>
-    <div class="minibadge-badge-list-cards flex-row f-wrap" ng-show="vm.isOpenedList || vm.isOpenedOption">
-        <minibadge-card-type ng-repeat="badge in vm.badges"
-                             badge-type="badge.badgeType"
-                             badge="badge"
-                             on-footer-click="vm.redirectBadgeType(badge.badgeType)"
-                             on-body-click="vm.redirectBadgeType(badge.badgeType)"
-                             footer="vm.CARD_FOOTER.BADGE_DETAIL"
-                             body-icon="vm.cardIcon"
-                             is-disabled="vm.areCardDisabled">
-        </minibadge-card-type>
-    </div>
+<div class="minibadge-badge-list">
+    <minibadge-container ng-class="{ disabled: !vm.badges || !vm.badges.length }">
+        <container-title ng-click="vm.clickList()">
+            <h3>
+                <minibadge-title class="minibadge-badge-list-label"
+                                 icon="{play: true, opened: (vm.isOpenedList || vm.isOpenedOption) && vm.badges && !!vm.badges.length }">
+                    [[vm.lang.translate(vm.label)]]
+                </minibadge-title>
+            </h3>
+        </container-title>
+        <container-body>
+            <div class="minibadge-badge-cards flex-row f-wrap" ng-show="vm.isOpenedList || vm.isOpenedOption">
+                <minibadge-card-type ng-repeat="badge in vm.badges"
+                                     class="minibadge-mobile-full"
+                                     badge-type="badge.badgeType"
+                                     badge="badge"
+                                     on-footer-click="vm.redirectBadgeType(badge.badgeType)"
+                                     on-body-click="vm.redirectBadgeType(badge.badgeType)"
+                                     footer="vm.CARD_FOOTER.BADGE_DETAIL"
+                                     body-icon="vm.cardIcon"
+                                     is-disabled="vm.areCardDisabled">
+                </minibadge-card-type>
+            </div>
+        </container-body>
+    </minibadge-container>
 </div>

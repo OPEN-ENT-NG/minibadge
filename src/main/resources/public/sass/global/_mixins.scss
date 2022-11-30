@@ -1,6 +1,7 @@
 $minibadge-blue-dark: #368daf;
 $minibadge-blue: #67add1;
 $minibadge-blue-light: #eff8fc;
+$minibadge-green: #629c44;
 $minibadge-grey: #5b6472;
 $minibadge-grey-light: #d6d6d6;
 $minibadge-grey-lighter: #ebebeb;
@@ -9,7 +10,9 @@ $minibadge-red: #E13A3A;
 $minibadge-white: #fff;
 $minibadge-small-icon: 16px;
 
-$minibadge-shadow-light: rgba(214, 214, 214, 0.3);
+$minibadge-shadow: rgb(214, 214, 214);
+$minibadge-shadow-light: transparentize($minibadge-shadow, 0.3);
+$minibadge-shadow-lighter: transparentize($minibadge-shadow, 0.7);
 
 $minibadge-font-secondary: 'Comfortaa', cursive;
 

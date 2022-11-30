@@ -1,0 +1,39 @@
+<div ng-controller="StatisticsController as vm" class="minibadge-statistics minibadge-container flex-row f-column">
+    <h2>
+        <i18n>minibadge.statistics</i18n>
+    </h2>
+
+    <minibadge-container label="'minibadge.statistics.participation'">
+        <container-body class="minibadge-statistics-participation flex-row">
+            <minibadge-statistics-card
+                    icon="'check-decagram'"
+                    label="vm.translate('minibadge.statistics.badges.assigned', [vm.countValue])"
+                    class="minibadge-statistics-count-allowed">
+            </minibadge-statistics-card>
+            <minibadge-statistics-card class="minibadge-statistics-top-structures">
+                <container-body class="flex-row">
+                    <minibadge-card body-icon="'trophy'"
+                                    label="vm.translate('minibadge.statistics.top', [vm.topStructureLengthTest])">
+                    </minibadge-card>
+                    <div class="minibadge-statistics-top-structures-list">
+                    </div>
+                </container-body>
+            </minibadge-statistics-card>
+        </container-body>
+    </minibadge-container>
+
+    <minibadge-container label="'minibadge.statistics.badges'">
+        <container-body class="minibadge-statistics-badges flex-row">
+            <minibadge-statistics-card
+                    class="minibadge-statistics-most-allowed"
+                    icon="'check-circle'"
+                    label="vm.translate('minibadge.statistics.most.allowed.badges', [vm.badgeReceivedLengthTest])">
+            </minibadge-statistics-card>
+            <minibadge-statistics-card
+                    class="minibadge-statistics-most-refused"
+                    icon="'close-circle'"
+                    label="vm.translate('minibadge.statistics.most.refused.badges', [vm.badgeRefuseLengthTest])">
+            </minibadge-statistics-card>
+        </container-body>
+    </minibadge-container>
+</div>

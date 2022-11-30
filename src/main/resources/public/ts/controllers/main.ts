@@ -1,4 +1,4 @@
-import {model, ng, template} from 'entcore';
+import {model, ng, template, skin} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
@@ -46,6 +46,11 @@ class Controller implements ng.IController, ViewModel {
                 await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_GIVEN;
                 template.open('main', `badges-given`);
+            },
+            statistics: async () => {
+                await this.initInfos();
+                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_STATISTICS;
+                template.open('main', `statistics`);
             },
             badgeType: async () => {
                 await this.initInfos();

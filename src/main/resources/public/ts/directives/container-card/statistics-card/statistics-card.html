@@ -1,0 +1,13 @@
+<div class="minibadge-statistics-card">
+    <minibadge-container-card label="vm.label">
+        <container-title ng-transclude="title">
+            <h3>
+                <minibadge-title icon="vm.icon">
+                    [[vm.lang.translate(vm.label)]]
+                </minibadge-title>
+            </h3>
+        </container-title>
+
+        <container-body ng-transclude="body"></container-body>
+    </minibadge-container-card>
+</div>

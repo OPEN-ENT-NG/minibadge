@@ -25,121 +25,23 @@
     height: 183px;
   }
 
-  &-body {
+  &-body, &-body > container-body {
     flex: 1;
+    width: 100%;
+    align-items: center;
 
     &-icon {
-      padding: 10px;
-      font-size: 24px;
-
-      @include mobile {
-        padding: 5px;
-      }
-
-      &.minibadge-icon-right {
-        right: 0;
-        color: $minibadge-blue-dark;
-      }
+      flex: 1;
+      font-size: 80px;
     }
   }
 
-  &-footer {
+  &-footer, .minibadge-footer {
     border-radius: 0 0 10px 10px;
   }
 
-  .minibadge-footer {
-    &-award-badge {
-      height: 48px;
-
-      @include mobile {
-        height: 38px;
-      }
-
-      background: $minibadge-blue;
-      color: $minibadge-white;
-
-      &:hover {
-        background: $minibadge-orange;
-      }
-
-    }
-
-    &-badge-detail {
-      @include paddingX(10px);
-      background: $minibadge-white;
-      height: 80px;
-
-      @include mobile {
-        height: 100%;
-        line-height: 30px;
-        flex: 1;
-      }
-
-      .minibadge-more-info {
-        width: 100%;
-      }
-
-      .minibadge-actions {
-        align-self: flex-end;
-        margin-left: auto;
-        position: relative;
-
-        .dots-vertical {
-          font-size: 1.3rem;
-
-          &:hover {
-            color: $minibadge-orange;
-          }
-        }
-
-        .minibadge-action {
-          &-options {
-            display: flex;
-            flex-direction: column;
-            position: absolute;
-            top: 0;
-            left: 100%;
-            background: $minibadge-white;
-            border-radius: 2px;
-            box-shadow: 4px 8px 10px $minibadge-grey-light;
-            z-index: 1;
-
-            &.minibadge-reposition {
-              left: 0;
-              transform: translateX(-100%);
-            }
-          }
-
-          &-option {
-            @include paddingX(28px);
-            @include paddingY(6px);
-            white-space: nowrap;
-            justify-content: flex-start;
-
-            & .lock {
-              @include icon-small();
-            }
-
-            &:first-child {
-              border-radius: 2px 2px 0 0;
-            }
-
-            &:last-child {
-              border-radius: 0 0 2px 2px;
-            }
-
-            &:hover {
-              background-color: $minibadge-orange;
-              color: $minibadge-white;
-            }
-          }
-        }
-      }
-
-      .star {
-        color: $minibadge-orange;
-      }
-    }
+  container-footer {
+    flex: 1;
   }
 
   &-picture {
@@ -150,7 +52,8 @@
     }
   }
 
-  &-title {
+  &-title, h3 {
+    flex: 1;
     height: 31px;
   }
 

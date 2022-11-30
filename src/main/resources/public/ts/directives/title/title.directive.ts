@@ -1,19 +1,12 @@
 import {ng} from "entcore";
+import {IDirective, IScope} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
-import {IDirective, IScope, isFunction} from "angular";
 
 interface IViewModel {
-    bodyClick(): void;
 }
 
 interface IDirectiveProperties {
-    onBodyClick?(): void;
-
-    bodyIcon?: string;
-    label?: string;
-    isBodyDisabled?: boolean;
-    isDisabled?: boolean;
-    parentClass?: string;
+    icon?: string;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -28,33 +21,19 @@ class Controller implements ng.IController, IViewModel {
     $onInit() {
     }
 
-    bodyClick(): void {
-        if (!this.$scope.vm.isDisabled && !this.$scope.vm.isBodyDisabled && isFunction(this.$scope.vm.onBodyClick))
-            this.$scope.vm.onBodyClick()
-    }
-
     $onDestroy() {
     }
 
 }
 
-
 function directive(): IDirective {
     return {
         replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/card/card.html`,
+        transclude: true,
+        templateUrl: `${RootsConst.directive}/title/title.html`,
         scope: {
-            parentClass: '=?',
-            bodyIcon: '=?',
-            label: '=?',
-            isDisabled: '=?',
-            isBodyDisabled: '=?',
-            onBodyClick: '&?'
-        },
-        transclude: {
-            body: '?containerBody',
-            footer: '?containerFooter',
+            icon: '=?',
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -68,4 +47,4 @@ function directive(): IDirective {
     }
 }
 
-export const minibadgeCard = ng.directive('minibadgeCard', directive);
+export const minibadgeTitle = ng.directive('minibadgeTitle', directive);

@@ -1,19 +1,27 @@
 import {ng} from "entcore";
 import {RootsConst} from "../../core/constants/roots.const";
 import {IDirective, IScope, isFunction} from "angular";
+import {BadgeType} from "../../models/badge-type.model";
+import {CARD_FOOTER} from "../../core/enum/card-footers.enum";
+import {Badge} from "../../models/badge.model";
 
 interface IViewModel {
     bodyClick(): void;
+
+    CARD_FOOTER: typeof CARD_FOOTER;
+
 }
 
 interface IDirectiveProperties {
-    onBodyClick?(): void;
+    onBodyClick?(badgeType: BadgeType): void;
 
+    onFooterClick?(badgeType: BadgeType): void;
+
+    footer?: CARD_FOOTER;
     bodyIcon?: string;
-    label?: string;
-    isBodyDisabled?: boolean;
+    badgeType: BadgeType;
+    badge?: Badge;
     isDisabled?: boolean;
-    parentClass?: string;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -21,16 +29,17 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
+    CARD_FOOTER: typeof CARD_FOOTER;
 
     constructor(private $scope: IMinibadgeScope) {
+        this.CARD_FOOTER = CARD_FOOTER;
     }
 
     $onInit() {
     }
 
     bodyClick(): void {
-        if (!this.$scope.vm.isDisabled && !this.$scope.vm.isBodyDisabled && isFunction(this.$scope.vm.onBodyClick))
-            this.$scope.vm.onBodyClick()
+        if (!this.$scope.vm.isDisabled && isFunction(this.$scope.vm.onBodyClick)) this.$scope.vm.onBodyClick(this.$scope.vm.badgeType)
     }
 
     $onDestroy() {
@@ -41,20 +50,17 @@ class Controller implements ng.IController, IViewModel {
 
 function directive(): IDirective {
     return {
-        replace: true,
+        // replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/card/card.html`,
+        templateUrl: `${RootsConst.directive}/card/card-type.html`,
         scope: {
-            parentClass: '=?',
+            badgeType: '=',
+            badge: '=?',
+            footer: '=?',
             bodyIcon: '=?',
-            label: '=?',
             isDisabled: '=?',
-            isBodyDisabled: '=?',
-            onBodyClick: '&?'
-        },
-        transclude: {
-            body: '?containerBody',
-            footer: '?containerFooter',
+            onBodyClick: '&?',
+            onFooterClick: '&?'
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -68,4 +74,4 @@ function directive(): IDirective {
     }
 }
 
-export const minibadgeCard = ng.directive('minibadgeCard', directive);
+export const minibadgeCardType = ng.directive('minibadgeCardType', directive);

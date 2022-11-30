@@ -1,0 +1,11 @@
+<div class="minibadge-container-card flex-row f-column">
+    <div ng-transclude="title" class="minibadge-container-card-title">
+        <h3>
+            <minibadge-title icon="vm.icon" class="bold">
+                [[vm.lang.translate(vm.label)]]
+            </minibadge-title>
+        </h3>
+    </div>
+
+    <div ng-transclude="body" class="minibadge-container-card-body"></div>
+</div>

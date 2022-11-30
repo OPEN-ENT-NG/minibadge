@@ -1,19 +1,14 @@
-import {ng} from "entcore";
+import {ng, idiom as lang} from "entcore";
+import {IDirective, IScope} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
-import {IDirective, IScope, isFunction} from "angular";
 
 interface IViewModel {
-    bodyClick(): void;
+    lang: typeof lang;
 }
 
 interface IDirectiveProperties {
-    onBodyClick?(): void;
-
-    bodyIcon?: string;
     label?: string;
-    isBodyDisabled?: boolean;
-    isDisabled?: boolean;
-    parentClass?: string;
+    icon?: string;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -21,16 +16,13 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
+    lang: typeof lang;
 
     constructor(private $scope: IMinibadgeScope) {
+        this.lang = lang;
     }
 
     $onInit() {
-    }
-
-    bodyClick(): void {
-        if (!this.$scope.vm.isDisabled && !this.$scope.vm.isBodyDisabled && isFunction(this.$scope.vm.onBodyClick))
-            this.$scope.vm.onBodyClick()
     }
 
     $onDestroy() {
@@ -38,23 +30,18 @@ class Controller implements ng.IController, IViewModel {
 
 }
 
-
 function directive(): IDirective {
     return {
         replace: true,
         restrict: 'E',
-        templateUrl: `${RootsConst.directive}/card/card.html`,
-        scope: {
-            parentClass: '=?',
-            bodyIcon: '=?',
-            label: '=?',
-            isDisabled: '=?',
-            isBodyDisabled: '=?',
-            onBodyClick: '&?'
-        },
         transclude: {
+            title: '?containerTitle',
             body: '?containerBody',
-            footer: '?containerFooter',
+        },
+        templateUrl: `${RootsConst.directive}/container/container.html`,
+        scope: {
+            label: '=?',
+            icon: '=?',
         },
         controllerAs: 'vm',
         bindToController: true,
@@ -68,4 +55,4 @@ function directive(): IDirective {
     }
 }
 
-export const minibadgeCard = ng.directive('minibadgeCard', directive);
+export const minibadgeContainer = ng.directive('minibadgeContainer', directive);

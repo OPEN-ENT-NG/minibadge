@@ -1,19 +1,15 @@
-<div class="minibadge-card flex-row f-column centered-text" ng-class="{ disabled: vm.isDisabled }">
-    <div class="minibadge-card-body flex-row f-column" ng-click="vm.bodyClick()">
-        <i ng-if="vm.bodyIcon"
-           ng-class="vm.bodyIcon"
-           class="minibadge-card-body-icon absolute-position bold">
+<div class="minibadge-card flex-row f-column centered-text" ng-class="[{disabled: vm.isDisabled}, vm.parentClass]">
+
+    <div class="minibadge-card-body flex-row f-column"
+         ng-transclude="body"
+         ng-disabled="vm.isBodyDisabled || vm.isDisabled"
+         ng-click="vm.bodyClick()">
+        <i ng-if="vm.bodyIcon" ng-class="vm.bodyIcon" class="minibadge-card-body-icon flex-row align-center">
         </i>
-        <div class="minibadge-card-picture flex-row justify-center">
-            <img ng-src="/minibadge/public/img/[[vm.badgeType.pictureId]]"/>
-        </div>
-        <div ng-if="vm.CARD_FOOTER.BADGE_DETAIL != vm.footer"
-             class="minibadge-card-title flex-row justify-center align-center">[[vm.badgeType.label]]
-        </div>
+
+        <h3 ng-if="vm.label" class="bold">[[vm.label]]</h3>
     </div>
-    <award-badge-footer ng-if="vm.CARD_FOOTER.AWARD_BADGE === vm.footer && !vm.isDisabled" on-click="vm.onFooterClick(vm.badgeType)"
-                        badge-type="vm.badgeType"></award-badge-footer>
-    <badge-detail-footer ng-if="vm.CARD_FOOTER.BADGE_DETAIL === vm.footer" badge-type="vm.badgeType" badge="vm.badge"
-                         on-info-click="vm.onFooterClick(vm.badgeType)">
-    </badge-detail-footer>
+
+    <div ng-transclude="footer" class="minibadge-card-footer flex-row">
+    </div>
 </div>

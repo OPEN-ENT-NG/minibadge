@@ -1,0 +1,27 @@
+<minibadge-card on-body-click="vm.onBodyClick()" is-disabled="vm.isDisabled"
+                parent-class="{
+                'minibadge-card-badge-detail': vm.CARD_FOOTER.BADGE_DETAIL === vm.footer,
+                'minibadge-card-award-badge': vm.CARD_FOOTER.AWARD_BADGE === vm.footer
+                }">
+    <container-body class="flex-row f-column">
+        <i ng-if="vm.bodyIcon"
+           ng-class="vm.bodyIcon"
+           class="minibadge-card-body-icon absolute-position bold">
+        </i>
+        <div class="minibadge-card-picture flex-row justify-center">
+            <img ng-src="/minibadge/public/img/[[vm.badgeType.pictureId]]"/>
+        </div>
+        <div ng-if="vm.CARD_FOOTER.BADGE_DETAIL != vm.footer"
+             class="minibadge-card-title flex-row justify-center align-center">[[vm.badgeType.label]]
+        </div>
+    </container-body>
+    <container-footer>
+        <award-badge-footer ng-if="vm.CARD_FOOTER.AWARD_BADGE === vm.footer && !vm.isDisabled"
+                            on-click="vm.onFooterClick(vm.badgeType)"
+                            badge-type="vm.badgeType"></award-badge-footer>
+        <badge-detail-footer ng-if="vm.CARD_FOOTER.BADGE_DETAIL === vm.footer" badge-type="vm.badgeType"
+                             badge="vm.badge"
+                             on-info-click="vm.onFooterClick(vm.badgeType)">
+        </badge-detail-footer>
+    </container-footer>
+</minibadge-card>

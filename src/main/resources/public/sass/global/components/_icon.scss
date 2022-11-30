@@ -87,6 +87,16 @@ i {
     content: "\F493";
   }
 
+  &.close-circle::before {
+    font-family: 'material-icons';
+    content: "\F159";
+  }
+
+  &.check-circle::before {
+    font-family: 'material-icons';
+    content: "\F5E0";
+  }
+
   &.check-decagram::before {
     font-family: 'material-icons';
     content: "\F790";
@@ -95,5 +105,10 @@ i {
   &.chevron::before {
     font-family: 'material-icons';
     content: "\F142";
+  }
+
+  &.trophy::before {
+    font-family: 'material-icons';
+    content: "\F538";
   }
 }

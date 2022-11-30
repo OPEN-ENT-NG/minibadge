@@ -1,0 +1,90 @@
+
+.minibadge-statistics {
+  .minibadge-container-component {
+    .minibadge-title {
+      font-weight: bold;
+    }
+
+    container-body {
+      gap: 50px
+    }
+  }
+
+  &-card {
+    .minibadge-title {
+      font-weight: bold;
+      font-size: 25px;
+    }
+  }
+
+  &-count-allowed {
+    flex: 4;
+    display: flex;
+
+    .minibadge-container-card {
+      flex: 1;
+      justify-content: center;
+
+      .minibadge-title {
+        font-size: 30px;
+
+        .check-decagram {
+          color: $minibadge-orange;
+        }
+      }
+
+      .minibadge-container-card-body {
+        display: none;
+      }
+    }
+
+  }
+
+  &-top-structures {
+    flex: 5;
+
+    .minibadge-container-card-title {
+      display: none;
+    }
+
+    .minibadge-card {
+      flex: 1;
+      background: $minibadge-white;
+      border: none;
+      color: $minibadge-orange;
+      height: revert;
+
+      &-body {
+        justify-content: center;
+        gap: 20px;
+        h3 {
+          color: $minibadge-orange;
+          font-size: 30px;
+          font-weight: bold;
+        }
+      }
+    }
+
+    &-list {
+      flex: 3;
+    }
+  }
+
+  &-most-allowed {
+    flex: 5;
+
+    .check-circle {
+      color: $minibadge-green;
+    }
+  }
+
+  &-most-refused {
+    flex: 4;
+
+    .close-circle {
+      color: $minibadge-red;
+    }
+  }
+}
+
+

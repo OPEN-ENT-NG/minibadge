@@ -31,6 +31,9 @@ routes.define(function($routeProvider){
 		.when('/badges-given', {
 			action : 'badgeGiven'
 		})
+		.when('/statistics', {
+			action : 'statistics'
+		})
 		.otherwise({
 			redirectTo: '/'
 		});
