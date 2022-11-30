@@ -54,4 +54,12 @@ public interface UserService {
      * @return return future containing list of users that received the typed badge from current assigner
      */
     Future<List<User>> getAlreadyTypedAssignedFromUser(long typeId, UserInfos assigner, List<String> receiverIds);
+
+    /**
+     * get list of structures and substructures Ids from current sessionUser
+     *
+     * @param user current session user from which we want to get structures
+     * @return return future containing list of structures and substructures Ids
+     */
+    Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user);
 }

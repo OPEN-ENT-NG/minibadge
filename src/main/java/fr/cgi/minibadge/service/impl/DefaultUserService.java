@@ -207,4 +207,34 @@ public class DefaultUserService implements UserService {
                 .put("values", params)
                 .put("action", "prepared");
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user) {
+        Promise<List<String>> promise = Promise.promise();
+        getSessionUserStructureNSubstructureIdsRequest(user)
+                .onSuccess(structureIds -> promise.complete(structureIds
+                        .getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList()))
+                .onFailure(promise::fail);
+        return promise.future();
+    }
+
+    private Future<JsonObject> getSessionUserStructureNSubstructureIdsRequest(UserInfos user) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        String query = String.format(" MATCH (struct:Structure)-[r:HAS_ATTACHMENT*1..]->(s:Structure)  " +
+                        " WHERE s.id IN {%s} " +
+                        " RETURN {%s} + COLLECT(DISTINCT struct.id) AS %s",
+                Field.STRUCTUREIDS, Field.STRUCTUREIDS, Field.STRUCTUREIDS);
+
+        JsonObject params = new JsonObject();
+        params.put(Field.STRUCTUREIDS, user.getStructures());
+
+        neo.execute(query, params, Neo4jResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getSessionUserStructureNSubstructureIdsRequest] Fail to get structure " +
+                                "and substructure ids",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
 }
