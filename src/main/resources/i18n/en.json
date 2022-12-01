@@ -33,6 +33,7 @@
   "minibadge.error.get.badge.type": "An error occurred while retrieving the badge type",
   "minibadge.error.get.badge.types": "An error occurred while retrieving badge library",
   "minibadge.error.get.global.settings": "An error occurred while retrieving the configuration",
+  "minibadge.error.get.statistics": "An error occurred while retrieving statistics",
   "minibadge.error.search.users": "An error occurred while searching users",
   "minibadge.more.information": "More information",
   "minibadge.my.badges.received": "My badges received",

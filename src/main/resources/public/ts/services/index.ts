@@ -7,3 +7,4 @@ export * from './user.service';
 export * from './badge-assigned.service';
 export * from './sniplet-badge-assign.service';
 export * from './chart.service';
+export * from './statistic.service';

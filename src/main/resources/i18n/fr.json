@@ -38,6 +38,7 @@
   "minibadge.error.get.badge.type": "Une erreur est survenue à la récupération du type de badge",
   "minibadge.error.get.badge.types": "Une erreur est survenue à la récupération de la bibliothèque de badges",
   "minibadge.error.get.global.settings": "Une erreur est survenue à la récupération de la configuration",
+  "minibadge.error.get.statistics": "Une erreur est survenue à la récupération des statistiques",
   "minibadge.error.search.users": "Une erreur est survenue à la recherche d'utilisateurs",
   "minibadge.gave.level": "Badge pour",
   "minibadge.given.array.label": "Badge décerné",

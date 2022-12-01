@@ -43,6 +43,10 @@ public class ServiceFactory {
         return new DefaultBadgeAssignedService(sql, this.badgeService(), this.userService());
     }
 
+    public StatisticService statisticServiceService() {
+        return new DefaultStatisticService(sql);
+    }
+
     public UserService userService() {
         return new DefaultUserService(sql, neo4j, this.eventBus());
     }

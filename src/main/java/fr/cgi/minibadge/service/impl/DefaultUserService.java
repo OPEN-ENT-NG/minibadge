@@ -213,9 +213,9 @@ public class DefaultUserService implements UserService {
     public Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user) {
         Promise<List<String>> promise = Promise.promise();
         getSessionUserStructureNSubstructureIdsRequest(user)
+                .onFailure(promise::fail)
                 .onSuccess(structureIds -> promise.complete(structureIds
-                        .getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList()))
-                .onFailure(promise::fail);
+                        .getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList()));
         return promise.future();
     }
 

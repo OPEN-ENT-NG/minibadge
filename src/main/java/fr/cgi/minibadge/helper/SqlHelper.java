@@ -25,6 +25,18 @@ public class SqlHelper {
         return String.format("structure_id IN %s", Sql.listPrepared(structureIds));
     }
 
+    public static String andFilterStructures(List<String> structureIds, JsonArray params) {
+        String whereStructureIds = SqlHelper.filterStructures(structureIds, params);
+        return "".equals(whereStructureIds) ? "" : String.format("%s %s", "AND", whereStructureIds);
+    }
+
+    public static String filterStructuresWithNull(List<String> structureIds, JsonArray params) {
+        String whereStructureIds = SqlHelper.filterStructures(structureIds, params);
+        return String.format("(%s %s structure_id IS NULL)",
+                whereStructureIds, "".equals(whereStructureIds) ? "" : "OR");
+    }
+
+
     public static String addLimitOffset(Integer limit, Integer offset, JsonArray params) {
         String query = "";
         if (limit != null) {

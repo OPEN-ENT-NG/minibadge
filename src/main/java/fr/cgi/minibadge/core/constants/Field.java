@@ -31,6 +31,8 @@ public class Field {
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
     public static final String STRUCTUREIDS = "structureIds";
+    public static final String VALUE = "value";
+
 
     //BadgeAssigned
     public static final String BADGE_ASSIGNED_ID = "badge_assigned_id";
@@ -90,6 +92,11 @@ public class Field {
     public static final String ARE_THRESHOLDS_REACHED = "are_thresholds_reached";
     public static final String THRESHOLDSETTINGS = "thresholdSettings";
     public static final String ASSIGNATIONSNUMBER = "assignationsNumber";
+
+    // Statistics
+    public static final String STATISTICS = "statistics";
+    public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
+    public static final String COUNTBADGEASSIGNED = "countBadgeAssigned";
 
     private Field() {
         throw new IllegalStateException("Utility class");

@@ -30,6 +30,7 @@ public class Minibadge extends BaseServer {
         addController(new BadgeController(serviceFactory));
         addController(new BadgeTypeController(serviceFactory));
         addController(new BadgeAssignedController(serviceFactory));
+        addController(new StatisticController(serviceFactory));
         addController(new UserController(serviceFactory));
     }
 

@@ -7,7 +7,8 @@
         <container-body class="minibadge-statistics-participation flex-row">
             <minibadge-statistics-card
                     icon="'check-decagram'"
-                    label="vm.translate('minibadge.statistics.badges.assigned', [vm.countValue])"
+                    label="vm.translate('minibadge.statistics.badges.assigned',
+                    [vm.statistics.countBadgeAssigned.toLocaleString()])"
                     class="minibadge-statistics-count-allowed">
             </minibadge-statistics-card>
             <minibadge-statistics-card class="minibadge-statistics-top-structures">
