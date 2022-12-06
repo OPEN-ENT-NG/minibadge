@@ -2,6 +2,7 @@ export * from './navbar/navbar.directive';
 export * from './navbar/navbar-item/navbar-item.directive';
 export * from './card/card.directive';
 export * from './card/card-type.directive';
+export * from './card/card-type-stat.directive';
 export * from './card/footer/award-badge/award-badge-footer.directive';
 export * from './card/footer/badge-detail/badge-detail-footer.directive';
 export * from './search/search.directive';

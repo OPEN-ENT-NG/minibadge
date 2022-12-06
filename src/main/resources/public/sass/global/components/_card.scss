@@ -59,3 +59,28 @@
 
 }
 
+.minibadge-card-simple, minibadge-card-type-statistic {
+  display: flex;
+  align-self: center;
+
+  .minibadge-card {
+    @include desktop {
+      align-self: center;
+      background-color: $minibadge-white;
+      border: none
+    }
+  }
+}
+
+minibadge-card-type-statistic {
+  width: 100%;
+
+  .minibadge-card {
+    flex: 1;
+
+    &-title {
+      flex: none;
+      height: auto;
+    }
+  }
+}

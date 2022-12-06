@@ -1,5 +1,5 @@
 <div class="minibadge-container-component flex-row f-column">
-    <div ng-transclude="title">
+    <div ng-transclude="title" class="minibadge-container-component-title">
         <h3>
             <minibadge-title icon="vm.icon">
                 [[vm.lang.translate(vm.label)]]
@@ -7,5 +7,5 @@
         </h3>
     </div>
 
-    <div ng-transclude="body"></div>
+    <div ng-transclude="body" class="minibadge-container-component-body"></div>
 </div>

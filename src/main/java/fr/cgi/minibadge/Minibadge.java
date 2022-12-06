@@ -23,7 +23,7 @@ public class Minibadge extends BaseServer {
 
         Storage storage = new StorageFactory(vertx, config).getStorage();
 
-        ServiceFactory serviceFactory = new ServiceFactory(vertx, storage, Neo4j.getInstance(), Sql.getInstance(), MongoDb.getInstance());
+        ServiceFactory serviceFactory = new ServiceFactory(vertx, storage, Neo4j.getInstance(), Sql.getInstance(), MongoDb.getInstance(), config);
 
         addController(new MinibadgeController(serviceFactory));
         addController(new SettingController(serviceFactory));

@@ -3,7 +3,6 @@ package fr.cgi.minibadge.core.constants;
 public class Field {
     public static final String ID = "id";
     public static final String ASSIGNED = "assigned";
-    public static final String COUNT_ASSIGNED = "count_assigned";
     public static final String COUNTS = "counts";
     public static final String OWNER = "owner";
     public static final String OWNERID = "ownerId";
@@ -95,8 +94,14 @@ public class Field {
 
     // Statistics
     public static final String STATISTICS = "statistics";
+    public static final String COUNT_ASSIGNED = "count_assigned";
+    public static final String COUNTASSIGNED = "countAssigned";
     public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
     public static final String COUNTBADGEASSIGNED = "countBadgeAssigned";
+    public static final String MOSTASSIGNEDTYPES = "mostAssignedTypes";
+
+    //CONFIG
+    public static final String MOST_ASSIGNED_TYPE_LIST_SIZE = "most_assigned_type_list_size";
 
     private Field() {
         throw new IllegalStateException("Utility class");

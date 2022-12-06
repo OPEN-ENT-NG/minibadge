@@ -72,6 +72,7 @@
   "minibadge.selected.persons": "Personnes sélectionnées",
   "minibadge.success.assign": "Assignation du badge réussi",
   "minibadge.statistics": "Statistiques",
+  "minibadge.statistics.assigned.times": "Décerné {0} fois",
   "minibadge.statistics.badges": "Les badges",
   "minibadge.statistics.badges.assigned": "{0} badges décernés",
   "minibadge.statistics.most.allowed.badges": "Les {0} badges les plus décernés",

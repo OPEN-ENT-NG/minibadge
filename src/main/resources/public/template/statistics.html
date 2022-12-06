@@ -23,12 +23,30 @@
         </container-body>
     </minibadge-container>
 
-    <minibadge-container label="'minibadge.statistics.badges'">
+    <minibadge-container label="'minibadge.statistics.badges'" class="minibadge-container-badges">
         <container-body class="minibadge-statistics-badges flex-row">
             <minibadge-statistics-card
                     class="minibadge-statistics-most-allowed"
                     icon="'check-circle'"
-                    label="vm.translate('minibadge.statistics.most.allowed.badges', [vm.badgeReceivedLengthTest])">
+                    label="vm.translate('minibadge.statistics.most.allowed.badges', [vm.statistics.mostAssignedTypes.length])">
+                <container-body>
+                    <div ng-if="!!vm.statistics.mostAssignedTypes.length" class="minibadge-most-assigned flex-row">
+                        <minibadge-card-type badge-type="vm.statistics.mostAssignedTypes[0]"
+                                             class="minibadge-most-assigned-card minibadge-card-simple">
+                        </minibadge-card-type>
+                        <minibadge-title icon="'check-decagram'" class="minibadge-most-assigned-detail">
+                            <span>[[vm.translate('minibadge.statistics.assigned.times',
+                                [vm.statistics.mostAssignedTypes[0].countAssigned])]]</span>
+                        </minibadge-title>
+                        <div ng-if="vm.statistics.mostAssignedTypes.length > 1"
+                             class="minibadge-most-assigned-others flex-row f-column">
+                            <div ng-repeat="type in vm.statistics.mostAssignedTypes.slice(1)" class="flex-row">
+                                <minibadge-card-type-statistic badge-type="type">
+                                </minibadge-card-type-statistic>
+                            </div>
+                        </div>
+                    </div>
+                </container-body>
             </minibadge-statistics-card>
             <minibadge-statistics-card
                     class="minibadge-statistics-most-refused"

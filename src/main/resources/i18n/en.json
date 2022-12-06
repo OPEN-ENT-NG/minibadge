@@ -51,6 +51,7 @@
   "minibadge.selected.persons": "Selected people",
   "minibadge.success.assign": "Badge assignment successful",
   "minibadge.statistics": "Statistics",
+  "minibadge.statistics.assigned.times": "Assigned {0} times",
   "minibadge.statistics.badges": "Badges",
   "minibadge.statistics.badges.assigned": "{0} assigned badges",
   "minibadge.statistics.most.allowed.badges": "Top %s badges awarded",

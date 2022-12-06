@@ -12,6 +12,7 @@ export interface IBadgeTypeResponse {
     pictureId?: string;
     label: string;
     description: string;
+    countAssigned: number;
     createdAt?: string;
     owner?: User;
     setting?: TypeSettings;
@@ -31,6 +32,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
     pictureId?: string;
     label: string;
     description: string;
+    countAssigned: number;
     createdAt?: string;
     owner?: User;
     setting?: TypeSettings;
@@ -47,6 +49,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
         this.pictureId = data.pictureId;
         this.label = data.label;
         this.description = data.description;
+        this.countAssigned = data.countAssigned;
         this.createdAt = data.createdAt;
         this.owner = new User(<IUserResponse>data.owner);
         this.setting = new TypeSettings(<ITypeSettingResponse>data.setting);

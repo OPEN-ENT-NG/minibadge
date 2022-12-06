@@ -33,29 +33,8 @@
 
   &-id {
     @include desktop {
-      width: 420px;
       height: auto;
-    }
-
-    @include desktop {
       width: auto;
-    }
-
-    .minibadge-card-simple {
-      display: flex;
-      align-self: center;
-
-      .minibadge-card {
-        @include desktop {
-          align-self: center;
-          background-color: $minibadge-white;
-          border: none
-        }
-
-        &-full {
-          width: 100%;
-        }
-      }
     }
   }
 
