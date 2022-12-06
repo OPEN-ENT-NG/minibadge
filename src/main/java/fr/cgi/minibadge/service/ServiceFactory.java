@@ -48,7 +48,7 @@ public class ServiceFactory {
     }
 
     public StatisticService statisticServiceService() {
-        return new DefaultStatisticService(sql, new Config(config));
+        return new DefaultStatisticService(sql, new Config(config), userService());
     }
 
     public UserService userService() {

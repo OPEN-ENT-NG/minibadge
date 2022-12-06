@@ -8,8 +8,10 @@ import org.entcore.common.user.UserInfos;
 
 public class User extends UserInfos implements Model<User> {
 
-    Integer badgeAssignedTotal;
-    Chart permissions;
+    private Integer badgeAssignedTotal;
+    private Chart permissions;
+
+    private Integer countAssigned;
 
     public User() {
     }
@@ -36,8 +38,17 @@ public class User extends UserInfos implements Model<User> {
         this.setType(user.getString(Field.TYPE));
         this.setStructures(user.getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList());
         this.badgeAssignedTotal = user.getInteger(Field.BADGE_ASSIGNED_TOTAL);
+        this.countAssigned = user.getInteger(Field.COUNT_ASSIGNED);
         this.permissions = new Chart(user);
         return this;
+    }
+
+    public Integer getCountAssigned() {
+        return this.countAssigned;
+    }
+
+    public void setCountAssigned(Integer countAssigned) {
+        this.countAssigned = countAssigned;
     }
 
     @Override
@@ -48,6 +59,7 @@ public class User extends UserInfos implements Model<User> {
                 .put(Field.LASTNAME, this.getLastName())
                 .put(Field.DISPLAYNAME, this.getUsername())
                 .put(Field.PROFILE, this.getType())
+                .put(Field.COUNTASSIGNED, this.countAssigned)
                 .put(Field.BADGEASSIGNEDTOTAL, this.badgeAssignedTotal);
     }
 

@@ -2,7 +2,7 @@
   h2 {
     margin: 10px 0 0;
     font-weight: bold;
-    color: $minibadge-grey;
+    color: $minibadge-grey-dark;
 
     @include mobile {
       @include marginX(10px);
@@ -11,7 +11,7 @@
 
   h3 {
     margin: 0;
-    color: $minibadge-grey;
+    color: $minibadge-grey-dark;
     font-size: 16px;
     font-weight: normal;
 

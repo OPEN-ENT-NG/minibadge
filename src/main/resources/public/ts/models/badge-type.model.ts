@@ -15,6 +15,7 @@ export interface IBadgeTypeResponse {
     countAssigned: number;
     createdAt?: string;
     owner?: User;
+    mostAssigningUsers?: IUserResponse[];
     setting?: TypeSettings;
 }
 
@@ -35,10 +36,12 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
     countAssigned: number;
     createdAt?: string;
     owner?: User;
+    mostAssigningUsers?: User[];
     setting?: TypeSettings;
 
     constructor(data?: IBadgeTypeResponse) {
         super();
+        this.mostAssigningUsers = [];
         if (data) this.build(data);
     }
 
@@ -52,6 +55,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
         this.countAssigned = data.countAssigned;
         this.createdAt = data.createdAt;
         this.owner = new User(<IUserResponse>data.owner);
+        this.mostAssigningUsers = new User().toList(data.mostAssigningUsers);
         this.setting = new TypeSettings(<ITypeSettingResponse>data.setting);
         return this;
     }

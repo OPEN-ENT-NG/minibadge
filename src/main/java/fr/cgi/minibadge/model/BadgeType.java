@@ -2,7 +2,10 @@ package fr.cgi.minibadge.model;
 
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Field;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 
 public class BadgeType implements Model<BadgeType> {
@@ -17,6 +20,7 @@ public class BadgeType implements Model<BadgeType> {
     private User owner;
     private Integer countAssigned;
     private Integer countRefused;
+    private List<User> mostAssigningUsers;
     private TypeSetting setting = new TypeSetting();
 
     public BadgeType() {
@@ -36,6 +40,7 @@ public class BadgeType implements Model<BadgeType> {
         this.description = badgeType.getString(Field.DESCRIPTION);
         this.countAssigned = badgeType.getInteger(Field.COUNT_ASSIGNED);
         this.countRefused = badgeType.getInteger(Field.COUNT_REFUSED);
+        this.mostAssigningUsers = new User().toList(badgeType.getJsonArray(Field.MOST_ASSIGNING_USERS, new JsonArray()));
         this.createdAt = badgeType.getString(Field.CREATED_AT, badgeType.getString(Field.CREATEDAT));
         return this;
     }
@@ -96,6 +101,10 @@ public class BadgeType implements Model<BadgeType> {
         this.owner = owner;
     }
 
+    public void setMostAssigningUsers(List<User> mostAssigningUsers) {
+        this.mostAssigningUsers = mostAssigningUsers;
+    }
+
     public void setSetting(TypeSetting setting) {
         this.setting = setting;
     }
@@ -115,6 +124,9 @@ public class BadgeType implements Model<BadgeType> {
                 .put(Field.SETTING, this.setting.toJson());
         if (this.owner != null)
             badgeType.put(Field.OWNER, this.owner.toJson());
+
+        if (this.mostAssigningUsers != null)
+            badgeType.put(Field.MOSTASSIGNINGUSERS, new User().toArray(this.mostAssigningUsers));
 
         return badgeType;
     }

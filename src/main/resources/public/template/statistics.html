@@ -36,10 +36,20 @@
                         <minibadge-card-type badge-type="vm.statistics.mostAssignedTypes[0]"
                                              class="minibadge-card-simple">
                         </minibadge-card-type>
-                        <minibadge-title icon="'check-decagram'" class="minibadge-most-assigned-detail">
-                            <span>[[vm.translate('minibadge.statistics.assigned.times',
-                                [vm.toLocaleString(vm.statistics.mostAssignedTypes[0].countAssigned)])]]</span>
-                        </minibadge-title>
+                        <div class="minibadge-most-assigned-detail flex-row f-column">
+                            <minibadge-title icon="'check-decagram'">
+                                <span>[[vm.translate('minibadge.statistics.assigned.times',
+                                    [vm.toLocaleString(vm.statistics.mostAssignedTypes[0].countAssigned)])]]</span>
+                            </minibadge-title>
+                            <minibadge-title ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
+                                             icon="'trophy'">
+                                <span>[[vm.translate('minibadge.statistics.top',
+                                    [vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length])]]</span>
+                            </minibadge-title>
+                            <minibadge-list ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
+                                            items="vm.statistics.mostAssignedTypes[0].mostAssigningUsers">
+                            </minibadge-list>
+                        </div>
                         <div ng-if="vm.statistics.mostAssignedTypes.length > 1"
                              class="minibadge-most-assigned-others flex-row f-column">
                             <div ng-repeat="type in vm.statistics.mostAssignedTypes.slice(1)" class="flex-row">
@@ -57,7 +67,8 @@
                     label="vm.translate('minibadge.statistics.most.refused.badges', [vm.statistics.mostRefusedTypes.length])">
                 <container-body>
                     <div class="flex-row">
-                        <div ng-repeat="type in vm.statistics.mostRefusedTypes" class="flex-row flex-one justify-center">
+                        <div ng-repeat="type in vm.statistics.mostRefusedTypes"
+                             class="flex-row flex-one justify-center">
                             <minibadge-card-type badge-type="type" class="minibadge-card-simple">
                             </minibadge-card-type>
                         </div>

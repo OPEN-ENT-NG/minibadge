@@ -17,6 +17,7 @@ export * from  './periode-picker/periode-picker';
 export * from  './badge-given-array/badge-given-array';
 export * from './chart/chart.directive';
 export * from './empty-statement/empty-statement.directive';
+export * from './list/list.directive';
 export * from './user-list/user-list.directive';
 export * from './paging/paging.directive';
 export * from './container/container.directive';

@@ -19,21 +19,35 @@ public class SqlHelper {
     }
 
     public static String filterStructures(List<String> structureIds, JsonArray params) {
+        return filterStructures(structureIds, params, null);
+    }
+
+    public static String filterStructures(List<String> structureIds, JsonArray params, String alias) {
         if (structureIds == null || structureIds.isEmpty()) return "";
 
+        alias = alias != null ? String.format("%s.", alias) : "";
         params.addAll(new JsonArray(structureIds));
-        return String.format("structure_id IN %s", Sql.listPrepared(structureIds));
+        return String.format("%sstructure_id IN %s", alias, Sql.listPrepared(structureIds));
     }
 
     public static String andFilterStructures(List<String> structureIds, JsonArray params) {
-        String whereStructureIds = SqlHelper.filterStructures(structureIds, params);
+        return andFilterStructures(structureIds, params, null);
+    }
+
+    public static String andFilterStructures(List<String> structureIds, JsonArray params, String alias) {
+        String whereStructureIds = SqlHelper.filterStructures(structureIds, params, alias);
         return "".equals(whereStructureIds) ? "" : String.format("%s %s", "AND", whereStructureIds);
     }
 
     public static String filterStructuresWithNull(List<String> structureIds, JsonArray params) {
-        String whereStructureIds = SqlHelper.filterStructures(structureIds, params);
-        return String.format("(%s %s structure_id IS NULL)",
-                whereStructureIds, "".equals(whereStructureIds) ? "" : "OR");
+        return filterStructuresWithNull(structureIds, params, null);
+    }
+
+    public static String filterStructuresWithNull(List<String> structureIds, JsonArray params, String alias) {
+        String whereStructureIds = SqlHelper.filterStructures(structureIds, params, alias);
+        alias = alias != null ? String.format("%s.", alias) : "";
+        return String.format("(%s %s %sstructure_id IS NULL)",
+                whereStructureIds, "".equals(whereStructureIds) ? "" : "OR", alias);
     }
 
 

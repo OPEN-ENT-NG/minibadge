@@ -4,6 +4,7 @@ import fr.cgi.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,6 +25,9 @@ public class Statistics implements Model<Statistics> {
         this.countBadgeAssigned = requestResult.getInteger(Field.COUNT);
     }
 
+    public List<BadgeType> mostAssignedTypes() {
+        return this.mostAssignedTypes != null ? this.mostAssignedTypes : new ArrayList<>();
+    }
     public void setMostAssignedTypes(JsonArray requestResults) {
         this.mostAssignedTypes = new BadgeType().toList(requestResults);
     }
