@@ -5,11 +5,13 @@ import {translate} from "../utils/string.utils";
 import {Statistics} from "../models/statistic.model";
 import {IStatisticService} from "../services";
 import {safeApply} from "../utils/safe-apply.utils";
+import {toLocaleString} from "../utils/number.utils";
 
 interface ViewModel {
     startDate: Date;
     endDate: Date;
     translate: typeof translate;
+    toLocaleString: typeof toLocaleString;
     statistics: Statistics;
 }
 
@@ -23,6 +25,7 @@ class Controller implements ng.IController, ViewModel {
     startDate: Date;
     endDate: Date;
     translate: typeof translate = translate;
+    toLocaleString: typeof toLocaleString = toLocaleString;
     // Pay attention, the values below are for the front test, they will be modified during the final implementation
     badgeReceivedLengthTest: string = (3).toLocaleString();
     badgeRefuseLengthTest: string = (3).toLocaleString();

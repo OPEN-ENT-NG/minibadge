@@ -3,9 +3,11 @@ import {RootsConst} from "../../core/constants/roots.const";
 import {IDirective, IScope} from "angular";
 import {BadgeType} from "../../models/badge-type.model";
 import {translate} from "../../utils/string.utils";
+import {toLocaleString} from "../../utils/number.utils";
 
 interface IViewModel {
     translate: typeof translate;
+    toLocaleString: typeof toLocaleString;
 }
 
 interface IDirectiveProperties {
@@ -17,8 +19,8 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
-
     translate: typeof translate = translate;
+    toLocaleString: typeof toLocaleString = toLocaleString;
 
     constructor(private $scope: IMinibadgeScope) {
     }

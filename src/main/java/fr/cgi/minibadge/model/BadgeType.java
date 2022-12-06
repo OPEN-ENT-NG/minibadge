@@ -16,6 +16,7 @@ public class BadgeType implements Model<BadgeType> {
     private String createdAt;
     private User owner;
     private Integer countAssigned;
+    private Integer countRefused;
     private TypeSetting setting = new TypeSetting();
 
     public BadgeType() {
@@ -34,6 +35,7 @@ public class BadgeType implements Model<BadgeType> {
         this.label = badgeType.getString(Field.LABEL);
         this.description = badgeType.getString(Field.DESCRIPTION);
         this.countAssigned = badgeType.getInteger(Field.COUNT_ASSIGNED);
+        this.countRefused = badgeType.getInteger(Field.COUNT_REFUSED);
         this.createdAt = badgeType.getString(Field.CREATED_AT, badgeType.getString(Field.CREATEDAT));
         return this;
     }
@@ -109,6 +111,7 @@ public class BadgeType implements Model<BadgeType> {
                 .put(Field.CREATEDAT, this.createdAt)
                 .put(Field.DESCRIPTION, this.description)
                 .put(Field.COUNTASSIGNED, this.countAssigned)
+                .put(Field.COUNTREFUSED, this.countRefused)
                 .put(Field.SETTING, this.setting.toJson());
         if (this.owner != null)
             badgeType.put(Field.OWNER, this.owner.toJson());

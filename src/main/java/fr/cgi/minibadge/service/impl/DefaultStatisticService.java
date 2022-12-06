@@ -39,11 +39,13 @@ public class DefaultStatisticService implements StatisticService {
 
         Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
         Future<JsonArray> mostAssignedTypesFuture = listBadgeTypesWithCountAssigned(structureIds);
+        Future<JsonArray> mostRefusedTypesFuture = listRefusedBadgeTypesWithCountRefused(structureIds);
 
-        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture)
+        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, mostRefusedTypesFuture)
                 .onSuccess(countBadgeAssigned -> {
                     statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
                     statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
+                    statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
                     promise.complete(statistics);
                 })
                 .onFailure(promise::fail);
@@ -95,6 +97,35 @@ public class DefaultStatisticService implements StatisticService {
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::listBadgeTypesWithCountAssigned] Fail to list type with count assignations",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> listRefusedBadgeTypesWithCountRefused(List<String> structureIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray params = new JsonArray();
+        String request = String.format("SELECT bt.id, bt.slug, bt.structure_id, bt.owner_id, bt.picture_id, bt.label, " +
+                        " bt.description, COALESCE(b.count_refused, 0) as count_refused " +
+                        " FROM %s bt LEFT JOIN (SELECT b.badge_type_id, COUNT(DISTINCT (b.id)) as count_refused " +
+                        " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id " +
+                        " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
+                        " WHERE is_structure_receiver IS TRUE %s " +
+                        " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
+                        " GROUP BY bt.id, b.count_refused  ORDER BY count_refused DESC LIMIT %s",
+                DefaultBadgeTypeService.BADGE_TYPE_TABLE,
+                DefaultBadgeService.BADGE_DISABLED_TABLE,
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
+                BADGE_ASSIGNED_STRUCTURE_TABLE,
+                SqlHelper.andFilterStructures(structureIds, params),
+                SqlHelper.filterStructuresWithNull(structureIds, params),
+                config.mostRefusedTypeListSize());
+
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::listRefusedBadgeTypesWithCountRefused] Fail to list refused types with " +
+                                "count refused",
                         this.getClass().getSimpleName()))));
 
         return promise.future();

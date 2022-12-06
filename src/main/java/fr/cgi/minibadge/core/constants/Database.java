@@ -4,6 +4,7 @@ public class Database {
     public static final String BADGE = "badge";
     public static final String BADGE_PUBLIC = "badge_public";
     public static final String BADGE_ASSIGNABLE = "badge_assignable";
+    public static final String BADGE_DISABLED = "badge_disabled";
     public static final String BADGE_ASSIGNED = "badge_assigned";
     public static final String BADGE_ASSIGNED_VALID = "badge_assigned_valid";
     public static final String BADGE_ASSIGNED_STRUCTURE = "badge_assigned_structure";

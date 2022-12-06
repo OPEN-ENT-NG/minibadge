@@ -1,5 +1,6 @@
 .minibadge-container {
   &-component, &-card {
+    flex: 1;
     row-gap: 8px;
     background: $minibadge-white;
     @include paddingXY(8px, 16px);

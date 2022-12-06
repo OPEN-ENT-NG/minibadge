@@ -10,6 +10,8 @@
   }
 
   &-card {
+    display: flex;
+
     h3 > .minibadge-title {
       font-weight: bold;
       font-size: 25px;
@@ -55,7 +57,6 @@
 
       &-body {
         justify-content: center;
-        gap: 20px;
 
         h3 {
           color: $minibadge-orange;
@@ -97,19 +98,19 @@
       .minibadge-most-assigned {
         padding: 10px;
         align-items: stretch;
-
-        &-card {
-          .minibadge-card {
-            height: 146px;
-            width: 176px;
-          }
-        }
       }
     }
 
     .minibadge-most-assigned-detail, .minibadge-most-assigned-others {
       flex: 1;
       line-height: 30px;
+    }
+
+    minibadge-card-type {
+      .minibadge-card {
+        height: 146px;
+        width: 176px;
+      }
     }
 
   }
@@ -120,6 +121,10 @@ minibadge-card-type-statistic {
     height: auto;
     .minibadge-card-body {
       flex: revert;
+      .minibadge-card-picture {
+        flex: revert;
+        @include marginX(10px);
+      }
     }
   }
 }

@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DefaultBadgeService implements BadgeService {
@@ -29,6 +28,7 @@ public class DefaultBadgeService implements BadgeService {
     public static final String BADGE_PUBLIC_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_PUBLIC);
     public static final String BADGE_ASSIGNABLE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNABLE);
     public static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
+    public static final String BADGE_DISABLED_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_DISABLED);
     private final UserService userService;
     private final Sql sql;
 
@@ -93,7 +93,7 @@ public class DefaultBadgeService implements BadgeService {
                         " (SELECT COUNT(DISTINCT ba.id) FROM %s ba  WHERE ba.badge_id = b.id) as count_assigned " +
                         " FROM %s b INNER JOIN %s bt ON b.badge_type_id = bt.id " +
                         " WHERE b.owner_id = ? AND (SELECT COUNT(DISTINCT ba.id)FROM %s ba  WHERE ba.badge_id = b.id )   > 0  " +
-                        " %s %s " ,
+                        " %s %s ",
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,

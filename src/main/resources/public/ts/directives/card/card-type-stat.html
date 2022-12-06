@@ -3,10 +3,10 @@
         <div class="minibadge-card-picture flex-row justify-center">
             <img ng-src="/minibadge/public/img/[[vm.badgeType.pictureId]]"/>
         </div>
-        <div class="flex-row f-column justify-start align-start">
+        <div class="flex-row f-column flex-one justify-start align-start">
             <span class="minibadge-card-title">[[vm.badgeType.label]]</span>
             <minibadge-title icon="'check-decagram'" ng-if="vm.badgeType.countAssigned">
-                <span>[[vm.translate('minibadge.statistics.assigned.times', [vm.badgeType.countAssigned])]]</span>
+                <span>[[vm.translate('minibadge.statistics.assigned.times', [vm.toLocaleString(vm.badgeType.countAssigned)])]]</span>
             </minibadge-title>
         </div>
     </container-body>

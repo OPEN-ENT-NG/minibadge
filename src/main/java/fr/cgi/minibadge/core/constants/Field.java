@@ -96,12 +96,16 @@ public class Field {
     public static final String STATISTICS = "statistics";
     public static final String COUNT_ASSIGNED = "count_assigned";
     public static final String COUNTASSIGNED = "countAssigned";
+    public static final String COUNT_REFUSED = "count_refused";
+    public static final String COUNTREFUSED = "countRefused";
     public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
     public static final String COUNTBADGEASSIGNED = "countBadgeAssigned";
     public static final String MOSTASSIGNEDTYPES = "mostAssignedTypes";
+    public static final String MOSTREFUSEDTYPES = "mostRefusedTypes";
 
     //CONFIG
     public static final String MOST_ASSIGNED_TYPE_LIST_SIZE = "most_assigned_type_list_size";
+    public static final String MOST_REFUSED_TYPE_LIST_SIZE = "most_refused_type_list_size";
 
     private Field() {
         throw new IllegalStateException("Utility class");

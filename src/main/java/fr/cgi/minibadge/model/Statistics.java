@@ -11,6 +11,7 @@ public class Statistics implements Model<Statistics> {
 
     private Integer countBadgeAssigned;
     private List<BadgeType> mostAssignedTypes;
+    private List<BadgeType> mostRefusedTypes;
 
     public Statistics() {
     }
@@ -27,6 +28,10 @@ public class Statistics implements Model<Statistics> {
         this.mostAssignedTypes = new BadgeType().toList(requestResults);
     }
 
+    public void setMostRefusedTypes(JsonArray requestResults) {
+        this.mostRefusedTypes = new BadgeType().toList(requestResults);
+    }
+
     @Override
     public Statistics set(JsonObject statistics) {
         return this;
@@ -34,9 +39,13 @@ public class Statistics implements Model<Statistics> {
 
     @Override
     public JsonObject toJson() {
-        return new JsonObject()
-                .put(Field.COUNTBADGEASSIGNED, countBadgeAssigned)
-                .put(Field.MOSTASSIGNEDTYPES, new BadgeType().toArray(mostAssignedTypes));
+        JsonObject result = new JsonObject()
+                .put(Field.COUNTBADGEASSIGNED, countBadgeAssigned);
+
+        if (mostAssignedTypes != null) result.put(Field.MOSTASSIGNEDTYPES, new BadgeType().toArray(mostAssignedTypes));
+        if (mostRefusedTypes != null) result.put(Field.MOSTREFUSEDTYPES, new BadgeType().toArray(mostRefusedTypes));
+
+        return result;
     }
 
     @Override
