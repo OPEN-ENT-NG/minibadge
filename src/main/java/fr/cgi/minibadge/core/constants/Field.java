@@ -23,6 +23,7 @@ public class Field {
     public static final String DISPLAY_NAME = "display_name";
     public static final String FIRSTNAME = "firstName";
     public static final String LASTNAME = "lastName";
+    public static final String NAME = "name";
     public static final String USERNAME = "username";
     public static final String IDUSERS = "idUsers";
     public static final String COUNT = "count";
@@ -103,12 +104,14 @@ public class Field {
     public static final String MOSTASSIGNEDTYPES = "mostAssignedTypes";
     public static final String MOSTREFUSEDTYPES = "mostRefusedTypes";
     public static final String MOSTASSIGNINGUSERS = "mostAssigningUsers";
+    public static final String MOSTASSIGNINGSTRUCTURES = "mostAssigningStructures";
     public static final String MOST_ASSIGNING_USERS = "most_assigning_users";
 
     //CONFIG
     public static final String MOST_ASSIGNED_TYPE_LIST_SIZE = "most_assigned_type_list_size";
     public static final String MOST_REFUSED_TYPE_LIST_SIZE = "most_refused_type_list_size";
     public static final String MOST_ASSIGNING_USER_LIST_SIZE = "most_assigning_user_list_size";
+    public static final String MOST_ASSIGNING_STRUCTURE_LIST_SIZE = "most_assigning_structure_list_size";
 
     private Field() {
         throw new IllegalStateException("Utility class");

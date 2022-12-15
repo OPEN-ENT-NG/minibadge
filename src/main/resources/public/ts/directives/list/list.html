@@ -1,5 +1,6 @@
 <ul class="minibadge-list">
-    <li class="minibadge-list-item" ng-repeat="item in vm.items">
+    <li class="minibadge-list-item" ng-repeat="item in vm.items track by $index">
+        <span class="minibadge-list-item-number" ng-if="vm.showNumber">[[$index + 1]]&period;&nbsp;</span>
         <span ng-transclude="display" class="minibadge-list-item-display">[[item.displayItem()]]</span>
         <span ng-transclude="distinction" ng-if="vm.isFunction(item.displayItemDistinction)"
               class="minibadge-list-item-distinction">

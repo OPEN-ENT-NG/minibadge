@@ -9,6 +9,7 @@ public class Config implements Model<Config> {
     private Integer mostAssignedTypeListSize;
     private Integer mostRefusedTypeListSize;
     private Integer mostAssigningUserListSize;
+    private Integer mostAssigningStructureListSize;
 
     public Config() {
     }
@@ -21,7 +22,8 @@ public class Config implements Model<Config> {
     public Config set(JsonObject statistics) {
         this.mostAssignedTypeListSize = statistics.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE);
         this.mostRefusedTypeListSize = statistics.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
-        this.mostAssignedTypeListSize = statistics.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
+        this.mostAssigningUserListSize = statistics.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
+        this.mostAssigningStructureListSize = statistics.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
         return this;
     }
 
@@ -37,12 +39,17 @@ public class Config implements Model<Config> {
         return this.mostAssigningUserListSize != null ? this.mostAssigningUserListSize : 3;
     }
 
+    public Integer mostAssigningStructureListSize() {
+        return this.mostAssigningStructureListSize != null ? this.mostAssigningStructureListSize : 5;
+    }
+
     @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put(Field.MOST_ASSIGNED_TYPE_LIST_SIZE, mostAssignedTypeListSize)
                 .put(Field.MOST_REFUSED_TYPE_LIST_SIZE, mostRefusedTypeListSize)
-                .put(Field.MOST_ASSIGNING_USER_LIST_SIZE, mostAssigningUserListSize);
+                .put(Field.MOST_ASSIGNING_USER_LIST_SIZE, mostAssigningUserListSize)
+                .put(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, mostAssigningStructureListSize);
     }
 
     @Override

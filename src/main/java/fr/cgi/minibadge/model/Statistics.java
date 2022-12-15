@@ -13,6 +13,7 @@ public class Statistics implements Model<Statistics> {
     private Integer countBadgeAssigned;
     private List<BadgeType> mostAssignedTypes;
     private List<BadgeType> mostRefusedTypes;
+    private List<Structure> mostAssigningStructures;
 
     public Statistics() {
     }
@@ -28,12 +29,17 @@ public class Statistics implements Model<Statistics> {
     public List<BadgeType> mostAssignedTypes() {
         return this.mostAssignedTypes != null ? this.mostAssignedTypes : new ArrayList<>();
     }
+
     public void setMostAssignedTypes(JsonArray requestResults) {
         this.mostAssignedTypes = new BadgeType().toList(requestResults);
     }
 
     public void setMostRefusedTypes(JsonArray requestResults) {
         this.mostRefusedTypes = new BadgeType().toList(requestResults);
+    }
+
+    public void setMostAssigningStructures(List<Structure> structures) {
+        this.mostAssigningStructures = structures;
     }
 
     @Override
@@ -48,6 +54,8 @@ public class Statistics implements Model<Statistics> {
 
         if (mostAssignedTypes != null) result.put(Field.MOSTASSIGNEDTYPES, new BadgeType().toArray(mostAssignedTypes));
         if (mostRefusedTypes != null) result.put(Field.MOSTREFUSEDTYPES, new BadgeType().toArray(mostRefusedTypes));
+        if (mostAssigningStructures != null)
+            result.put(Field.MOSTASSIGNINGSTRUCTURES, new Structure().toArray(mostAssigningStructures));
 
         return result;
     }

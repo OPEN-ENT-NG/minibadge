@@ -26,10 +26,6 @@ class Controller implements ng.IController, ViewModel {
     endDate: Date;
     translate: typeof translate = translate;
     toLocaleString: typeof toLocaleString = toLocaleString;
-    // Pay attention, the values below are for the front test, they will be modified during the final implementation
-    badgeReceivedLengthTest: string = (3).toLocaleString();
-    badgeRefuseLengthTest: string = (3).toLocaleString();
-    topStructureLengthTest: string = (5).toLocaleString();
     statistics: Statistics;
 
     constructor(private $scope: IMinibadgeScope, private statisticService: IStatisticService) {

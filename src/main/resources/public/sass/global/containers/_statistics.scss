@@ -1,4 +1,6 @@
 .minibadge-statistics {
+  line-height: 30px;
+
   .minibadge-container-component {
     h3 > .minibadge-title {
       font-weight: bold;
@@ -44,12 +46,7 @@
   &-top-structures {
     flex: 5;
 
-    .minibadge-container-card-title {
-      display: none;
-    }
-
     .minibadge-card {
-      flex: 1;
       background: $minibadge-white;
       border: none;
       color: $minibadge-orange;
@@ -67,7 +64,7 @@
     }
 
     &-list {
-      flex: 3;
+      flex: 1;
     }
   }
 
@@ -103,7 +100,6 @@
 
     .minibadge-most-assigned-detail, .minibadge-most-assigned-others {
       flex: 1;
-      line-height: 30px;
     }
 
     minibadge-card-type {

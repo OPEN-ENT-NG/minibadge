@@ -9,6 +9,7 @@ interface IViewModel {
 
 interface IDirectiveProperties {
     items: IDisplayItem[];
+    showNumber?: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -36,6 +37,7 @@ function directive(): IDirective {
         templateUrl: `${RootsConst.directive}/list/list.html`,
         scope: {
             items: '=',
+            showNumber: '=?',
         },
         transclude: {
             display: '?itemDisplay',

@@ -4,11 +4,9 @@ import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.helper.PromiseHelper;
 import fr.cgi.minibadge.helper.SqlHelper;
-import fr.cgi.minibadge.model.BadgeType;
-import fr.cgi.minibadge.model.Config;
-import fr.cgi.minibadge.model.Statistics;
-import fr.cgi.minibadge.model.User;
+import fr.cgi.minibadge.model.*;
 import fr.cgi.minibadge.service.StatisticService;
+import fr.cgi.minibadge.service.StructureService;
 import fr.cgi.minibadge.service.UserService;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -28,12 +26,14 @@ public class DefaultStatisticService implements StatisticService {
     private final Sql sql;
     private final Config config;
     private final UserService userService;
+    private final StructureService structureService;
 
 
-    public DefaultStatisticService(Sql sql, Config config, UserService userService) {
+    public DefaultStatisticService(Sql sql, Config config, UserService userService, StructureService structureService) {
         this.sql = sql;
         this.config = config;
         this.userService = userService;
+        this.structureService = structureService;
     }
 
     @Override
@@ -56,9 +56,10 @@ public class DefaultStatisticService implements StatisticService {
                     statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
                     statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
 
-                    return setUsersOnFirstMostAssignedType(statistics, structureIds);
+                    return CompositeFuture.all(setUsersOnFirstMostAssignedType(statistics, structureIds),
+                            setStructures(statistics, structureIds));
                 })
-                .onSuccess(promise::complete)
+                .onSuccess(result -> promise.complete(statistics))
                 .onFailure(promise::fail);
 
 
@@ -205,6 +206,53 @@ public class DefaultStatisticService implements StatisticService {
                 mostAssigningUsersCounts.stream()
                         .filter(user -> user.getUserId().equals(assigningUser.getUserId()))
                         .findFirst()
-                        .ifPresent(user -> assigningUser.setCountAssigned(user.getCountAssigned())));
+                        .ifPresent(user -> assigningUser.setCountAssigned(user.countAssigned())));
+    }
+
+    private Future<Statistics> setStructures(Statistics statistics, List<String> structureIds) {
+        Promise<Statistics> promise = Promise.promise();
+        List<Structure> mostAssigningStructuresCounts = new ArrayList<>();
+        listMostAssigningStructuresWithCount(structureIds)
+                .compose(structures -> {
+                    mostAssigningStructuresCounts.addAll(new Structure().toList(structures));
+                    return structureService.getStructures(mostAssigningStructuresCounts.stream()
+                            .map(Structure::id).collect(Collectors.toList()));
+                })
+                .onSuccess(mostAssigningStructures -> {
+                    mergeMostAssigningStructuresWithCounts(mostAssigningStructures, mostAssigningStructuresCounts);
+                    statistics.setMostAssigningStructures(mostAssigningStructures);
+                    promise.complete(statistics);
+                })
+                .onFailure(promise::fail);
+        return promise.future();
+    }
+
+    private Future<JsonArray> listMostAssigningStructuresWithCount(List<String> structureIds) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        JsonArray params = new JsonArray();
+        String request = String.format("SELECT structure_id, COUNT(DISTINCT badge_assigned_id) as count_assigned " +
+                        " FROM %s WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
+                        " ORDER BY count_assigned DESC LIMIT %s",
+                BADGE_ASSIGNED_STRUCTURE_TABLE,
+                SqlHelper.andFilterStructures(structureIds, params),
+                config.mostAssigningStructureListSize());
+
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::listMostAssigningStructuresWithCount] Fail to list refused types with " +
+                                "count refused",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    private void mergeMostAssigningStructuresWithCounts(List<Structure> mostAssigningStructures,
+                                                        List<Structure> mostAssigningStructuresCounts) {
+        mostAssigningStructures.forEach(assigningStructure ->
+                mostAssigningStructuresCounts.stream()
+                        .filter(structure -> structure.id().equals(assigningStructure.id()))
+                        .findFirst()
+                        .ifPresent(user -> assigningStructure.setCountAssigned(user.countAssigned())));
     }
 }

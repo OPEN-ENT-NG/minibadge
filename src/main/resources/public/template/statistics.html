@@ -11,12 +11,17 @@
                     [vm.toLocaleString(vm.statistics.countBadgeAssigned)])"
                     class="minibadge-statistics-count-allowed">
             </minibadge-statistics-card>
-            <minibadge-statistics-card class="minibadge-statistics-top-structures">
+            <minibadge-statistics-card class="minibadge-statistics-top-structures"
+                                       ng-if="vm.statistics.mostAssigningStructures.length"
+                                       label="vm.translate('minibadge.statistics.most.active.structures')">
                 <container-body class="flex-row">
                     <minibadge-card body-icon="'trophy'"
-                                    label="vm.translate('minibadge.statistics.top', [vm.topStructureLengthTest])">
+                                    label="vm.translate('minibadge.statistics.top',
+                                    [vm.statistics.mostAssigningStructures.length])">
                     </minibadge-card>
                     <div class="minibadge-statistics-top-structures-list">
+                        <minibadge-list items="vm.statistics.mostAssigningStructures" show-number="true">
+                        </minibadge-list>
                     </div>
                 </container-body>
             </minibadge-statistics-card>

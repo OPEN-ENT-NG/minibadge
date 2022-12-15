@@ -54,6 +54,7 @@
   "minibadge.statistics.assigned.times": "Assigned {0} times",
   "minibadge.statistics.badges": "Badges",
   "minibadge.statistics.badges.assigned": "{0} assigned badges",
+  "minibadge.statistics.most.active.structures": "Most active structures",
   "minibadge.statistics.most.allowed.badges": "Top %s badges awarded",
   "minibadge.statistics.most.refused.badges": "Top %s badges refused",
   "minibadge.statistics.participation": "Participation",

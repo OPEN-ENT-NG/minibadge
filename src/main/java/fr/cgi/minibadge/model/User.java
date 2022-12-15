@@ -10,7 +10,6 @@ public class User extends UserInfos implements Model<User> {
 
     private Integer badgeAssignedTotal;
     private Chart permissions;
-
     private Integer countAssigned;
 
     public User() {
@@ -43,7 +42,7 @@ public class User extends UserInfos implements Model<User> {
         return this;
     }
 
-    public Integer getCountAssigned() {
+    public Integer countAssigned() {
         return this.countAssigned;
     }
 
