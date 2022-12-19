@@ -65,13 +65,12 @@ export const chartService: IChartService = {
     getChart: async (): Promise<Chart> => Me.preference(PREFERENCES.CHART)
         .then((res: AxiosResponse) => new Chart(<IChartResponse>res)),
 
-    getUserChart: async (): Promise<Chart> =>
-        this.chartService.getChart()
-            .catch(() => new Chart(<IChartResponse>{
-                acceptChart: undefined,
-                acceptAssign: undefined,
-                acceptReceive: undefined
-            }))
+    getUserChart: async (): Promise<Chart> => chartService.getChart()
+        .catch(() => new Chart(<IChartResponse>{
+            acceptChart: undefined,
+            acceptAssign: undefined,
+            acceptReceive: undefined
+        }))
 };
 
 export const ChartService = ng.service('ChartService', (): IChartService => chartService);

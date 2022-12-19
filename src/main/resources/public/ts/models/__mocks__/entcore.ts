@@ -23,19 +23,24 @@ const services: Array<IService> = [];
 
 export const ng = {
     service: jest.fn((name:string, contents: any) => {
-        this.ng.services.push({name, contents})
+        if (this.ng && this.ng.services && typeof this.ng.services.length === 'number')
+            this.ng.services.push({name, contents})
     }),
     directive: jest.fn((name:string, contents: any) => {
-        this.ng.directives.push({name, contents})
+        if (this.ng && this.ng.directives && typeof this.ng.directives.length === 'number')
+            this.ng.directives.push({name, contents})
     }),
     controller: jest.fn((name:string, contents: any) => {
-        this.ng.controllers.push({name, contents})
+        if (this.ng && this.ng.controllers && typeof this.ng.controllers.length === 'number')
+            this.ng.controllers.push({name, contents})
     }),
     // init services, controller and directives
     initMockedModules: jest.fn((app: any) => {
-        this.ng.services.forEach((s) => app.service(s.name, s.contents));
-        this.ng.directives.forEach((d) => app.directive(d.name, d.contents));
-        this.ng.controllers.forEach((c) => app.controller(c.name, c.contents));
+        if (this.ng && app) {
+            if (this.ng.services) this.ng.services.forEach((s) => app.service(s.name, s.contents));
+            if (this.ng.directives) this.ng.directives.forEach((d) => app.directive(d.name, d.contents));
+            if (this.ng.controllers) this.ng.controllers.forEach((c) => app.controller(c.name, c.contents));
+        }
     }),
     controllers: controllers,
     directives: directives,

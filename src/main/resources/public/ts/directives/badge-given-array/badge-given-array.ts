@@ -2,10 +2,7 @@ import {ng} from "entcore";
 import {IDirective, ILocationService, IScope, isFunction, IWindowService} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
 import {DATE_FORMAT} from "../../core/enum/date.enum";
-import {BadgeType} from "../../models/badge-type.model";
-import {CARD_FOOTER} from "../../core/enum/card-footers.enum";
 import {BadgeAssigned} from "../../models/badge-assigned.model";
-import {safeApply} from "../../utils/safe-apply.utils";
 
 
 interface IViewModel {
@@ -66,7 +63,7 @@ class Controller implements ng.IController, IViewModel {
     }
 
     validRevoke = () => {
-        this.$scope.vm.deleteFunction({badgeGiven: this.badgeToRevoke})
+        this.$scope.vm.deleteFunction(<{ badgeGiven: BadgeAssigned }>{badgeGiven: this.badgeToRevoke})
         this.isOpenLightbox = false;
     }
 
@@ -74,7 +71,10 @@ class Controller implements ng.IController, IViewModel {
         if (isFunction(this.$scope.vm.filterFunction)) {
             this.label === filterLabel ? this.isAsc = !this.isAsc : this.isAsc = true;
             this.label = filterLabel;
-            this.$scope.vm.filterFunction({filterType: this.label, filterAsc: this.isAsc});
+            this.$scope.vm.filterFunction(<{ filterType: string, filterAsc: boolean }>{
+                filterType: this.label,
+                filterAsc: this.isAsc
+            });
         }
     }
 
