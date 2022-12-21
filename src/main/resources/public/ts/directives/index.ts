@@ -24,3 +24,4 @@ export * from './container/container.directive';
 export * from './container-card/container-card.directive';
 export * from './container-card/statistics-card/statistics-card.directive';
 export * from './title/title.directive';
+export * from './column-graph/column-graph.directive';

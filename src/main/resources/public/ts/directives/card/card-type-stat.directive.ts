@@ -6,6 +6,8 @@ import {translate} from "../../utils/string.utils";
 import {toLocaleString} from "../../utils/number.utils";
 
 interface IViewModel {
+    isCountAssignedValid(): boolean;
+
     translate: typeof translate;
     toLocaleString: typeof toLocaleString;
 }
@@ -27,6 +29,8 @@ class Controller implements ng.IController, IViewModel {
 
     $onInit() {
     }
+
+    isCountAssignedValid = (): boolean => typeof this.$scope.vm.badgeType.countAssigned === 'number';
 
     $onDestroy() {
     }

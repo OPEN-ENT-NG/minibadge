@@ -102,6 +102,7 @@ public class Field {
     public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
     public static final String COUNTBADGEASSIGNED = "countBadgeAssigned";
     public static final String MOSTASSIGNEDTYPES = "mostAssignedTypes";
+    public static final String LESSASSIGNEDTYPES = "lessAssignedTypes";
     public static final String MOSTREFUSEDTYPES = "mostRefusedTypes";
     public static final String MOSTASSIGNINGUSERS = "mostAssigningUsers";
     public static final String MOSTASSIGNINGSTRUCTURES = "mostAssigningStructures";
@@ -109,6 +110,7 @@ public class Field {
 
     //CONFIG
     public static final String MOST_ASSIGNED_TYPE_LIST_SIZE = "most_assigned_type_list_size";
+    public static final String LESS_ASSIGNED_TYPE_LIST_SIZE = "less_assigned_type_list_size";
     public static final String MOST_REFUSED_TYPE_LIST_SIZE = "most_refused_type_list_size";
     public static final String MOST_ASSIGNING_USER_LIST_SIZE = "most_assigning_user_list_size";
     public static final String MOST_ASSIGNING_STRUCTURE_LIST_SIZE = "most_assigning_structure_list_size";

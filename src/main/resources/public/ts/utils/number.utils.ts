@@ -1,3 +1,3 @@
 export function toLocaleString(value: number) {
-    return value ? value.toLocaleString() : "";
+    return typeof value === 'number' ? value.toLocaleString() : "";
 }

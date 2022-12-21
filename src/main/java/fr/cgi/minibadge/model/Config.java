@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 public class Config implements Model<Config> {
 
     private Integer mostAssignedTypeListSize;
+    private Integer lessAssignedTypeListSize;
     private Integer mostRefusedTypeListSize;
     private Integer mostAssigningUserListSize;
     private Integer mostAssigningStructureListSize;
@@ -21,6 +22,7 @@ public class Config implements Model<Config> {
     @Override
     public Config set(JsonObject statistics) {
         this.mostAssignedTypeListSize = statistics.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE);
+        this.lessAssignedTypeListSize = statistics.getInteger(Field.LESS_ASSIGNED_TYPE_LIST_SIZE);
         this.mostRefusedTypeListSize = statistics.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
         this.mostAssigningUserListSize = statistics.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
         this.mostAssigningStructureListSize = statistics.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
@@ -28,7 +30,10 @@ public class Config implements Model<Config> {
     }
 
     public Integer mostAssignedTypeListSize() {
-        return this.mostAssignedTypeListSize != null ? this.mostAssignedTypeListSize : 3;
+        return this.mostAssignedTypeListSize != null ? this.mostAssignedTypeListSize : 15;
+    }
+    public Integer lessAssignedTypeListSize() {
+        return this.lessAssignedTypeListSize != null ? this.lessAssignedTypeListSize : 15;
     }
 
     public Integer mostRefusedTypeListSize() {
@@ -47,6 +52,7 @@ public class Config implements Model<Config> {
     public JsonObject toJson() {
         return new JsonObject()
                 .put(Field.MOST_ASSIGNED_TYPE_LIST_SIZE, mostAssignedTypeListSize)
+                .put(Field.LESS_ASSIGNED_TYPE_LIST_SIZE, lessAssignedTypeListSize)
                 .put(Field.MOST_REFUSED_TYPE_LIST_SIZE, mostRefusedTypeListSize)
                 .put(Field.MOST_ASSIGNING_USER_LIST_SIZE, mostAssigningUserListSize)
                 .put(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, mostAssigningStructureListSize);

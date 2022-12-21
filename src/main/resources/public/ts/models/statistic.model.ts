@@ -5,6 +5,7 @@ import {IStructureResponse, Structure} from "./structure.model";
 export interface IStatisticsResponse {
     countBadgeAssigned?: number;
     mostAssignedTypes?: IBadgeTypeResponse[];
+    lessAssignedTypes?: IBadgeTypeResponse[];
     mostRefusedTypes?: IBadgeTypeResponse[];
     mostAssigningStructures?: IStructureResponse[];
 }
@@ -13,6 +14,7 @@ export interface IStatisticsResponse {
 export class Statistics extends MinibadgeModel<Statistics> {
     countBadgeAssigned: number;
     mostAssignedTypes: BadgeType[];
+    lessAssignedTypes: BadgeType[];
     mostRefusedTypes: BadgeType[];
     mostAssigningStructures?: Structure[]
 
@@ -28,6 +30,7 @@ export class Statistics extends MinibadgeModel<Statistics> {
     build(data: IStatisticsResponse): Statistics {
         this.countBadgeAssigned = data.countBadgeAssigned || 0;
         this.mostAssignedTypes = new BadgeType().toList(data.mostAssignedTypes) || [];
+        this.lessAssignedTypes = new BadgeType().toList(data.lessAssignedTypes) || [];
         this.mostRefusedTypes = new BadgeType().toList(data.mostRefusedTypes) || [];
         this.mostAssigningStructures = new Structure().toList(data.mostAssigningStructures) || [];
         return this;

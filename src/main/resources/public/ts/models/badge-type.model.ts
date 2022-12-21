@@ -1,9 +1,10 @@
 import {ILimitOffsetPayload, IPaginatedResponses} from "./request.model";
 import {IUserResponse, User} from "./user.model";
 import {MinibadgeModel} from "./model";
-import {TypeSettings, ITypeSettingResponse} from "./type-settings.model";
+import {ITypeSettingResponse, TypeSettings} from "./type-settings.model";
 import {idiom as lang} from "entcore";
 import {RelationSetting} from "./protagonist-setting.model";
+import {IGraphItem} from "./graph.model";
 
 export interface IBadgeTypeResponse {
     id?: number;
@@ -26,7 +27,7 @@ export interface IBadgeTypesResponses extends IPaginatedResponses<IBadgeTypeResp
 }
 
 
-export class BadgeType extends MinibadgeModel<BadgeType> {
+export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
     id?: number;
     structureId?: string;
     ownerId?: string;
@@ -77,5 +78,13 @@ export class BadgeType extends MinibadgeModel<BadgeType> {
             .join(", ")
     }
     getDetailPath = (): string => `/badge-types/${this.id}`;
+
+    graphCategory(): string {
+        return this.label || "";
+    }
+
+    graphValue(): number {
+        return this.countAssigned || 0;
+    }
 
 }

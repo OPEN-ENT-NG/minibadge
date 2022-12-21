@@ -47,13 +47,18 @@ public class DefaultStatisticService implements StatisticService {
         Statistics statistics = new Statistics();
 
         Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
-        Future<JsonArray> mostAssignedTypesFuture = listBadgeTypesWithCountAssigned(structureIds);
-        Future<JsonArray> mostRefusedTypesFuture = listRefusedBadgeTypesWithCountRefused(structureIds);
+        Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
+                config.mostAssignedTypeListSize());
+        Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
+                config.lessAssignedTypeListSize());
+        Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
 
-        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, mostRefusedTypesFuture)
+        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
+                        mostRefusedTypesFuture)
                 .compose(result -> {
                     statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
                     statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
+                    statistics.setLessAssignedTypes(lessAssignedTypesFuture.result());
                     statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
 
                     return CompositeFuture.all(setUsersOnFirstMostAssignedType(statistics, structureIds),
@@ -86,7 +91,11 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonArray> listBadgeTypesWithCountAssigned(List<String> structureIds) {
+    private Future<JsonArray> badgeTypesWithCountAssigned(List<String> structureIds, Integer limit) {
+        return badgeTypesWithCountAssigned(structureIds, null, limit);
+    }
+
+    private Future<JsonArray> badgeTypesWithCountAssigned(List<String> structureIds, Boolean isDesc, Integer limit) {
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
@@ -97,14 +106,15 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
                         " WHERE is_structure_assigner IS TRUE %s " +
                         " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
-                        " GROUP BY bt.id, b.count_assigned ORDER BY count_assigned DESC LIMIT %s",
+                        " GROUP BY bt.id, b.count_assigned ORDER BY count_assigned %s LIMIT %s",
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
                 DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
                 SqlHelper.andFilterStructures(structureIds, params),
                 SqlHelper.filterStructuresWithNull(structureIds, params),
-                config.mostAssignedTypeListSize());
+                (Boolean.TRUE.equals(isDesc) ? "DESC" : ""),
+                limit);
 
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -114,7 +124,7 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonArray> listRefusedBadgeTypesWithCountRefused(List<String> structureIds) {
+    private Future<JsonArray> refusedBadgeTypesWithCount(List<String> structureIds) {
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();

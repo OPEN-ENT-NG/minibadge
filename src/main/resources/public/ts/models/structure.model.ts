@@ -1,6 +1,4 @@
 import {MinibadgeModel} from "./model";
-import {IPaginatedPayload, IPaginatedResponses, IQueryStringPayload} from "./request.model";
-import {PROTAGONIST_TYPES} from "../core/enum/protagonist-types.enum";
 import {IDisplayItem} from "./display-list.model";
 import {toLocaleString} from "../utils/number.utils";
 

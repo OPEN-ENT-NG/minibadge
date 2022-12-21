@@ -21,9 +21,9 @@ interface IViewModel {
 
 
 interface IDirectiveProperties {
-    filterFunction?({filterType: string, filterAsc: boolean}): void;
+    filterFunction?(val: { filterType: string, filterAsc: boolean }): void;
 
-    deleteFunction({badgeGiven: BadgeAssigned}): void;
+    deleteFunction(val: { badgeGiven: BadgeAssigned }): void;
 
     badgesGiven: BadgeAssigned[];
     isOpenLightbox: boolean;
