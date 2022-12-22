@@ -9,6 +9,7 @@ interface IViewModel {
 interface IDirectiveProperties {
     label?: string;
     icon?: string;
+    isTitleCentered?: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -42,6 +43,7 @@ function directive(): IDirective {
         scope: {
             label: '=?',
             icon: '=?',
+            isTitleCentered: '=?',
         },
         controllerAs: 'vm',
         bindToController: true,

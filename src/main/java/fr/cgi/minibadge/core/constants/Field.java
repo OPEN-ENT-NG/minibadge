@@ -106,6 +106,8 @@ public class Field {
     public static final String MOSTREFUSEDTYPES = "mostRefusedTypes";
     public static final String MOSTASSIGNINGUSERS = "mostAssigningUsers";
     public static final String MOSTASSIGNINGSTRUCTURES = "mostAssigningStructures";
+    public static final String TOPASSIGNINGUSERS = "topAssigningUsers";
+    public static final String TOPRECEIVINGUSERS = "topReceivingUsers";
     public static final String MOST_ASSIGNING_USERS = "most_assigning_users";
 
     //CONFIG
@@ -114,6 +116,8 @@ public class Field {
     public static final String MOST_REFUSED_TYPE_LIST_SIZE = "most_refused_type_list_size";
     public static final String MOST_ASSIGNING_USER_LIST_SIZE = "most_assigning_user_list_size";
     public static final String MOST_ASSIGNING_STRUCTURE_LIST_SIZE = "most_assigning_structure_list_size";
+    public static final String TOP_ASSIGNING_USER_LIST_SIZE = "top_most_assigning_user_list_size";
+    public static final String TOP_RECEIVING_USER_LIST_SIZE = "top_most_receiving_user_list_size";
 
     private Field() {
         throw new IllegalStateException("Utility class");

@@ -34,7 +34,12 @@ public class StatisticController extends ControllerHelper {
 
         UserUtils.getUserInfos(eb, request, user ->
                 userService.getSessionUserStructureNSubstructureIds(user)
-                        .compose(statisticService::getStatistics)
+                        .compose(structuresIds -> {
+                            if (structuresIds != null && user.getStructures() != null
+                                    && user.getStructures().size() >= structuresIds.size())
+                                return statisticService.getSpecificStructuresStatistics(structuresIds);
+                            return statisticService.getGlobalStatistics(structuresIds);
+                        })
                         .onSuccess(statistics -> renderJson(request, statistics.toJson()))
                         .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

@@ -2,6 +2,7 @@ package fr.cgi.minibadge.service.impl;
 
 import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
+import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.helper.PromiseHelper;
 import fr.cgi.minibadge.helper.SqlHelper;
 import fr.cgi.minibadge.model.*;
@@ -18,8 +19,11 @@ import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DefaultStatisticService implements StatisticService {
     public static final String BADGE_ASSIGNED_STRUCTURE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_STRUCTURE);
@@ -37,12 +41,12 @@ public class DefaultStatisticService implements StatisticService {
     }
 
     @Override
-    public Future<Statistics> getStatistics() {
-        return this.getStatistics(null);
+    public Future<Statistics> getGlobalStatistics() {
+        return this.getGlobalStatistics(null);
     }
 
     @Override
-    public Future<Statistics> getStatistics(List<String> structureIds) {
+    public Future<Statistics> getGlobalStatistics(List<String> structureIds) {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
 
@@ -65,6 +69,57 @@ public class DefaultStatisticService implements StatisticService {
                             setStructures(statistics, structureIds));
                 })
                 .onSuccess(result -> promise.complete(statistics))
+                .onFailure(promise::fail);
+
+
+        return promise.future();
+    }
+
+    public Future<Statistics> getSpecificStructuresStatistics() {
+        return this.getSpecificStructuresStatistics(null);
+    }
+
+    @Override
+    public Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds) {
+        Promise<Statistics> promise = Promise.promise();
+        Statistics statistics = new Statistics();
+
+        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
+        Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
+                config.mostAssignedTypeListSize());
+        Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
+                config.lessAssignedTypeListSize());
+        Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
+
+
+        Future<JsonArray> topAssigningUsersFuture = listTopUsersWithCount(structureIds, true,
+                config.topAssigningUserListSize());
+        Future<JsonArray> topReceivingUserFuture = listTopUsersWithCount(structureIds, false,
+                config.topReceivingUserListSize());
+
+        List<User> mostAssigningUsersCounts = new ArrayList<>();
+
+        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
+                        mostRefusedTypesFuture, topAssigningUsersFuture, topReceivingUserFuture)
+                .compose(result -> {
+                    statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
+                    statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
+                    statistics.setLessAssignedTypes(lessAssignedTypesFuture.result());
+                    statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
+                    statistics.setTopAssigningUsers(topAssigningUsersFuture.result());
+                    statistics.setTopReceivingUsers(topReceivingUserFuture.result());
+
+                    return getFirstMostAssignedTypeUsers(statistics, structureIds);
+                })
+                .compose(users -> {
+                    mostAssigningUsersCounts.addAll(users);
+                    return getUsersFromCountsList(statistics.topAssigningUsers(), statistics.topReceivingUsers(),
+                            mostAssigningUsersCounts);
+                })
+                .onSuccess(users -> {
+                    mergeUsersToStatistics(statistics, users, mostAssigningUsersCounts);
+                    promise.complete(statistics);
+                })
                 .onFailure(promise::fail);
 
 
@@ -155,19 +210,21 @@ public class DefaultStatisticService implements StatisticService {
 
     private Future<Statistics> setUsersOnFirstMostAssignedType(Statistics statistics, List<String> structureIds) {
         Promise<Statistics> promise = Promise.promise();
+        List<User> mostAssigningUsersCounts = new ArrayList<>();
         if (statistics.mostAssignedTypes().isEmpty()) promise.complete(statistics);
         else {
             BadgeType mostAssignedBadgeType = statistics.mostAssignedTypes().get(0);
-            List<User> mostAssigningUsersCounts = new ArrayList<>();
-            listMostAssigningUsersWithCount(structureIds, mostAssignedBadgeType.id())
+            getFirstMostAssignedTypeUsers(statistics, structureIds)
                     .compose(users -> {
-                        mostAssigningUsersCounts.addAll(new User().toList(users));
+                        if (users == null || users.isEmpty()) return Future.succeededFuture(new ArrayList<>());
+                        mostAssigningUsersCounts.addAll(users);
                         return userService.getUsers(mostAssigningUsersCounts.stream()
                                 .map(UserInfos::getUserId).collect(Collectors.toList()));
                     })
                     .onSuccess(mostAssigningUsers -> {
-                        mergeMostAssigningUsersWithCounts(mostAssigningUsers, mostAssigningUsersCounts);
-                        mostAssignedBadgeType.setMostAssigningUsers(mostAssigningUsers);
+                        mostAssignedBadgeType.setMostAssigningUsers(
+                                setCountsToUsers(mostAssigningUsers, mostAssigningUsersCounts)
+                        );
                         promise.complete(statistics);
                     })
                     .onFailure(promise::fail);
@@ -175,24 +232,47 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonArray> listMostAssigningUsersWithCount(List<String> structureIds, Long typeId) {
+    private Future<List<User>> getFirstMostAssignedTypeUsers(Statistics statistics, List<String> structureIds) {
+        Promise<List<User>> promise = Promise.promise();
+        if (statistics.mostAssignedTypes().isEmpty()) promise.complete(new ArrayList<>());
+        else {
+            BadgeType mostAssignedBadgeType = statistics.mostAssignedTypes().get(0);
+            listTopUsersWithCount(structureIds, mostAssignedBadgeType.id(), true,
+                    config.mostAssigningUserListSize())
+                    .onSuccess(users -> promise.complete(new User().toList(users)))
+                    .onFailure(promise::fail);
+        }
+        return promise.future();
+    }
+
+
+    private Future<JsonArray> listTopUsersWithCount(List<String> structureIds, boolean isStructureAssigner, Integer limit) {
+        return listTopUsersWithCount(structureIds, null, isStructureAssigner, limit);
+    }
+
+    private Future<JsonArray> listTopUsersWithCount(List<String> structureIds, Long typeId,
+                                                    boolean isStructureAssigner, Integer limit) {
         Promise<JsonArray> promise = Promise.promise();
+        String userSelector = (isStructureAssigner ? "ba.assignor_id" : "b.owner_id");
 
         JsonArray params = new JsonArray();
-        String request = String.format("SELECT ba.assignor_id as id, COUNT(DISTINCT ba.id) as count_assigned " +
+        String request = String.format("SELECT %s as id, COUNT(DISTINCT ba.id) as count_assigned " +
                         " FROM %s ba INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
                         " INNER JOIN %s b on b.id = ba.badge_id INNER JOIN %s bt on bt.id = b.badge_type_id " +
-                        " WHERE is_structure_assigner IS TRUE %s AND %s %s" +
-                        " GROUP BY ba.assignor_id ORDER BY count_assigned DESC " +
+                        " WHERE %s IS TRUE %s AND %s %s" +
+                        " GROUP BY %s ORDER BY count_assigned DESC " +
                         " LIMIT %s",
+                userSelector,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
                 DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
+                (isStructureAssigner ? Field.IS_STRUCTURE_ASSIGNER : Field.IS_STRUCTURE_RECEIVER),
                 SqlHelper.andFilterStructures(structureIds, params, "bas"),
                 SqlHelper.filterStructuresWithNull(structureIds, params, "bt"),
                 (filterTypeId(typeId, params)),
-                config.mostAssigningUserListSize());
+                userSelector,
+                limit);
 
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -211,12 +291,18 @@ public class DefaultStatisticService implements StatisticService {
         return "";
     }
 
-    private void mergeMostAssigningUsersWithCounts(List<User> mostAssigningUsers, List<User> mostAssigningUsersCounts) {
-        mostAssigningUsers.forEach(assigningUser ->
-                mostAssigningUsersCounts.stream()
-                        .filter(user -> user.getUserId().equals(assigningUser.getUserId()))
-                        .findFirst()
-                        .ifPresent(user -> assigningUser.setCountAssigned(user.countAssigned())));
+    private List<User> setCountsToUsers(List<User> users, List<User> mostAssigningUsersCounts) {
+        return mostAssigningUsersCounts.stream()
+                .map(assigningUser -> {
+                    User userResult = users.stream()
+                            .filter(user -> user.getUserId().equals(assigningUser.getUserId()))
+                            .findFirst()
+                            .orElse(assigningUser);
+
+                    userResult.setCountAssigned(assigningUser.countAssigned());
+                    return userResult;
+                })
+                .collect(Collectors.toList());
     }
 
     private Future<Statistics> setStructures(Statistics statistics, List<String> structureIds) {
@@ -265,4 +351,37 @@ public class DefaultStatisticService implements StatisticService {
                         .findFirst()
                         .ifPresent(user -> assigningStructure.setCountAssigned(user.countAssigned())));
     }
+
+    private Future<List<User>> getUsersFromCountsList(List<User> topAssigningUsers, List<User> topReceivingUsers,
+                                                      List<User> mostAssigningUsersCounts) {
+        List<String> userIds = Stream.of(
+                        topAssigningUsers.stream().map(UserInfos::getUserId).collect(Collectors.toList()),
+                        topReceivingUsers.stream().map(UserInfos::getUserId).collect(Collectors.toList()),
+                        mostAssigningUsersCounts.stream().map(UserInfos::getUserId).collect(Collectors.toList())
+                )
+                .flatMap(Collection::stream)
+                .distinct()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        return userService.getUsers(userIds);
+    }
+
+    private void mergeUsersToStatistics(Statistics statistics, List<User> users,
+                                        List<User> mostAssigningUsersCounts) {
+        if (!statistics.mostAssignedTypes().isEmpty()) {
+            BadgeType mostAssignedBadgeType = statistics.mostAssignedTypes().get(0);
+            mostAssignedBadgeType.setMostAssigningUsers(
+                    setCountsToUsers(users, mostAssigningUsersCounts)
+            );
+        }
+        statistics.setTopAssigningUsers(
+                setCountsToUsers(users, statistics.topAssigningUsers())
+        );
+        statistics.setTopReceivingUsers(
+                setCountsToUsers(users, statistics.topReceivingUsers())
+        );
+    }
+
+
 }

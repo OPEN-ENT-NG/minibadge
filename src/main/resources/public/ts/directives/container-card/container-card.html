@@ -1,7 +1,8 @@
 <div class="minibadge-container-card flex-row f-column">
-    <div ng-transclude="title" class="minibadge-container-card-title">
+    <div ng-transclude="title" class="minibadge-container-card-title flex-row"
+         ng-class="{'justify-center': vm.isTitleCentered}">
         <h3>
-            <minibadge-title icon="vm.icon" class="bold">
+            <minibadge-title icon="vm.icon">
                 [[vm.lang.translate(vm.label)]]
             </minibadge-title>
         </h3>

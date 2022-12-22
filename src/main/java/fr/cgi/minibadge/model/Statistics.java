@@ -15,6 +15,8 @@ public class Statistics implements Model<Statistics> {
     private List<BadgeType> lessAssignedTypes;
     private List<BadgeType> mostRefusedTypes;
     private List<Structure> mostAssigningStructures;
+    private List<User> topAssigningUsers;
+    private List<User> topReceivingUsers;
 
     public Statistics() {
     }
@@ -29,6 +31,14 @@ public class Statistics implements Model<Statistics> {
 
     public List<BadgeType> mostAssignedTypes() {
         return this.mostAssignedTypes != null ? this.mostAssignedTypes : new ArrayList<>();
+    }
+
+    public List<User> topAssigningUsers() {
+        return this.topAssigningUsers != null ? this.topAssigningUsers : new ArrayList<>();
+    }
+
+    public List<User> topReceivingUsers() {
+        return this.topReceivingUsers != null ? this.topReceivingUsers : new ArrayList<>();
     }
 
     public void setMostAssignedTypes(JsonArray requestResults) {
@@ -47,6 +57,21 @@ public class Statistics implements Model<Statistics> {
         this.mostAssigningStructures = structures;
     }
 
+    public void setTopAssigningUsers(JsonArray requestResults) {
+        this.topAssigningUsers = new User().toList(requestResults);
+    }
+
+    public void setTopReceivingUsers(JsonArray requestResults) {
+        this.topReceivingUsers = new User().toList(requestResults);
+    }
+    public void setTopAssigningUsers(List<User> users) {
+        this.topAssigningUsers = users;
+    }
+
+    public void setTopReceivingUsers(List<User> users) {
+        this.topReceivingUsers = users;
+    }
+
     @Override
     public Statistics set(JsonObject statistics) {
         return this;
@@ -62,6 +87,8 @@ public class Statistics implements Model<Statistics> {
         if (mostRefusedTypes != null) result.put(Field.MOSTREFUSEDTYPES, new BadgeType().toArray(mostRefusedTypes));
         if (mostAssigningStructures != null)
             result.put(Field.MOSTASSIGNINGSTRUCTURES, new Structure().toArray(mostAssigningStructures));
+        if (topAssigningUsers != null) result.put(Field.TOPASSIGNINGUSERS, new User().toArray(topAssigningUsers));
+        if (topReceivingUsers != null) result.put(Field.TOPRECEIVINGUSERS, new User().toArray(topReceivingUsers));
 
         return result;
     }

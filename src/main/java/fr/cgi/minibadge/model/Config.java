@@ -11,6 +11,8 @@ public class Config implements Model<Config> {
     private Integer mostRefusedTypeListSize;
     private Integer mostAssigningUserListSize;
     private Integer mostAssigningStructureListSize;
+    private Integer topAssigningUserListSize;
+    private Integer topReceivingUserListSize;
 
     public Config() {
     }
@@ -26,6 +28,8 @@ public class Config implements Model<Config> {
         this.mostRefusedTypeListSize = statistics.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
         this.mostAssigningUserListSize = statistics.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
         this.mostAssigningStructureListSize = statistics.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
+        this.topAssigningUserListSize = statistics.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE);
+        this.topReceivingUserListSize = statistics.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE);
         return this;
     }
 
@@ -48,6 +52,14 @@ public class Config implements Model<Config> {
         return this.mostAssigningStructureListSize != null ? this.mostAssigningStructureListSize : 5;
     }
 
+    public Integer topAssigningUserListSize() {
+        return this.topAssigningUserListSize != null ? this.topAssigningUserListSize : 5;
+    }
+
+    public Integer topReceivingUserListSize() {
+        return this.topReceivingUserListSize != null ? this.topReceivingUserListSize : 5;
+    }
+
     @Override
     public JsonObject toJson() {
         return new JsonObject()
@@ -55,7 +67,9 @@ public class Config implements Model<Config> {
                 .put(Field.LESS_ASSIGNED_TYPE_LIST_SIZE, lessAssignedTypeListSize)
                 .put(Field.MOST_REFUSED_TYPE_LIST_SIZE, mostRefusedTypeListSize)
                 .put(Field.MOST_ASSIGNING_USER_LIST_SIZE, mostAssigningUserListSize)
-                .put(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, mostAssigningStructureListSize);
+                .put(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, mostAssigningStructureListSize)
+                .put(Field.TOP_ASSIGNING_USER_LIST_SIZE, topAssigningUserListSize)
+                .put(Field.TOP_RECEIVING_USER_LIST_SIZE, topReceivingUserListSize);
     }
 
     @Override

@@ -12,7 +12,7 @@ public interface StatisticService {
      *
      * @return Future containing current global statistics
      */
-    Future<Statistics> getStatistics();
+    Future<Statistics> getGlobalStatistics();
 
     /**
      * Get global statistics
@@ -20,5 +20,20 @@ public interface StatisticService {
      * @param  structureIds List of structure From which we want to aggregate statistics
      * @return Future containing current global statistics
      */
-    Future<Statistics> getStatistics(List<String> structureIds);
+    Future<Statistics> getGlobalStatistics(List<String> structureIds);
+
+    /**
+     * Get specific statistics
+     *
+     * @return Future containing current some specific structures statistics
+     */
+    Future<Statistics> getSpecificStructuresStatistics();
+
+    /**
+     * Get specific statistics
+     *
+     * @param  structureIds List of structure From which we want to aggregate statistics
+     * @return Future containing current some specific structures statistics
+     */
+    Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds);
 }
