@@ -298,7 +298,7 @@ public class DefaultStatisticService implements StatisticService {
                             .filter(user -> user.getUserId().equals(assigningUser.getUserId()))
                             .findFirst()
                             .orElse(assigningUser);
-
+                    userResult = new User(userResult); //copy user
                     userResult.setCountAssigned(assigningUser.countAssigned());
                     return userResult;
                 })
