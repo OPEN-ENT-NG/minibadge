@@ -1,0 +1,16 @@
+<div ng-show="!!vm.containerHeader" class="minibadge-container-header flex-row align-center">
+    <minibadge-title class="flex-one">
+        <h2>[[vm.lang.translate(vm.containerHeader.label)]]</h2>
+    </minibadge-title>
+    <div class="minibadge-margin-top no-margin-bottom">
+        <button ng-repeat="button in vm.containerHeader.buttons"
+                class="minibadge-mobile-padding-x"
+                ng-click="vm.buttonClick(button)">
+            <i ng-if="!!button.icon" ng-class="button.icon"></i>&nbsp;<span>[[vm.lang.translate(button.label)]]</span>
+        </button>
+        <button class="minibadge-button-title-settings desktop-disabled minibadge-mobile-padding-x"
+                ng-click="vm.openChartLightbox()">
+            <i class="settings"></i>&nbsp;<i18n>minibadge.settings</i18n>
+        </button>
+    </div>
+</div>

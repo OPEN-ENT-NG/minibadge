@@ -1,26 +1,20 @@
-import {ng, notify} from 'entcore';
+import {Behaviours, ng, notify} from 'entcore';
 import {ILocationService, IScope} from "angular";
 import {Setting} from "../models/setting.model";
 import {IBadgeService} from "../services";
 import {safeApply} from "../utils/safe-apply.utils";
-import {AxiosError} from "axios";
 import {Badge, IBadgePayload} from "../models/badge.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
-import {IChartService} from "../services";
+import {MINIBADGE_APP} from "../minibadgeBehaviours";
+import {Subscription} from "rxjs";
+import {Chart} from "../models/chart.model";
 
 interface ViewModel {
     getBadges(): Promise<void>;
 
-    openChartLightbox(): void;
-
-    resetChartValues(): void;
-
     badges: Badge[];
     searchQuery: string;
-    isChartLightboxOpened: boolean;
-    isChartAccepted: boolean;
-    isMinibadgeAccepted: boolean;
     publishedBadges: Badge[];
     privatizedBadges: Badge[];
     refusedBadges: Badge[];
@@ -45,18 +39,20 @@ class Controller implements ng.IController, ViewModel {
     refusedBadges: Badge[];
     isOpenedOption: boolean = false;
     searchQuery: string;
-    isChartLightboxOpened: boolean;
-    isChartAccepted: boolean;
-    isMinibadgeAccepted: boolean;
+
+    subscriptions: Subscription = new Subscription();
 
     constructor(private $scope: IMinibadgeScope, private $location: ILocationService,
-                private badgeService: IBadgeService, private chartService: IChartService) {
+                private badgeService: IBadgeService) {
         this.$scope.vm = this;
-        this.isChartLightboxOpened = !this.$scope.setting.userPermissions.acceptChart;
-        this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
-        this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
-            || !!this.$scope.setting.userPermissions.acceptReceive;
         this.payload = {};
+
+        this.subscriptions.add(Behaviours.applicationsBehaviours[MINIBADGE_APP].chartEventsService
+            .getChart().subscribe((chart: Chart) => this.initBadges()));
+
+        this.$scope.$parent.$on("$destroy", () => {
+            this.subscriptions.unsubscribe();
+        });
     }
 
     $onInit() {
@@ -85,26 +81,6 @@ class Controller implements ng.IController, ViewModel {
                 safeApply(this.$scope);
             })
             .catch(() => notify.error('minibadge.error.get.badges'))
-    }
-
-    openChartLightbox = (): void => {
-        this.isChartLightboxOpened = true;
-    }
-
-    resetChartValues = (): void => {
-        this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
-        this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
-            || !!this.$scope.setting.userPermissions.acceptReceive;
-    }
-
-    chartValidate = async (): Promise<void> => {
-        this.chartService.saveChart(this.isChartAccepted, this.isMinibadgeAccepted)
-            .then(async () => {
-                await this.initBadges();
-                this.$scope.setting.userPermissions = await this.chartService.getChart();
-                this.resetChartValues();
-            })
-            .catch(() => notify.error('minibadge.error.chart.validate'));
     }
 
 

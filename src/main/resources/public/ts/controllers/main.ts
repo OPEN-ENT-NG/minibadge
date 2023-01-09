@@ -1,13 +1,26 @@
-import {model, ng, template, skin} from 'entcore';
+import {Behaviours, model, ng, notify, template} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
 import {IScope} from "angular";
 import {Chart} from "../models/chart.model";
 import {IUserResponse, User} from "../models/user.model";
+import {MINIBADGE_APP} from "../minibadgeBehaviours";
+import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
+import {Subscription} from "rxjs";
 
 interface ViewModel {
+    openChartLightbox(): void;
+
+    chartValidate(): Promise<void>;
+
+    resetChartValues(): void;
+
     navbarViewSelected: NAVBAR_VIEWS;
+    containerHeader: ContainerHeader;
+    isChartLightboxOpened: boolean;
+    isChartAccepted: boolean;
+    isMinibadgeAccepted: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -24,6 +37,12 @@ interface IMinibadgeScope extends IScope {
 
 class Controller implements ng.IController, ViewModel {
     navbarViewSelected: NAVBAR_VIEWS;
+    containerHeader: ContainerHeader;
+    isChartLightboxOpened: boolean;
+    isChartAccepted: boolean;
+    isMinibadgeAccepted: boolean;
+
+    subscriptions: Subscription = new Subscription();
 
     constructor(private $scope: IMinibadgeScope,
                 private $route: any,
@@ -35,21 +54,25 @@ class Controller implements ng.IController, ViewModel {
             badgeReceived: async () => {
                 await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_RECEIVED;
+                this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.my.badges.received"});
                 template.open('main', `main`);
             },
             badgeTypes: async () => {
                 await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_LIBRARY;
+                this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.navbar.badges.library"});
                 template.open('main', `badge-types`);
             },
             badgeGiven: async () => {
                 await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_GIVEN;
+                this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.badges.given"});
                 template.open('main', `badges-given`);
             },
             statistics: async () => {
                 await this.initInfos();
                 this.navbarViewSelected = NAVBAR_VIEWS.BADGES_STATISTICS;
+                this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.statistics"});
                 template.open('main', `statistics`);
             },
             badgeType: async () => {
@@ -60,6 +83,31 @@ class Controller implements ng.IController, ViewModel {
     }
 
     $onInit() {
+        this.subscriptions.add(Behaviours.applicationsBehaviours[MINIBADGE_APP].containerHeaderEventsService
+            .getContainerHeader().subscribe((containerHeader: ContainerHeader) => {
+                this.containerHeader = containerHeader;
+            }));
+    }
+
+    openChartLightbox = (): void => {
+        this.isChartLightboxOpened = true;
+    }
+
+    chartValidate = async (): Promise<void> => {
+        this.chartService.saveChart(this.isChartAccepted, this.isMinibadgeAccepted)
+            .then(async () => {
+                this.$scope.setting.userPermissions = await this.chartService.getChart();
+                Behaviours.applicationsBehaviours[MINIBADGE_APP].chartEventsService
+                    .validateChart(this.$scope.setting.userPermissions)
+                this.resetChartValues();
+            })
+            .catch(() => notify.error('minibadge.error.chart.validate'));
+    }
+
+    resetChartValues = (): void => {
+        this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
+        this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+            || !!this.$scope.setting.userPermissions.acceptReceive;
     }
 
     private async initInfos() {
@@ -69,6 +117,11 @@ class Controller implements ng.IController, ViewModel {
                 let setting: Setting = data[0];
                 setting.userPermissions = data[1];
                 this.$scope.setting = setting;
+
+                this.isChartLightboxOpened = !this.$scope.setting.userPermissions.acceptChart;
+                this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
+                this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+                    || !!this.$scope.setting.userPermissions.acceptReceive;
             });
     }
 

@@ -1,7 +1,4 @@
-<div ng-controller="BadgeTypesController as vm" class="minibadge-container flex-row f-column">
-    <h2>
-        <i18n>minibadge.navbar.badges.library</i18n>
-    </h2>
+<div ng-controller="BadgeTypesController as vm">
     <search-input search-query="vm.searchQuery" on-search="vm.initBadgeTypes()"
                   placeholder="minibadge.badge.search"></search-input>
     <div class="minibadge-card-list flex-row f-wrap justify-center" ng-show="!!vm.badgeTypes.length">

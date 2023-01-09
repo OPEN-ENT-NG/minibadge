@@ -2,13 +2,13 @@ import {MinibadgeModel} from "./model";
 
 export interface IActionOptionResponse {
     label: string;
-    icon: string;
+    icon?: string;
     action: Function;
 }
 
 export class ActionOption extends MinibadgeModel<ActionOption> {
     label: string;
-    icon: string;
+    icon?: string;
     action: Function;
 
     constructor(data?: IActionOptionResponse) {

@@ -9,6 +9,8 @@ import {Setting} from "../models/setting.model";
 import {Subscription} from "rxjs";
 import {User} from "../models/user.model";
 import {Paging} from "../models/paging.model";
+import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
+import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
 
 
 interface ViewModel {
@@ -95,7 +97,17 @@ class Controller implements ng.IController, ViewModel {
     private getBadgeType = async (): Promise<void> => {
         this.badgeTypeService.getBadgeType(this.typeId)
             .then((data: BadgeType) => {
-                if (data) this.badgeType = data;
+                if (data) {
+                    this.badgeType = data;
+                    Behaviours.applicationsBehaviours[MINIBADGE_APP].containerHeaderEventsService
+                        .changeContainerHeader(new ContainerHeader(<IContainerHeaderResponse>{
+                            label: `${this.lang.translate('minibadge.badge')} ${this.badgeType.label}`,
+                            buttons: [new ActionOption(<IActionOptionResponse>{
+                                label: 'minibadge.badge.assign',
+                                action: () => this.onOpenLightbox(),
+                            })]
+                        }));
+                }
                 safeApply(this.$scope);
             })
             .catch(() => notify.error('minibadge.error.get.badge.type'));

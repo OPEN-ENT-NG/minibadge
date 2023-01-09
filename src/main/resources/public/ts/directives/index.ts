@@ -22,6 +22,7 @@ export * from './user-list/user-list.directive';
 export * from './paging/paging.directive';
 export * from './container/container.directive';
 export * from './container-card/container-card.directive';
+export * from './container-header/container-header.directive';
 export * from './container-card/statistics-card/statistics-card.directive';
 export * from './title/title.directive';
 export * from './column-graph/column-graph.directive';
