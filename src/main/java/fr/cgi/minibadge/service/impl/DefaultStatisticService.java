@@ -327,10 +327,14 @@ public class DefaultStatisticService implements StatisticService {
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
-        String request = String.format("SELECT structure_id, COUNT(DISTINCT badge_assigned_id) as count_assigned " +
-                        " FROM %s WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
+        String request = String.format("SELECT bas.structure_id, COUNT(DISTINCT bas.badge_assigned_id) as count_assigned " +
+                        " FROM %s bas INNER JOIN %s ba on bas.badge_assigned_id = ba.id" +
+                        " INNER JOIN %s b on ba.badge_id = b.id " +
+                        " WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
                         " ORDER BY count_assigned DESC LIMIT %s",
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
+                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
                 SqlHelper.andFilterStructures(structureIds, params),
                 config.mostAssigningStructureListSize());
 
