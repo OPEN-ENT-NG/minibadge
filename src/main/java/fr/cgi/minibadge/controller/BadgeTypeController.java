@@ -1,6 +1,7 @@
 package fr.cgi.minibadge.controller;
 
 import fr.cgi.minibadge.core.constants.Database;
+import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.helper.RequestHelper;
 import fr.cgi.minibadge.model.User;
@@ -81,10 +82,15 @@ public class BadgeTypeController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> {
             Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
             Future<Integer> countAssignersFuture = badgeAssignedService.countBadgeTypeAssigners(typeId, user);
+            Future<Integer> totalAssignationFuture = badgeAssignedService.getTotalAssignations(typeId, user);
 
-            CompositeFuture.all(assignersFuture, countAssignersFuture)
-                    .onSuccess(users -> renderJson(request,
-                            RequestHelper.formatResponse(page, countAssignersFuture.result(), limit, assignersFuture.result())))
+            CompositeFuture.all(assignersFuture, countAssignersFuture, totalAssignationFuture)
+                    .onSuccess(users -> {
+                        JsonObject response = RequestHelper.formatResponse(page, countAssignersFuture.result(), limit,
+                                assignersFuture.result());
+                        response.put(Field.SESSIONUSERASSIGNEDTOTAL, totalAssignationFuture.result());
+                        renderJson(request, response);
+                    })
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
         });
 
@@ -102,10 +108,16 @@ public class BadgeTypeController extends ControllerHelper {
 
         Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
         Future<Integer> countReceiversFuture = badgeService.countBadgeTypeReceivers(typeId);
+        Future<Integer> totalAssignationFuture = badgeAssignedService.getTotalAssignations(typeId, null);
 
-        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture)
-                .onSuccess(users -> renderJson(request,
-                        RequestHelper.formatResponse(page, countReceiversFuture.result(), limit, receiversFuture.result())))
+        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture,
+                        totalAssignationFuture)
+                .onSuccess(users -> {
+                    JsonObject response = RequestHelper.formatResponse(page, countReceiversFuture.result(), limit,
+                            receiversFuture.result());
+                    response.put(Field.COUNTASSIGNED, totalAssignationFuture.result());
+                    renderJson(request, response);
+                })
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
 

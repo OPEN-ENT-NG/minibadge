@@ -1,19 +1,12 @@
 <div class="minibadge-container minibadge-user-list flex-row f-column">
-    <h3 ng-if="vm.label">[[vm.lang.translate(vm.label)]]</h3>
+    <div ng-if="vm.label" class="flex-row">
+        <h3>[[vm.lang.translate(vm.label)]] <span ng-if="vm.labelDistinction">&#40;[[vm.labelDistinction]]&#41;</span></h3>
+    </div>
     <h4 ng-if="vm.listDistinction">
         <i class="check-decagram"></i>&nbsp;
         [[vm.lang.translate(vm.listDistinction)]]&nbsp;&#58;
     </h4>
-    <ul class="minibadge-user-list-items">
-        <li class="minibadge-user-list-item" ng-repeat="user in vm.users">
-            <img class="minibadge-user-list-item-avatar"
-                 ng-src="/userbook/avatar/[[user.id]]?thumbnail=48x48"/>&nbsp;
-            <span>[[user.getDisplayName()]]
-                <span ng-if="!!vm.userPrecision" class="minibadge-user-list-item-precision">
-                    &comma;&nbsp;&nbsp;[[vm.userPrecision({user: user})]]
-                </span>
-            </span>
-        </li>
-    </ul>
+    <minibadge-list items="vm.users" is-italic-distinction="true" is-end-distinction="vm.isEndDistinction">
+    </minibadge-list>
     <minibadge-paging paging="vm.usersPaging" on-change="vm.pageChange()"></minibadge-paging>
 </div>

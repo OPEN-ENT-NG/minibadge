@@ -11,14 +11,18 @@ import {User} from "../models/user.model";
 import {Paging} from "../models/paging.model";
 import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
+import {toLocaleString} from "../utils/number.utils";
+import {translate} from "../utils/string.utils";
 
 
 interface ViewModel {
     onOpenLightbox(): void;
 
-    displayTotalAssigned(user: User): string;
+    sessionUserAssignedTotal(): string;
 
-    displayProfile(user: User): string;
+    countAssigned(): string;
+
+    displayItemImg(user: User): string
 
     getBadgeTypeAssigners(): Promise<void>;
 
@@ -60,11 +64,15 @@ class Controller implements ng.IController, ViewModel {
     $onInit() {
         this.assignersPayload = new Paging({page: 0});
         this.receiversPayload = new Paging({page: 0});
-        Promise.all([
-            this.getBadgeType(),
-            this.getBadgeTypeAssigners(),
-            this.getBadgeTypeReceivers(),
-        ]);
+
+
+        this.getBadgeType()
+            .then(() => {
+                Promise.all([
+                    this.getBadgeTypeAssigners(),
+                    this.getBadgeTypeReceivers(),
+                ])
+            });
     }
 
     onOpenLightbox = (): void => {
@@ -72,30 +80,52 @@ class Controller implements ng.IController, ViewModel {
             .sendBadgeType(this.badgeType);
     }
 
-    displayTotalAssigned = (user: User): string => user.badgeAssignedTotal ? user.badgeAssignedTotal.toString() : null;
+    sessionUserAssignedTotal = (): string => this.badgeType && this.badgeType.sessionUserAssignedTotal ?
+        toLocaleString(this.badgeType.sessionUserAssignedTotal) : null;
 
-    displayProfile = (user: User): string => this.lang.translate(user.profileToI18n());
+    countAssigned = (): string => this.badgeType && this.badgeType.countAssigned ?
+        toLocaleString(this.badgeType.countAssigned) : null;
+
+    displayItemImg = (user: User): string => `/userbook/avatar/${user.id}?thumbnail=48x48`;
 
     getBadgeTypeAssigners = async (): Promise<void> => {
-        this.badgeTypeService.getBadgeTypeAssigners(this.typeId, this.assignersPayload)
-            .then((data: User[]) => {
-                if (data) this.assigners = data;
-                safeApply(this.$scope);
-            })
-            .catch(() => notify.error('minibadge.error.get.badge.type'));
+        if (this.badgeType)
+            this.badgeTypeService.getBadgeTypeAssigners(this.badgeType, this.assignersPayload)
+                .then((data: User[]) => {
+                    if (data) {
+                        this.assigners = data;
+                        this.assigners.forEach((user: User) => {
+                            user.displayItemDistinction = (): string => this.lang.translate(user.profileToI18n());
+                            user.displayItemImg = (): string => this.displayItemImg(user);
+                        });
+                    }
+                    safeApply(this.$scope);
+                })
+                .catch(() => notify.error('minibadge.error.get.badge.type'));
     }
 
     getBadgeTypeReceivers = async (): Promise<void> => {
-        this.badgeTypeService.getBadgeReceivers(this.typeId, this.receiversPayload)
-            .then((data: User[]) => {
-                if (data) this.receivers = data;
-                safeApply(this.$scope);
-            })
-            .catch(() => notify.error('minibadge.error.get.badge.type'));
+        if (this.badgeType)
+            this.badgeTypeService.getBadgeReceivers(this.badgeType, this.receiversPayload)
+                .then((data: User[]) => {
+                    if (data) {
+                        this.receivers = data;
+                        this.receivers.forEach((user: User) => {
+                            user.displayItemDistinction = (): string =>
+                                user.badgeAssignedTotal ? translate("minibadge.times",
+                                        [toLocaleString(user.badgeAssignedTotal)])
+                                    : null;
+                            user.displayItemImg = (): string => this.displayItemImg(user);
+
+                        })
+                    }
+                    safeApply(this.$scope);
+                })
+                .catch(() => notify.error('minibadge.error.get.badge.type'));
     }
 
     private getBadgeType = async (): Promise<void> => {
-        this.badgeTypeService.getBadgeType(this.typeId)
+        return this.badgeTypeService.getBadgeType(this.typeId)
             .then((data: BadgeType) => {
                 if (data) {
                     this.badgeType = data;

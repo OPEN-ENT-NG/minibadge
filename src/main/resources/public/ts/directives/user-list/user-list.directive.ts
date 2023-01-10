@@ -9,13 +9,13 @@ interface IViewModel {
 }
 
 interface IDirectiveProperties {
-    userPrecision?(): string;
-
     pageChange(): void;
 
     users: User[];
     label: string;
+    labelDistinction?: string;
     listDistinction: string;
+    isEndDistinction?: boolean;
     usersPaging: Paging;
 }
 
@@ -46,10 +46,11 @@ function directive(): IDirective {
         scope: {
             users: '=',
             label: '=',
+            labelDistinction: '=?',
             listDistinction: '=',
             usersPaging: '=',
+            isEndDistinction: '=?',
             pageChange: '&',
-            userPrecision: '&?'
         },
         controllerAs: 'vm',
         bindToController: true,

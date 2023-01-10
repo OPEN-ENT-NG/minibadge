@@ -10,14 +10,17 @@
                                      users="vm.assigners"
                                      label="'minibadge.badges.received.from.users'"
                                      list-distinction="'minibadge.badges.assigned.by'"
-                                     user-precision="vm.displayProfile(user)"></minibadge-user-list>
+                                     label-distinction="vm.sessionUserAssignedTotal()">
+                </minibadge-user-list>
                 <minibadge-user-list class="minibadge-type" ng-show="vm.receivers && vm.receivers.length"
                                      users-paging="vm.receiversPayload"
                                      page-change="vm.getBadgeTypeReceivers()"
                                      users="vm.receivers"
                                      label="'minibadge.badges.received.by.users'"
                                      list-distinction="'minibadge.badges.assigned.to'"
-                                     user-precision="vm.displayTotalAssigned(user)"></minibadge-user-list>
+                                     label-distinction="vm.countAssigned()"
+                                     is-end-distinction="true">
+                </minibadge-user-list>
             </div>
         </div>
     </div>

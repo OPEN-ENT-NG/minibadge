@@ -1,10 +1,21 @@
-<ul class="minibadge-list">
+<ul class="minibadge-list flex-row f-column">
     <li class="minibadge-list-item" ng-repeat="item in vm.items track by $index">
         <span class="minibadge-list-item-number" ng-if="vm.showNumber">[[$index + 1]]&period;&nbsp;</span>
-        <span ng-transclude="display" class="minibadge-list-item-display">[[item.displayItem()]]</span>
-        <span ng-transclude="distinction" ng-if="vm.isFunction(item.displayItemDistinction)"
-              class="minibadge-list-item-distinction">
-            &ensp;&#40;[[item.displayItemDistinction()]]&#41;
+        <img ng-if="vm.isFunction(item.displayItemImg) && !!item.displayItemImg()" class="minibadge-list-item-img"
+             ng-src="vm.displayItemImg()"/>&nbsp;
+        <span class="minibadge-list-item-display">[[item.displayItem()]]</span>
+        <span ng-if="vm.isFunction(item.displayItemDistinction)" class="flex-one">
+            <span ng-if="!vm.isItalicDistinction" class="minibadge-list-item-distinction-simple flex-row">
+                <span ng-class="{'flex-one': vm.isEndDistinction}">
+                    &ensp;&#40;[[item.displayItemDistinction()]]&#41;
+                </span>
+            </span>
+            <span ng-if="vm.isItalicDistinction" class="minibadge-list-item-distinction-italic flex-row flex-one">
+                <span ng-class="{'flex-one': vm.isEndDistinction}">&comma;&nbsp;&nbsp;</span>
+                <span>
+                    [[item.displayItemDistinction()]]
+                </span>
+            </span>
         </span>
     </li>
 </ul>

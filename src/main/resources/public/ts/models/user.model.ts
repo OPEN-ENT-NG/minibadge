@@ -17,6 +17,8 @@ export interface IUserResponse {
 }
 
 export interface IUsersResponses extends IPaginatedResponses<IUserResponse> {
+    sessionUserAssignedTotal?: number;
+    countAssigned?: number;
 }
 
 export interface IUserPayload extends IQueryStringPayload {
@@ -59,6 +61,8 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     getDisplayName = (): string => !!this.displayName ? this.displayName : `${this.firstName} ${this.lastName}`;
 
     displayItem = (): string => this.getDisplayName();
+
+    displayItemImg = (): string => null;
 
     displayItemDistinction = (): string => toLocaleString(this.countAssigned);
 

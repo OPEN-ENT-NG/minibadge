@@ -10,6 +10,8 @@ interface IViewModel {
 interface IDirectiveProperties {
     items: IDisplayItem[];
     showNumber?: boolean;
+    isItalicDistinction?: boolean;
+    isEndDistinction?: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -38,10 +40,8 @@ function directive(): IDirective {
         scope: {
             items: '=',
             showNumber: '=?',
-        },
-        transclude: {
-            display: '?itemDisplay',
-            distinction: '?itemDistinction',
+            isItalicDistinction: '=?',
+            isEndDistinction: '=?',
         },
         controllerAs: 'vm',
         bindToController: true,

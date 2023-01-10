@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fr.cgi.minibadge.core.constants.Field.*;
-import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_PUBLIC_TABLE;
-import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
+import static fr.cgi.minibadge.service.impl.DefaultBadgeService.*;
 import static fr.cgi.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
 import static fr.cgi.minibadge.service.impl.DefaultUserService.USER_TABLE;
 
@@ -287,6 +286,46 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                                 this.getClass().getSimpleName()))));
 
         return promise.future();
+    }
+
+    @Override
+    public Future<Integer> getTotalAssignations(long typeId, UserInfos badgeOwner) {
+        Promise<Integer> promise = Promise.promise();
+
+        getTotalAssignationsRequest(typeId, badgeOwner)
+                .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> getTotalAssignationsRequest(long typeId, UserInfos badgeOwner) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        JsonArray params = new JsonArray()
+                .add(typeId);
+
+        String request = String.format(" SELECT COUNT(DISTINCT ba.id) as count " +
+                        " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id WHERE b.badge_type_id = ? %s",
+                BADGE_ASSIGNABLE_TABLE,
+                BADGE_ASSIGNED_VALID_TABLE,
+                filterOwnerId(badgeOwner, params));
+
+        sql.prepared(request, params,
+                SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                        String.format("[Minibadge@%s::getTotalAssignationsRequest] " +
+                                        "Fail to retrieve owner total assignations",
+                                this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    private String filterOwnerId(UserInfos badgeOwner, JsonArray params) {
+        if (badgeOwner != null) {
+            params.add(badgeOwner.getUserId());
+            return "AND b.owner_id = ?";
+        }
+        return "";
     }
 
     @Override

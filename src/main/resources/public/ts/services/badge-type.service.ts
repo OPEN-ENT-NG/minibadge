@@ -10,9 +10,9 @@ export interface IBadgeTypeService {
 
     getBadgeType(typeId: number): Promise<BadgeType>;
 
-    getBadgeTypeAssigners(typeId: number, payload: Paging): Promise<User[]>;
+    getBadgeTypeAssigners(badgeType: BadgeType, payload: Paging): Promise<User[]>;
 
-    getBadgeReceivers(typeId: number, payload: Paging): Promise<User[]>;
+    getBadgeReceivers(badgeType: BadgeType, payload: Paging): Promise<User[]>;
 }
 
 export const badgeTypeService: IBadgeTypeService = {
@@ -40,15 +40,18 @@ export const badgeTypeService: IBadgeTypeService = {
     /**
      * Get users that gave me this (:typeId) badge typed
      *
-     * @param typeId badge type identifier
-     * @param payload
+     * @param badgeType type concerned
+     * @param payload params to send to backend
      */
-    getBadgeTypeAssigners: async (typeId: number, payload: Paging): Promise<User[]> => {
+    getBadgeTypeAssigners: async (badgeType: BadgeType, payload: Paging): Promise<User[]> => {
         if (model.me.hasWorkflow(rights.workflow.receive))
-            return http.get(`/minibadge/types/${typeId}/assigners?page=${payload.page}`)
+            return http.get(`/minibadge/types/${badgeType.id}/assigners?page=${payload.page}`)
                 .then((res: AxiosResponse) => {
                     let usersResponses: IUsersResponses = res.data;
-                    if (usersResponses) payload.pageCount = usersResponses.page;
+                    if (usersResponses) {
+                        badgeType.sessionUserAssignedTotal = usersResponses.sessionUserAssignedTotal
+                        payload.pageCount = usersResponses.page;
+                    }
                     return new User().toList(usersResponses ? usersResponses.all : [])
                 });
         return [];
@@ -57,14 +60,17 @@ export const badgeTypeService: IBadgeTypeService = {
     /**
      * Get users that received this (:typeId) badge typed
      *
-     * @param typeId badge type identifier
-     * @param payload
+     * @param badgeType type concerned
+     * @param payload params to send to backend
      */
-    getBadgeReceivers: async (typeId: number, payload: Paging): Promise<User[]> =>
-        http.get(`/minibadge/types/${typeId}/receivers?page=${payload.page}`)
+    getBadgeReceivers: async (badgeType: BadgeType, payload: Paging): Promise<User[]> =>
+        http.get(`/minibadge/types/${badgeType.id}/receivers?page=${payload.page}`)
             .then((res: AxiosResponse) => {
                 let usersResponses: IUsersResponses = res.data;
-                if (usersResponses) payload.pageCount = usersResponses.page;
+                if (usersResponses) {
+                    badgeType.countAssigned = usersResponses.countAssigned
+                    payload.pageCount = usersResponses.page;
+                }
                 return new User().toList(usersResponses ? usersResponses.all : [])
             })
 };
