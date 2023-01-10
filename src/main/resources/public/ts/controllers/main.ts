@@ -2,7 +2,7 @@ import {Behaviours, model, ng, notify, template} from 'entcore';
 import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
 import {IChartService, ISettingService} from "../services";
 import {Setting} from "../models/setting.model";
-import {IScope} from "angular";
+import {ILocationService, IScope} from "angular";
 import {Chart} from "../models/chart.model";
 import {IUserResponse, User} from "../models/user.model";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
@@ -46,6 +46,7 @@ class Controller implements ng.IController, ViewModel {
 
     constructor(private $scope: IMinibadgeScope,
                 private $route: any,
+                private $location: ILocationService,
                 private settingService: ISettingService,
                 private chartService: IChartService) {
         this.$scope.vm = this;
@@ -110,6 +111,10 @@ class Controller implements ng.IController, ViewModel {
             || !!this.$scope.setting.userPermissions.acceptReceive;
     }
 
+    redirectMainView = (): void => {
+        this.$location.path('/');
+    }
+
     private async initInfos() {
         this.$scope.me = new User(<IUserResponse>model.me);
         await Promise.all([this.getSettings(), this.chartService.getUserChart()])
@@ -135,4 +140,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const mainController = ng.controller('MainController',
-    ['$scope', 'route', 'SettingService', 'ChartService', Controller]);
+    ['$scope', 'route', '$location', 'SettingService', 'ChartService', Controller]);

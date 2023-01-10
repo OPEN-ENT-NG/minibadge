@@ -17,7 +17,7 @@
 <body ng-controller="MainController as vm" class="minibadge">
 <portal>
     <div class="minibadge-main-row-title flex-row align-center">
-        <h1 class="minibadge-main-title title mobile-disabled flex-row align-center">
+        <h1 class="minibadge-main-title title mobile-disabled flex-row align-center" ng-click="vm.redirectMainView()">
             <img class="application-logo" ng-src="/minibadge/public/img/uni-minibadge.svg"
                  alt="" src="/minibadge/public/img/uni-minibadge.svg">&nbsp;
             <i18n>minibadge.title</i18n>
