@@ -124,8 +124,9 @@ class Controller implements ng.IController, ViewModel {
                 this.$scope.setting = setting;
 
                 this.isChartLightboxOpened = !this.$scope.setting.userPermissions.acceptChart;
-                this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
-                this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
+                this.isChartAccepted = true;
+                this.isMinibadgeAccepted = !this.$scope.setting.userPermissions.acceptChart
+                    || !!this.$scope.setting.userPermissions.acceptAssign
                     || !!this.$scope.setting.userPermissions.acceptReceive;
             });
     }
