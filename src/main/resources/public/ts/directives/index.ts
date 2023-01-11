@@ -26,3 +26,4 @@ export * from './container-header/container-header.directive';
 export * from './container-card/statistics-card/statistics-card.directive';
 export * from './title/title.directive';
 export * from './column-graph/column-graph.directive';
+export * from './on-error-src/on-error-src.directive';

@@ -2,7 +2,7 @@
     <li class="minibadge-list-item" ng-repeat="item in vm.items track by $index">
         <span class="minibadge-list-item-number" ng-if="vm.showNumber">[[$index + 1]]&period;&nbsp;</span>
         <img ng-if="vm.isFunction(item.displayItemImg) && !!item.displayItemImg()" class="minibadge-list-item-img"
-             ng-src="vm.displayItemImg()"/>&nbsp;
+             ng-src="[[item.displayItemImg()]]" on-error-src="/minibadge/public/img/default-avatar.svg"/>&nbsp;
         <span class="minibadge-list-item-display">[[item.displayItem()]]</span>
         <span ng-if="vm.isFunction(item.displayItemDistinction)" class="flex-one">
             <span ng-if="!vm.isItalicDistinction" class="minibadge-list-item-distinction-simple flex-row">
