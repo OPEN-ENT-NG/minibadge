@@ -4,6 +4,7 @@ import * as ApexCharts from 'apexcharts';
 import {RootsConst} from "../../core/constants/roots.const";
 import {IGraphItem} from "../../models/graph.model";
 import {safeApply} from "../../utils/safe-apply.utils";
+import {translate} from "../../utils/string.utils";
 
 interface IViewModel extends ng.IController {
     graph: ApexCharts;
@@ -71,6 +72,7 @@ function directive(): IDirective {
 
                 vm.options = {
                     series: [{
+                        name: translate("minibadge.number"),
                         data: values
                     }],
                     chart: {
