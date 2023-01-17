@@ -26,6 +26,7 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_DISABLED_TABLE;
 import static fr.cgi.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
 
 public class DefaultUserService implements UserService {
@@ -49,7 +50,7 @@ public class DefaultUserService implements UserService {
         searchRequest(request, query)
                 .compose(queriedUsers -> {
                     users.addAll(mapToAuthorizedAssignUsers(user, queriedUsers));
-                    return getAlreadyTypedAssignedFromUser(typeId, user,
+                    return getUnassignableUserIds(typeId, user,
                             users.stream().map(User::getUserId).collect(Collectors.toList()));
                 })
                 .onFailure(promise::fail)
@@ -94,39 +95,57 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Future<List<User>> getAlreadyTypedAssignedFromUser(long typeId, UserInfos assigner,
-                                                              List<String> receiverIds) {
+    public Future<List<User>> getUnassignableUserIds(long typeId, UserInfos assigner,
+                                                     List<String> receiverIds) {
         Promise<List<User>> promise = Promise.promise();
 
-        getAlreadyTypedAssignedFromUserRequest(typeId, assigner, receiverIds)
+        getUnassignableUserIdsRequest(typeId, assigner, receiverIds)
                 .onSuccess(users -> promise.complete(new User().toList(users)))
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
-    private Future<JsonArray> getAlreadyTypedAssignedFromUserRequest(long typeId, UserInfos assigner,
-                                                                     List<String> receiverIds) {
+    private Future<JsonArray> getUnassignableUserIdsRequest(long typeId, UserInfos assigner,
+                                                            List<String> receiverIds) {
         if (receiverIds == null || receiverIds.isEmpty()) return Future.succeededFuture(new JsonArray());
 
         Promise<JsonArray> promise = Promise.promise();
-        JsonArray params = new JsonArray()
-                .add(assigner.getUserId())
-                .add(typeId)
-                .addAll(new JsonArray(receiverIds));
+        JsonArray params = new JsonArray();
 
-        String request = String.format(" SELECT DISTINCT(owner_id) as id " +
-                        " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
-                        " WHERE assignor_id = ? AND badge_type_id = ?  AND owner_id IN %s",
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE, Sql.listPrepared(receiverIds));
+        String request = String.format("%s UNION %s",
+                getAlreadyOwnerIdTypedAssignedFromUserQuery(typeId, assigner, receiverIds, params),
+                getDisabledBadgeOwnerIdsQuery(typeId, receiverIds, params));
 
         sql.prepared(request, params,
                 SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                        String.format("[Minibadge@%s::getAlreadyTypedAssignedFromUserRequest] " +
-                                        "Fail to retrieve already assigned users",
+                        String.format("[Minibadge@%s::getUnassignableUserIdsRequest] " +
+                                        "Fail to retrieve Unassignable user ids",
                                 this.getClass().getSimpleName()))));
 
         return promise.future();
+    }
+
+    private String getAlreadyOwnerIdTypedAssignedFromUserQuery(long typeId, UserInfos assigner,
+                                                               List<String> receiverIds, JsonArray params) {
+        params.add(assigner.getUserId())
+                .add(typeId)
+                .addAll(new JsonArray(receiverIds));
+
+        return String.format(" SELECT DISTINCT(owner_id) as id " +
+                        " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
+                        " WHERE assignor_id = ? AND badge_type_id = ? AND owner_id IN %s",
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE, Sql.listPrepared(receiverIds));
+    }
+
+    private String getDisabledBadgeOwnerIdsQuery(long typeId, List<String> receiverIds, JsonArray params) {
+        params.add(typeId)
+                .addAll(new JsonArray(receiverIds));
+
+        return String.format(" SELECT DISTINCT(owner_id) as id " +
+                        " FROM %s b " +
+                        " WHERE badge_type_id = ? AND owner_id IN %s",
+                BADGE_DISABLED_TABLE, Sql.listPrepared(receiverIds));
     }
 
     private List<User> filterUsersNotAssignedYet(List<User> allUsers, List<User> receivedUsers) {
