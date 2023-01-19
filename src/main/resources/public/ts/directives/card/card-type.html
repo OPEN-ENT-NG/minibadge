@@ -1,4 +1,5 @@
 <minibadge-card on-body-click="vm.onBodyClick()" is-disabled="vm.isDisabled"
+                is-body-click-defined="vm.isFunction(vm.onBodyClick)"
                 parent-class="{
                 'minibadge-card-badge-detail': vm.CARD_FOOTER.BADGE_DETAIL === vm.footer,
                 'minibadge-card-award-badge': vm.CARD_FOOTER.AWARD_BADGE === vm.footer

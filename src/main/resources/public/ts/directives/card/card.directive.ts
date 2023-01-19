@@ -4,6 +4,8 @@ import {IDirective, IScope, isFunction} from "angular";
 
 interface IViewModel {
     bodyClick(): void;
+
+    isFunction: typeof isFunction;
 }
 
 interface IDirectiveProperties {
@@ -14,6 +16,7 @@ interface IDirectiveProperties {
     isBodyDisabled?: boolean;
     isDisabled?: boolean;
     parentClass?: string;
+    isBodyClickDefined?: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -21,6 +24,7 @@ interface IMinibadgeScope extends IScope {
 }
 
 class Controller implements ng.IController, IViewModel {
+    isFunction: typeof isFunction = isFunction;
 
     constructor(private $scope: IMinibadgeScope) {
     }
@@ -50,6 +54,7 @@ function directive(): IDirective {
             label: '=?',
             isDisabled: '=?',
             isBodyDisabled: '=?',
+            isBodyClickDefined: '=?',
             onBodyClick: '&?'
         },
         transclude: {

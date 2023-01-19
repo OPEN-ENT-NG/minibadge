@@ -1,6 +1,8 @@
 <div class="minibadge-card flex-row f-column centered-text" ng-class="[{disabled: vm.isDisabled}, vm.parentClass]">
 
     <div class="minibadge-card-body flex-row f-column"
+         ng-class="{'cursor-default': !vm.isFunction(vm.onBodyClick) || !vm.isBodyClickDefined || vm.isBodyDisabled
+         || vm.isDisabled}"
          ng-transclude="body"
          ng-disabled="vm.isBodyDisabled || vm.isDisabled"
          ng-click="vm.bodyClick()">

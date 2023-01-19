@@ -8,6 +8,8 @@ import {Badge} from "../../models/badge.model";
 interface IViewModel {
     bodyClick(): void;
 
+    isFunction: typeof isFunction;
+
     CARD_FOOTER: typeof CARD_FOOTER;
 
 }
@@ -31,6 +33,8 @@ interface IMinibadgeScope extends IScope {
 class Controller implements ng.IController, IViewModel {
     CARD_FOOTER: typeof CARD_FOOTER;
 
+    isFunction: typeof isFunction = isFunction;
+
     constructor(private $scope: IMinibadgeScope) {
         this.CARD_FOOTER = CARD_FOOTER;
     }
@@ -50,7 +54,6 @@ class Controller implements ng.IController, IViewModel {
 
 function directive(): IDirective {
     return {
-        // replace: true,
         restrict: 'E',
         templateUrl: `${RootsConst.directive}/card/card-type.html`,
         scope: {
