@@ -1,10 +1,12 @@
-import {idiom as lang, ng} from "entcore";
+import {idiom as lang, model, ng} from "entcore";
 import {RootsConst} from "../../core/constants/roots.const";
 import {ILocationService, IScope, IWindowService} from "angular";
 import {NAVBAR_VIEWS} from "../../core/enum/navbar.enum";
+import {rights} from "../../core/constants/rights.const";
 
 interface IViewModel {
     isSelected(navbarView: NAVBAR_VIEWS): boolean;
+    hasStatisticsViewRight(): boolean;
 
     lang: typeof lang;
     NAVBAR_VIEWS: typeof NAVBAR_VIEWS;
@@ -34,6 +36,8 @@ class Controller implements ng.IController, IViewModel {
     }
 
     isSelected = (navbarView: NAVBAR_VIEWS): boolean => navbarView === this.navbarViewSelected;
+
+    hasStatisticsViewRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsView);
 
 }
 

@@ -10,6 +10,7 @@ public class Rights {
     public static final String FULLNAME_RECEIVE = String.format("%s.%s|receive", FakeRight.class.getPackage().getName(),
             FakeRight.class.getSimpleName());
     public static final String VIEW = "minibadge.view";
+    public static final String STATISTICS_VIEW = "minibadge.statistics.view";
 
     private Rights() {
         throw new IllegalStateException("Utility class");

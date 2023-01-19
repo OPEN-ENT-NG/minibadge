@@ -8,6 +8,7 @@ import {IUserResponse, User} from "../models/user.model";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
 import {Subscription} from "rxjs";
+import {rights} from "../core/constants/rights.const";
 
 interface ViewModel {
     openChartLightbox(): void;
@@ -71,10 +72,13 @@ class Controller implements ng.IController, ViewModel {
                 template.open('main', `badges-given`);
             },
             statistics: async () => {
-                await this.initInfos();
-                this.navbarViewSelected = NAVBAR_VIEWS.BADGES_STATISTICS;
-                this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.statistics"});
-                template.open('main', `statistics`);
+                if (!model.me.hasWorkflow(rights.workflow.statisticsView)) this.$location.path('/');
+                else {
+                    await this.initInfos();
+                    this.navbarViewSelected = NAVBAR_VIEWS.BADGES_STATISTICS;
+                    this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.statistics"});
+                    template.open('main', `statistics`);
+                }
             },
             badgeType: async () => {
                 await this.initInfos();

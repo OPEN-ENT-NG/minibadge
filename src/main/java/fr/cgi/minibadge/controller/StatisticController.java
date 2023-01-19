@@ -1,7 +1,7 @@
 package fr.cgi.minibadge.controller;
 
 import fr.cgi.minibadge.core.constants.Request;
-import fr.cgi.minibadge.security.ViewRight;
+import fr.cgi.minibadge.security.StatisticsViewRight;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.cgi.minibadge.service.StatisticService;
 import fr.cgi.minibadge.service.UserService;
@@ -29,7 +29,7 @@ public class StatisticController extends ControllerHelper {
     @Get("/statistics")
     @ApiDoc("Retrieve statistics")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
-    @ResourceFilter(ViewRight.class)
+    @ResourceFilter(StatisticsViewRight.class)
     public void getStatistics(HttpServerRequest request) {
 
         UserUtils.getUserInfos(eb, request, user ->

@@ -9,6 +9,7 @@
                  view-path="'/badges-given'"
                  is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_GIVEN)"></navbar-item>
     <navbar-item class="mobile-disabled"
+                 ng-if="vm.hasStatisticsViewRight()"
                  label="vm.lang.translate('minibadge.navbar.badges.statistics')"
                  view-path="'/statistics'"
                  is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_STATISTICS)"></navbar-item>

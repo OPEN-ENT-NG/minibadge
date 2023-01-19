@@ -27,4 +27,10 @@ public class FakeRight extends ControllerHelper {
     public void receive(HttpServerRequest request) {
         notImplemented(request);
     }
+
+    @Get("/rights/statistics/view")
+    @SecuredAction(Rights.STATISTICS_VIEW)
+    public void statisticsView(HttpServerRequest request) {
+        notImplemented(request);
+    }
 }
