@@ -16,6 +16,7 @@ public class BadgeType implements Model<BadgeType> {
     private String pictureId;
     private String label;
     private String description;
+    private String descriptionShort;
     private String createdAt;
     private User owner;
     private Integer countAssigned;
@@ -38,6 +39,7 @@ public class BadgeType implements Model<BadgeType> {
         this.pictureId = badgeType.getString(Field.PICTURE_ID, badgeType.getString(Field.PICTUREID));
         this.label = badgeType.getString(Field.LABEL);
         this.description = badgeType.getString(Field.DESCRIPTION);
+        this.descriptionShort = badgeType.getString(Field.DESCRIPTION_SHORT, badgeType.getString(Field.DESCRIPTIONSHORT));
         this.countAssigned = badgeType.getInteger(Field.COUNT_ASSIGNED);
         this.countRefused = badgeType.getInteger(Field.COUNT_REFUSED);
         this.mostAssigningUsers = new User().toList(badgeType.getJsonArray(Field.MOST_ASSIGNING_USERS, new JsonArray()));
@@ -93,6 +95,14 @@ public class BadgeType implements Model<BadgeType> {
         this.description = description;
     }
 
+    public String descriptionShort() {
+        return descriptionShort;
+    }
+
+    public void setDescriptionShort(String descriptionShort) {
+        this.descriptionShort = descriptionShort;
+    }
+
     public User owner() {
         return owner;
     }
@@ -119,6 +129,7 @@ public class BadgeType implements Model<BadgeType> {
                 .put(Field.LABEL, this.label)
                 .put(Field.CREATEDAT, this.createdAt)
                 .put(Field.DESCRIPTION, this.description)
+                .put(Field.DESCRIPTIONSHORT, this.descriptionShort)
                 .put(Field.COUNTASSIGNED, this.countAssigned)
                 .put(Field.COUNTREFUSED, this.countRefused)
                 .put(Field.SETTING, this.setting.toJson());

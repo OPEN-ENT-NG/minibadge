@@ -13,6 +13,7 @@ export interface IBadgeTypeResponse {
     pictureId?: string;
     label: string;
     description: string;
+    descriptionShort: string;
     countAssigned: number;
     sessionUserAssignedTotal?: number;
     createdAt?: string;
@@ -35,6 +36,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
     pictureId?: string;
     label: string;
     description: string;
+    descriptionShort: string;
     countAssigned: number;
     sessionUserAssignedTotal?: number;
     createdAt?: string;
@@ -55,6 +57,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
         this.pictureId = data.pictureId;
         this.label = data.label;
         this.description = data.description;
+        this.descriptionShort = data.descriptionShort;
         this.countAssigned = data.countAssigned;
         this.createdAt = data.createdAt;
         this.owner = new User(<IUserResponse>data.owner);

@@ -155,7 +155,7 @@ public class DefaultStatisticService implements StatisticService {
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT bt.id, bt.slug, bt.structure_id, bt.owner_id, bt.picture_id, bt.label, " +
-                        " bt.description, COALESCE(b.count_assigned, 0) as count_assigned " +
+                        " bt.description, bt.description_short, COALESCE(b.count_assigned, 0) as count_assigned " +
                         " FROM %s bt LEFT JOIN (SELECT b.badge_type_id, COUNT(DISTINCT (ba.id)) as count_assigned " +
                         " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id " +
                         " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
@@ -184,7 +184,7 @@ public class DefaultStatisticService implements StatisticService {
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT bt.id, bt.slug, bt.structure_id, bt.owner_id, bt.picture_id, bt.label, " +
-                        " bt.description, COALESCE(b.count_refused, 0) as count_refused " +
+                        " bt.description, bt.description_short, COALESCE(b.count_refused, 0) as count_refused " +
                         " FROM %s bt LEFT JOIN (SELECT b.badge_type_id, COUNT(DISTINCT (b.id)) as count_refused " +
                         " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id " +
                         " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +

@@ -17,6 +17,8 @@ public class Field {
     public static final String PICTURE_ID = "picture_id";
     public static final String LABEL = "label";
     public static final String DESCRIPTION = "description";
+    public static final String DESCRIPTION_SHORT = "description_short";
+    public static final String DESCRIPTIONSHORT = "descriptionShort";
     public static final String CREATEDAT = "createdAt";
     public static final String CREATED_AT = "created_at";
     public static final String DISPLAYNAME = "displayName";

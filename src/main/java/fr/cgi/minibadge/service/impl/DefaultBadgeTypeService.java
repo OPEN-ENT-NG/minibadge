@@ -53,8 +53,8 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
         JsonArray params = new JsonArray();
 
-        String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description " +
-                        " FROM %s WHERE (%s %s structure_id IS NULL) %s %s %s", BADGE_TYPE_TABLE,
+        String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, " +
+                        " description_short FROM %s WHERE (%s %s structure_id IS NULL) %s %s %s", BADGE_TYPE_TABLE,
                 SqlHelper.filterStructures(structureIds, params),
                 (structureIds != null && !structureIds.isEmpty()) ? "OR" : "",
                 (query != null && !query.isEmpty()) ? "AND" : "",
@@ -93,7 +93,8 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
         Promise<JsonObject> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
-        String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, created_at " +
+        String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, " +
+                        " description_short, created_at " +
                         " FROM %s WHERE (%s %s structure_id IS NULL) AND id = ?", BADGE_TYPE_TABLE,
                 SqlHelper.filterStructures(structureIds, params),
                 (structureIds != null && !structureIds.isEmpty()) ? "OR" : "");
