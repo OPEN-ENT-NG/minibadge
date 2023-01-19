@@ -1,6 +1,7 @@
 package fr.cgi.minibadge.controller;
 
 import fr.cgi.minibadge.core.constants.Database;
+import fr.cgi.minibadge.core.constants.EventBusConst;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.helper.RequestHelper;
@@ -18,6 +19,8 @@ import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.events.EventStore;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.user.UserUtils;
 
@@ -25,10 +28,12 @@ import java.util.List;
 
 public class BadgeAssignedController extends ControllerHelper {
 
+    private final EventStore eventStore;
     private final BadgeAssignedService badgeAssignedService;
 
     public BadgeAssignedController(ServiceFactory serviceFactory) {
         super();
+        this.eventStore = EventStoreFactory.getFactory().getEventStore(fr.cgi.minibadge.Minibadge.class.getSimpleName());
         this.badgeAssignedService = serviceFactory.badgeAssignedService();
     }
 
@@ -72,7 +77,10 @@ public class BadgeAssignedController extends ControllerHelper {
         RequestUtils.bodyToJson(request, String.format("%s%s", pathPrefix, "badgeAssignedCreate"), body -> {
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();
             UserUtils.getUserInfos(eb, request, user -> badgeAssignedService.assign(typeId, ownerIds, user)
-                    .onSuccess(badgeType -> renderJson(request, new JsonObject()))
+                    .onSuccess(badgeType -> {
+                        eventStore.createAndStoreEvent(EventBusConst.CREATE_EVENT, request);
+                        renderJson(request, new JsonObject());
+                    })
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
         });
     }

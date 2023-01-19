@@ -1,6 +1,6 @@
 package fr.cgi.minibadge.helper;
 
-import fr.cgi.minibadge.core.constants.DateConst;
+import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.UserType;
 import fr.cgi.minibadge.model.*;
@@ -59,8 +59,8 @@ public class SettingHelper {
     public static List<ThresholdSetting> getDefaultBadgeSettings() {
         return Collections.singletonList(new ThresholdSetting(
                 new JsonObject()
-                        .put(Field.MAXASSIGNABLE, 3)
-                        .put(Field.PERIODASSIGNABLE, DateConst.DAY)
+                        .put(Field.MAXASSIGNABLE, Minibadge.modelConfig.defaultMaxAssignable())
+                        .put(Field.PERIODASSIGNABLE, Minibadge.modelConfig.defaultPeriodAssignable())
         ));
     }
 

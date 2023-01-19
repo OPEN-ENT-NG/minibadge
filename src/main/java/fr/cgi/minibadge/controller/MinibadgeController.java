@@ -1,5 +1,6 @@
 package fr.cgi.minibadge.controller;
 
+import fr.cgi.minibadge.core.constants.EventBusConst;
 import fr.cgi.minibadge.core.constants.Request;
 import fr.cgi.minibadge.core.constants.Rights;
 import fr.cgi.minibadge.security.ReceiveRight;
@@ -36,7 +37,7 @@ public class MinibadgeController extends ControllerHelper {
     public void view(HttpServerRequest request) {
         renderView(request, new JsonObject());
 
-        eventStore.createAndStoreEvent("ACCESS", request);
+        eventStore.createAndStoreEvent(EventBusConst.ACCESS_EVENT, request);
     }
 
     @Put("/accept")

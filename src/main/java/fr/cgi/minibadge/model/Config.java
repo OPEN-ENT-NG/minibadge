@@ -1,11 +1,13 @@
 package fr.cgi.minibadge.model;
 
+import fr.cgi.minibadge.core.constants.DateConst;
 import fr.cgi.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
 
 
 public class Config implements Model<Config> {
-
+    private Integer defaultMaxAssignable;
+    private String defaultPeriodAssignable;
     private Integer mostAssignedTypeListSize;
     private Integer lessAssignedTypeListSize;
     private Integer mostRefusedTypeListSize;
@@ -17,20 +19,30 @@ public class Config implements Model<Config> {
     public Config() {
     }
 
-    public Config(JsonObject statistics) {
-        this.set(statistics);
+    public Config(JsonObject config) {
+        this.set(config);
     }
 
     @Override
-    public Config set(JsonObject statistics) {
-        this.mostAssignedTypeListSize = statistics.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE);
-        this.lessAssignedTypeListSize = statistics.getInteger(Field.LESS_ASSIGNED_TYPE_LIST_SIZE);
-        this.mostRefusedTypeListSize = statistics.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
-        this.mostAssigningUserListSize = statistics.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
-        this.mostAssigningStructureListSize = statistics.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
-        this.topAssigningUserListSize = statistics.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE);
-        this.topReceivingUserListSize = statistics.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE);
+    public Config set(JsonObject config) {
+        this.defaultMaxAssignable = config.getInteger(Field.DEFAULT_MAX_ASSIGNABLE);
+        this.defaultPeriodAssignable = config.getString(Field.DEFAULT_PERIOD_ASSIGNABLE);
+        this.mostAssignedTypeListSize = config.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE);
+        this.lessAssignedTypeListSize = config.getInteger(Field.LESS_ASSIGNED_TYPE_LIST_SIZE);
+        this.mostRefusedTypeListSize = config.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
+        this.mostAssigningUserListSize = config.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
+        this.mostAssigningStructureListSize = config.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
+        this.topAssigningUserListSize = config.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE);
+        this.topReceivingUserListSize = config.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE);
         return this;
+    }
+
+    public Integer defaultMaxAssignable() {
+        return this.defaultMaxAssignable != null ? this.defaultMaxAssignable : 3;
+    }
+
+    public String defaultPeriodAssignable() {
+        return this.defaultPeriodAssignable != null ? this.defaultPeriodAssignable : DateConst.DAY;
     }
 
     public Integer mostAssignedTypeListSize() {
@@ -63,6 +75,8 @@ public class Config implements Model<Config> {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
+                .put(Field.DEFAULT_MAX_ASSIGNABLE, defaultMaxAssignable)
+                .put(Field.DEFAULT_MAX_ASSIGNABLE, defaultMaxAssignable)
                 .put(Field.MOST_ASSIGNED_TYPE_LIST_SIZE, mostAssignedTypeListSize)
                 .put(Field.LESS_ASSIGNED_TYPE_LIST_SIZE, lessAssignedTypeListSize)
                 .put(Field.MOST_REFUSED_TYPE_LIST_SIZE, mostRefusedTypeListSize)

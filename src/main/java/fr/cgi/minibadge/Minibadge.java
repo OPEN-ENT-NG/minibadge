@@ -1,6 +1,7 @@
 package fr.cgi.minibadge;
 
 import fr.cgi.minibadge.controller.*;
+import fr.cgi.minibadge.model.Config;
 import fr.cgi.minibadge.service.ServiceFactory;
 import fr.wseduc.mongodb.MongoDb;
 import org.entcore.common.http.BaseServer;
@@ -14,11 +15,13 @@ public class Minibadge extends BaseServer {
     public static final int PAGE_SIZE_MAX = 100;
 
     public static String dbSchema;
+    public static Config modelConfig;
 
     @Override
     public void start() throws Exception {
         super.start();
 
+        modelConfig = new Config(config);
         dbSchema = config.getString("db-schema");
 
         Storage storage = new StorageFactory(vertx, config).getStorage();
@@ -32,6 +35,7 @@ public class Minibadge extends BaseServer {
         addController(new BadgeAssignedController(serviceFactory));
         addController(new StatisticController(serviceFactory));
         addController(new UserController(serviceFactory));
+        addController(new ConfigController());
     }
 
 }

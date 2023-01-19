@@ -112,6 +112,8 @@ public class Field {
     public static final String MOST_ASSIGNING_USERS = "most_assigning_users";
 
     //CONFIG
+    public static final String DEFAULT_MAX_ASSIGNABLE = "default_max_assignable";
+    public static final String DEFAULT_PERIOD_ASSIGNABLE = "default_period_assignable";
     public static final String MOST_ASSIGNED_TYPE_LIST_SIZE = "most_assigned_type_list_size";
     public static final String LESS_ASSIGNED_TYPE_LIST_SIZE = "less_assigned_type_list_size";
     public static final String MOST_REFUSED_TYPE_LIST_SIZE = "most_refused_type_list_size";
