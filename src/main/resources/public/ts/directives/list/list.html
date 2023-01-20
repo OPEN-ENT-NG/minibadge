@@ -4,7 +4,7 @@
         <img ng-if="vm.isFunction(item.displayItemImg) && !!item.displayItemImg()" class="minibadge-list-item-img"
              ng-src="[[item.displayItemImg()]]" on-error-src="/minibadge/public/img/default-avatar.svg"/>&nbsp;
         <span class="minibadge-list-item-display">[[item.displayItem()]]</span>
-        <span ng-if="vm.isFunction(item.displayItemDistinction)" class="flex-one">
+        <span ng-if="vm.isFunction(item.displayItemDistinction)" class="minibadge-list-item-distinction">
             <span ng-if="!vm.isItalicDistinction" class="minibadge-list-item-distinction-simple flex-row">
                 <span ng-class="{'flex-one': vm.isEndDistinction}">
                     &ensp;&#40;[[item.displayItemDistinction()]]&#41;
