@@ -62,6 +62,7 @@ class Controller implements ng.IController, ViewModel {
     }
 
     $onInit() {
+        window.scrollTo(0, 0);
         this.assignersPayload = new Paging({page: 0});
         this.receiversPayload = new Paging({page: 0});
 
