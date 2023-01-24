@@ -17,8 +17,8 @@ export interface IUserResponse {
 }
 
 export interface IUsersResponses extends IPaginatedResponses<IUserResponse> {
-    sessionUserAssignedTotal?: number;
-    countAssigned?: number;
+    sessionUserAssignersTotal?: number;
+    receiversTotal?: number;
 }
 
 export interface IUserPayload extends IQueryStringPayload {

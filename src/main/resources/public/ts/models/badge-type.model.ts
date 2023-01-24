@@ -15,7 +15,8 @@ export interface IBadgeTypeResponse {
     description: string;
     descriptionShort: string;
     countAssigned: number;
-    sessionUserAssignedTotal?: number;
+    sessionUserAssignersTotal?: number;
+    receiversTotal?: number;
     createdAt?: string;
     owner?: User;
     mostAssigningUsers?: IUserResponse[];
@@ -38,7 +39,8 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
     description: string;
     descriptionShort: string;
     countAssigned: number;
-    sessionUserAssignedTotal?: number;
+    sessionUserAssignersTotal?: number;
+    receiversTotal?: number;
     createdAt?: string;
     owner?: User;
     mostAssigningUsers?: User[];

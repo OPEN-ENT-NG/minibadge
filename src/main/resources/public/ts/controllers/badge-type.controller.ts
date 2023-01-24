@@ -18,9 +18,9 @@ import {translate} from "../utils/string.utils";
 interface ViewModel {
     onOpenLightbox(): void;
 
-    sessionUserAssignedTotal(): string;
+    sessionUserAssignersTotal(): string;
 
-    countAssigned(): string;
+    receiversTotal(): string;
 
     displayItemImg(user: User): string
 
@@ -80,11 +80,11 @@ class Controller implements ng.IController, ViewModel {
             .sendBadgeType(this.badgeType);
     }
 
-    sessionUserAssignedTotal = (): string => this.badgeType && this.badgeType.sessionUserAssignedTotal ?
-        toLocaleString(this.badgeType.sessionUserAssignedTotal) : null;
+    sessionUserAssignersTotal = (): string => this.badgeType && this.badgeType.sessionUserAssignersTotal ?
+        toLocaleString(this.badgeType.sessionUserAssignersTotal) : null;
 
-    countAssigned = (): string => this.badgeType && this.badgeType.countAssigned ?
-        toLocaleString(this.badgeType.countAssigned) : null;
+    receiversTotal = (): string => this.badgeType && this.badgeType.receiversTotal ?
+        toLocaleString(this.badgeType.receiversTotal) : null;
 
     displayItemImg = (user: User): string => `/userbook/avatar/${user.id}?thumbnail=48x48`;
 

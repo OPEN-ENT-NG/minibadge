@@ -289,24 +289,35 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
     @Override
-    public Future<Integer> getTotalAssignations(long typeId, UserInfos badgeOwner) {
+    public Future<Integer> getTotalReceivers(long typeId) {
         Promise<Integer> promise = Promise.promise();
 
-        getTotalAssignationsRequest(typeId, badgeOwner)
+        getTotalUsersRequest(typeId, null, true)
+                .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+    @Override
+    public Future<Integer> getTotalAssigners(long typeId, UserInfos badgeOwner) {
+        Promise<Integer> promise = Promise.promise();
+
+        getTotalUsersRequest(typeId, badgeOwner, false)
                 .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
-    private Future<JsonObject> getTotalAssignationsRequest(long typeId, UserInfos badgeOwner) {
+    private Future<JsonObject> getTotalUsersRequest(long typeId, UserInfos badgeOwner, boolean isReceiver) {
         Promise<JsonObject> promise = Promise.promise();
 
         JsonArray params = new JsonArray()
                 .add(typeId);
 
-        String request = String.format(" SELECT COUNT(DISTINCT ba.id) as count " +
+        String request = String.format(" SELECT COUNT(DISTINCT %s) as count " +
                         " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id WHERE b.badge_type_id = ? %s",
+                isReceiver ? "b.owner_id" : "ba.assignor_id",
                 BADGE_ASSIGNABLE_TABLE,
                 BADGE_ASSIGNED_VALID_TABLE,
                 filterOwnerId(badgeOwner, params));

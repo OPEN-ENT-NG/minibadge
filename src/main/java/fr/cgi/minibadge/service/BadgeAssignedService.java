@@ -55,14 +55,22 @@ public interface BadgeAssignedService {
     Future<List<User>> getBadgeTypeAssigners(long typeId, UserInfos badgeOwner, int limit, Integer offset);
 
     /**
+     * Get type total receivers
+     *
+     * @param typeId type identifier
+     * @return return future containing total receivers
+     */
+    Future<Integer> getTotalReceivers(long typeId);
+
+    /**
      * Get type total assignations
      *
      * @param typeId type identifier
      * @param badgeOwner owner that received this id typed badge
      *
-     * @return return future containing total assignations
+     * @return return future containing total assigners (for current userInfo)
      */
-    Future<Integer> getTotalAssignations(long typeId, UserInfos badgeOwner);
+    Future<Integer> getTotalAssigners(long typeId, UserInfos badgeOwner);
 
     /**
      * Count users that gave me this (:typeId) badge typed

@@ -67,6 +67,9 @@ public class Field {
     public static final String LEVEL = "level";
     public static final String ASSIGNABLEBY = "assignableBy";
 
+    //TYPE
+    public static final String RECEIVERSTOTAL = "receiversTotal";
+
     // CHART
     public static final String ACCEPTCHART = "acceptChart";
     public static final String ACCEPTASSIGN = "acceptAssign";
@@ -77,7 +80,7 @@ public class Field {
     public static final String USERIDS = "userIds";
     public static final String BADGE_ASSIGNED_TOTAL = "badge_assigned_total";
     public static final String BADGEASSIGNEDTOTAL = "badgeAssignedTotal";
-    public static final String SESSIONUSERASSIGNEDTOTAL = "sessionUserAssignedTotal";
+    public static final String SESSIONUSERASSIGNERSTOTAL = "sessionUserAssignersTotal";
     public static final String TYPE = "type";
 
     //Protagonist
