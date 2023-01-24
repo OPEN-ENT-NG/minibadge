@@ -3,11 +3,11 @@ import {Behaviours, ng, notify} from 'entcore';
 import {IBadgeTypeService} from "../services";
 import {BadgeType, IBadgeTypesPayload} from "../models/badge-type.model";
 import {safeApply} from "../utils/safe-apply.utils";
-import {AxiosError} from "axios";
 import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {ILocationService, IScope} from "angular";
 import {Setting} from "../models/setting.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
+import {unaccent} from "../utils/string.utils";
 
 
 interface ViewModel {
@@ -64,14 +64,23 @@ class Controller implements ng.IController, ViewModel {
         this.badgeTypeService.getBadgeTypes(this.payload)
             .then((data: BadgeType[]) => {
                 if (data && data.length > 0) {
-                    this.badgeTypes.push(...data);
+                    this.insertBadgeTypesKeepingOrder(this.badgeTypes.length - 1, data);
                     Behaviours.applicationsBehaviours[MINIBADGE_APP].infiniteScrollService
                         .updateScroll();
                 }
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.get.badge.types'))
+            .catch(() => notify.error('minibadge.error.get.badge.types'))
     }
+
+    private insertBadgeTypesKeepingOrder = async (index: number, data: BadgeType[]): Promise<void> => {
+        const value = this.badgeTypes[index];
+        if (!value || unaccent(value.label) <= unaccent(data[0].label)) {
+            this.badgeTypes.splice(index < (this.$scope.setting.pageSize - 1) ? 0 : index + 1, 0, ...data);
+            return;
+        }
+        return this.insertBadgeTypesKeepingOrder(index - this.$scope.setting.pageSize, data);
+    };
 
     onScroll = async (): Promise<void> => {
         this.payload.offset += this.$scope.setting.pageSize;
@@ -85,7 +94,7 @@ class Controller implements ng.IController, ViewModel {
     }
 
     redirectBadgeType = (badgeType: BadgeType): void => {
-       this.$location.path(badgeType.getDetailPath());
+        this.$location.path(badgeType.getDetailPath());
     }
 
     onOpenLightbox = (badgeType: BadgeType): void => {

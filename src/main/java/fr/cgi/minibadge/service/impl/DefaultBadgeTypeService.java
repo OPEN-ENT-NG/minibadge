@@ -54,7 +54,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
         JsonArray params = new JsonArray();
 
         String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, " +
-                        " description_short FROM %s WHERE (%s %s structure_id IS NULL) %s %s ORDER BY label %s",
+                        " description_short FROM %s WHERE (%s %s structure_id IS NULL) %s %s ORDER BY UNACCENT(label) %s",
                 BADGE_TYPE_TABLE,
                 SqlHelper.filterStructures(structureIds, params),
                 (structureIds != null && !structureIds.isEmpty()) ? "OR" : "",
