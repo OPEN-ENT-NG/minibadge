@@ -1,5 +1,6 @@
 package fr.cgi.minibadge.controller;
 
+import fr.cgi.minibadge.Minibadge;
 import fr.cgi.minibadge.core.constants.Database;
 import fr.cgi.minibadge.core.constants.Field;
 import fr.cgi.minibadge.core.constants.Request;
@@ -75,20 +76,19 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeAssigners(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params);
+        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
         long typeId = Long.parseLong(params.get(Database.TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> {
             Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
-            Future<Integer> countAssignersFuture = badgeAssignedService.countBadgeTypeAssigners(typeId, user);
-            Future<Integer> totalAssignersFuture = badgeAssignedService.getTotalAssigners(typeId, user);
+            Future<Integer> countAssignersFuture = badgeAssignedService.countTotalAssigners(typeId, user);
 
-            CompositeFuture.all(assignersFuture, countAssignersFuture, totalAssignersFuture)
+            CompositeFuture.all(assignersFuture, countAssignersFuture)
                     .onSuccess(users -> {
                         JsonObject response = RequestHelper.formatResponse(page, countAssignersFuture.result(), limit,
                                 assignersFuture.result());
-                        response.put(Field.SESSIONUSERASSIGNERSTOTAL, totalAssignersFuture.result());
+                        response.put(Field.USERASSIGNERSTOTAL, countAssignersFuture.result());
                         renderJson(request, response);
                     })
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
@@ -102,20 +102,18 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeReceivers(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params);
+        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
         long typeId = Long.parseLong(params.get(Database.TYPEID));
 
         Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
-        Future<Integer> countReceiversFuture = badgeService.countBadgeTypeReceivers(typeId);
-        Future<Integer> totalReceiversFuture = badgeAssignedService.getTotalReceivers(typeId);
+        Future<Integer> countReceiversFuture = badgeService.countTotalReceivers(typeId);
 
-        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture,
-                        totalReceiversFuture)
+        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture)
                 .onSuccess(users -> {
                     JsonObject response = RequestHelper.formatResponse(page, countReceiversFuture.result(), limit,
                             receiversFuture.result());
-                    response.put(Field.RECEIVERSTOTAL, totalReceiversFuture.result());
+                    response.put(Field.RECEIVERSTOTAL, countReceiversFuture.result());
                     renderJson(request, response);
                 })
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));

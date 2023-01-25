@@ -18,7 +18,7 @@ import {translate} from "../utils/string.utils";
 interface ViewModel {
     onOpenLightbox(): void;
 
-    sessionUserAssignersTotal(): string;
+    userAssignersTotal(): string;
 
     receiversTotal(): string;
 
@@ -81,8 +81,8 @@ class Controller implements ng.IController, ViewModel {
             .sendBadgeType(this.badgeType);
     }
 
-    sessionUserAssignersTotal = (): string => this.badgeType && this.badgeType.sessionUserAssignersTotal ?
-        toLocaleString(this.badgeType.sessionUserAssignersTotal) : null;
+    userAssignersTotal = (): string => this.badgeType && this.badgeType.userAssignersTotal ?
+        toLocaleString(this.badgeType.userAssignersTotal) : null;
 
     receiversTotal = (): string => this.badgeType && this.badgeType.receiversTotal ?
         toLocaleString(this.badgeType.receiversTotal) : null;

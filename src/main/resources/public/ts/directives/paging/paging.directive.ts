@@ -38,7 +38,6 @@ class Controller implements ng.IController, IViewModel {
 
     $onDestroy() {
     }
-
 }
 
 function directive(): IDirective {

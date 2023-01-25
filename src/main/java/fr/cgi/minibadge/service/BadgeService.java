@@ -86,5 +86,5 @@ public interface BadgeService {
      * @param typeId type identifier
      * @return return future containing receivers count
      */
-    Future<Integer> countBadgeTypeReceivers(long typeId);
+    Future<Integer> countTotalReceivers(long typeId);
 }

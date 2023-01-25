@@ -21,6 +21,10 @@ public class RequestHelper {
                 : Minibadge.PAGE_SIZE, Minibadge.PAGE_SIZE_MAX);
     }
 
+    public static int cappingLimit(MultiMap params, Integer configValue) {
+        return configValue != null ? configValue : cappingLimit(params);
+    }
+
     public static int pageToOffset(int page, int limit) {
         return page * limit;
     }
@@ -34,7 +38,7 @@ public class RequestHelper {
     public static JsonObject formatResponse(Integer page, Integer dataTotal, Integer limit, List<? extends Model<?>> dataList) {
         return addAllValue(new JsonObject(), dataList)
                 .put(Request.PAGE, page)
-                .put(Request.PAGECOUNT, Math.round((double) dataTotal/limit) + 1);
+                .put(Request.PAGECOUNT, (long)Math.floor((double) dataTotal/limit));
     }
 
     public static JsonObject addAllValue(JsonObject jsonObject, List<? extends Model<?>> dataList) {

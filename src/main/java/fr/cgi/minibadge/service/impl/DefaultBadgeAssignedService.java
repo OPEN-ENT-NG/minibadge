@@ -289,61 +289,10 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
     @Override
-    public Future<Integer> getTotalReceivers(long typeId) {
+    public Future<Integer> countTotalAssigners(long typeId, UserInfos badgeOwner) {
         Promise<Integer> promise = Promise.promise();
 
-        getTotalUsersRequest(typeId, null, true)
-                .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
-                .onFailure(promise::fail);
-
-        return promise.future();
-    }
-    @Override
-    public Future<Integer> getTotalAssigners(long typeId, UserInfos badgeOwner) {
-        Promise<Integer> promise = Promise.promise();
-
-        getTotalUsersRequest(typeId, badgeOwner, false)
-                .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
-                .onFailure(promise::fail);
-
-        return promise.future();
-    }
-
-    private Future<JsonObject> getTotalUsersRequest(long typeId, UserInfos badgeOwner, boolean isReceiver) {
-        Promise<JsonObject> promise = Promise.promise();
-
-        JsonArray params = new JsonArray()
-                .add(typeId);
-
-        String request = String.format(" SELECT COUNT(DISTINCT %s) as count " +
-                        " FROM %s b INNER JOIN %s ba on b.id = ba.badge_id WHERE b.badge_type_id = ? %s",
-                isReceiver ? "b.owner_id" : "ba.assignor_id",
-                BADGE_ASSIGNABLE_TABLE,
-                BADGE_ASSIGNED_VALID_TABLE,
-                filterOwnerId(badgeOwner, params));
-
-        sql.prepared(request, params,
-                SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
-                        String.format("[Minibadge@%s::getTotalAssignationsRequest] " +
-                                        "Fail to retrieve owner total assignations",
-                                this.getClass().getSimpleName()))));
-
-        return promise.future();
-    }
-
-    private String filterOwnerId(UserInfos badgeOwner, JsonArray params) {
-        if (badgeOwner != null) {
-            params.add(badgeOwner.getUserId());
-            return "AND b.owner_id = ?";
-        }
-        return "";
-    }
-
-    @Override
-    public Future<Integer> countBadgeTypeAssigners(long typeId, UserInfos badgeOwner) {
-        Promise<Integer> promise = Promise.promise();
-
-        countBadgeTypeAssignerIdsRequest(typeId, badgeOwner)
+        countTotalAssignersRequest(typeId, badgeOwner)
                 .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
                 .onFailure(promise::fail);
 
@@ -351,7 +300,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
 
-    private Future<JsonObject> countBadgeTypeAssignerIdsRequest(long typeId, UserInfos badgeOwner) {
+    private Future<JsonObject> countTotalAssignersRequest(long typeId, UserInfos badgeOwner) {
         Promise<JsonObject> promise = Promise.promise();
         JsonArray params = new JsonArray()
                 .add(badgeOwner.getUserId())

@@ -256,10 +256,10 @@ public class DefaultBadgeService implements BadgeService {
     }
 
     @Override
-    public Future<Integer> countBadgeTypeReceivers(long typeId) {
+    public Future<Integer> countTotalReceivers(long typeId) {
         Promise<Integer> promise = Promise.promise();
 
-        countBadgeTypeReceiverIdsRequest(typeId)
+        countTotalReceiversRequest(typeId)
                 .onSuccess(result -> promise.complete(SqlHelper.getResultCount(result)))
                 .onFailure(promise::fail);
 
@@ -267,7 +267,7 @@ public class DefaultBadgeService implements BadgeService {
 
     }
 
-    private Future<JsonObject> countBadgeTypeReceiverIdsRequest(long typeId) {
+    private Future<JsonObject> countTotalReceiversRequest(long typeId) {
         Promise<JsonObject> promise = Promise.promise();
 
         JsonArray params = new JsonArray()

@@ -15,6 +15,7 @@ public class Config implements Model<Config> {
     private Integer mostAssigningStructureListSize;
     private Integer topAssigningUserListSize;
     private Integer topReceivingUserListSize;
+    private Integer typeListsUsersSize;
 
     public Config() {
     }
@@ -34,6 +35,7 @@ public class Config implements Model<Config> {
         this.mostAssigningStructureListSize = config.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
         this.topAssigningUserListSize = config.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE);
         this.topReceivingUserListSize = config.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE);
+        this.typeListsUsersSize = config.getInteger(Field.TYPE_LISTS_USERS_SIZE);
         return this;
     }
 
@@ -72,6 +74,10 @@ public class Config implements Model<Config> {
         return this.topReceivingUserListSize != null ? this.topReceivingUserListSize : 5;
     }
 
+    public Integer typeListsUsersSize() {
+        return this.typeListsUsersSize != null ? this.typeListsUsersSize : 10;
+    }
+
     @Override
     public JsonObject toJson() {
         return new JsonObject()
@@ -83,7 +89,8 @@ public class Config implements Model<Config> {
                 .put(Field.MOST_ASSIGNING_USER_LIST_SIZE, mostAssigningUserListSize)
                 .put(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, mostAssigningStructureListSize)
                 .put(Field.TOP_ASSIGNING_USER_LIST_SIZE, topAssigningUserListSize)
-                .put(Field.TOP_RECEIVING_USER_LIST_SIZE, topReceivingUserListSize);
+                .put(Field.TOP_RECEIVING_USER_LIST_SIZE, topReceivingUserListSize)
+                .put(Field.TYPE_LISTS_USERS_SIZE, typeListsUsersSize);
     }
 
     @Override

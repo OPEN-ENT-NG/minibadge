@@ -49,8 +49,8 @@ export const badgeTypeService: IBadgeTypeService = {
                 .then((res: AxiosResponse) => {
                     let usersResponses: IUsersResponses = res.data;
                     if (usersResponses) {
-                        badgeType.sessionUserAssignersTotal = usersResponses.sessionUserAssignersTotal
-                        payload.pageCount = usersResponses.page;
+                        badgeType.userAssignersTotal = usersResponses.userAssignersTotal
+                        payload.pageCount = usersResponses.pageCount;
                     }
                     return new User().toList(usersResponses ? usersResponses.all : [])
                 });
@@ -69,7 +69,7 @@ export const badgeTypeService: IBadgeTypeService = {
                 let usersResponses: IUsersResponses = res.data;
                 if (usersResponses) {
                     badgeType.receiversTotal = usersResponses.receiversTotal
-                    payload.pageCount = usersResponses.page;
+                    payload.pageCount = usersResponses.pageCount;
                 }
                 return new User().toList(usersResponses ? usersResponses.all : [])
             })

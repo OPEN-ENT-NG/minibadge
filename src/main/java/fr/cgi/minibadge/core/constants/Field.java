@@ -80,7 +80,7 @@ public class Field {
     public static final String USERIDS = "userIds";
     public static final String BADGE_ASSIGNED_TOTAL = "badge_assigned_total";
     public static final String BADGEASSIGNEDTOTAL = "badgeAssignedTotal";
-    public static final String SESSIONUSERASSIGNERSTOTAL = "sessionUserAssignersTotal";
+    public static final String USERASSIGNERSTOTAL = "userAssignersTotal";
     public static final String TYPE = "type";
 
     //Protagonist
@@ -126,6 +126,7 @@ public class Field {
     public static final String MOST_ASSIGNING_STRUCTURE_LIST_SIZE = "most_assigning_structure_list_size";
     public static final String TOP_ASSIGNING_USER_LIST_SIZE = "top_most_assigning_user_list_size";
     public static final String TOP_RECEIVING_USER_LIST_SIZE = "top_most_receiving_user_list_size";
+    public static final String TYPE_LISTS_USERS_SIZE = "type_lists_users_size";
 
     private Field() {
         throw new IllegalStateException("Utility class");

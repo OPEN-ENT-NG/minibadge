@@ -17,7 +17,7 @@ export interface IUserResponse {
 }
 
 export interface IUsersResponses extends IPaginatedResponses<IUserResponse> {
-    sessionUserAssignersTotal?: number;
+    userAssignersTotal?: number;
     receiversTotal?: number;
 }
 
