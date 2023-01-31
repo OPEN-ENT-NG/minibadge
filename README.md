@@ -1,7 +1,7 @@
 # À propos de l'application Minibadge
 
 * Licence : [AGPL v3](http://www.gnu.org/licenses/agpl.txt) - Copyright Région Hauts de France
-* Propriétaire(s) : CGI
+* Propriétaire(s) : Région Hauts de France
 * Mainteneur(s) : CGI
 * Financeur(s) : Région Hauts de France
 * Description : Application d'assignation de badges entre les utilisateurs de l'OPEN ENT.
@@ -12,9 +12,9 @@ Dans le fichier 'ent-core.json.template' du projet OPEN ENT :
 
 <pre>
     {
-      "name": "fr.cgi~minibadge~1.0-SNAPSHOT",
+      "name": "fr.openent~minibadge~1.0-SNAPSHOT",
       "config": {
-        "main" : "fr.cgi.minibadge.Minibadge",
+        "main" : "fr.openent.minibadge.Minibadge",
         "port" : 8131,
         "app-name" : "MiniBadge",
     	"app-address" : "/minibadge",

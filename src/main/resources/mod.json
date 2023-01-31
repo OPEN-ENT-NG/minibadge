@@ -1,5 +1,5 @@
 {
-	"main" : "fr.cgi.minibadge.Minibadge",
+	"main" : "fr.openent.minibadge.Minibadge",
 	"port" : 8131,
 	"app-name" : "Minibadge",
 	"app-address" : "/minibadge",

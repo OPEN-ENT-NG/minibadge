@@ -1,7 +1,7 @@
     {
-      "name": "fr.cgi~minibadge~0.1-SNAPSHOT",
+      "name": "fr.openent~minibadge~0.1-SNAPSHOT",
       "config": {
-        "main" : "fr.cgi.minibadge.Minibadge",
+        "main" : "fr.openent.minibadge.Minibadge",
         "port" : 8131,
         "app-name" : "MiniBadge",
     	"app-address" : "/minibadge",
