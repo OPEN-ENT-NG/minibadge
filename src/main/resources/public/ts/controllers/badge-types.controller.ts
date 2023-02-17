@@ -1,4 +1,4 @@
-import {Behaviours, ng, notify} from 'entcore';
+import {Behaviours, model, ng, notify} from 'entcore';
 
 import {IBadgeTypeService} from "../services";
 import {BadgeType, IBadgeTypesPayload} from "../models/badge-type.model";
@@ -8,6 +8,7 @@ import {ILocationService, IScope} from "angular";
 import {Setting} from "../models/setting.model";
 import {CARD_FOOTER} from "../core/enum/card-footers.enum";
 import {unaccent} from "../utils/string.utils";
+import {rights} from "../core/constants/rights.const";
 
 
 interface ViewModel {
@@ -21,8 +22,8 @@ interface ViewModel {
 
     onOpenLightbox(badgeType: BadgeType): void;
 
-    CARD_FOOTER: typeof CARD_FOOTER;
     badgeTypes: BadgeType[];
+    getCardFooter: string;
     searchQuery: string;
 }
 
@@ -33,22 +34,18 @@ interface IMinibadgeScope extends IScope {
 
 class Controller implements ng.IController, ViewModel {
     private payload: IBadgeTypesPayload;
-
-    CARD_FOOTER: typeof CARD_FOOTER;
     badgeTypes: BadgeType[];
     searchQuery: string;
-    isMinibadgeAccepted: boolean;
+    getCardFooter: string;
 
     constructor(private $scope: IMinibadgeScope,
                 private $location: ILocationService,
                 private badgeTypeService: IBadgeTypeService) {
         this.$scope.vm = this;
-        this.CARD_FOOTER = CARD_FOOTER;
         this.payload = {
             offset: 0,
         };
-        this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
-            || !!this.$scope.setting.userPermissions.acceptReceive;
+        this.getCardFooter = this.$scope.setting.userPermissions.canAssign() ? CARD_FOOTER.AWARD_BADGE : null;
     }
 
     $onInit() {

@@ -6,8 +6,7 @@
                              on-body-click="vm.redirectBadgeType(badgeType)"
                              on-footer-click="vm.onOpenLightbox(badgeType)"
                              click-path="badgeType.getDetailPath()"
-                             footer="vm.CARD_FOOTER.AWARD_BADGE"
-                             is-disabled="!vm.isMinibadgeAccepted"
+                             footer="vm.getCardFooter"
                              body-icon="'icon-info-circle minibadge-icon-right'"
         >
         </minibadge-card-type>

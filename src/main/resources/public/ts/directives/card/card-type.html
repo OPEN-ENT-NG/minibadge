@@ -16,7 +16,7 @@
              class="minibadge-card-title flex-row justify-center align-center">[[vm.badgeType.label]]
         </div>
     </container-body>
-    <container-footer>
+    <container-footer ng-if="!!vm.footer && !vm.isDisabled">
         <award-badge-footer ng-if="vm.CARD_FOOTER.AWARD_BADGE === vm.footer && !vm.isDisabled"
                             on-click="vm.onFooterClick(vm.badgeType)"
                             badge-type="vm.badgeType"></award-badge-footer>
