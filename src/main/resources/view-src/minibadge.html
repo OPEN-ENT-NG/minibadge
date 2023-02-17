@@ -22,7 +22,8 @@
                  alt="" src="/minibadge/public/img/uni-minibadge.svg">&nbsp;
             <i18n>minibadge.title</i18n>
         </h1>
-        <button class="minibadge-button-title-settings mobile-disabled minibadge-mobile-padding-x absolute-position no-margin-bottom"
+        <button ng-if="vm.isAllowedToUseMinibadge"
+                class="minibadge-button-title-settings mobile-disabled minibadge-mobile-padding-x absolute-position no-margin-bottom"
                 ng-click="vm.openChartLightbox()">
             <i class="settings"></i>&nbsp;<i18n>minibadge.settings</i18n>
         </button>
@@ -30,14 +31,17 @@
     <minibadge-navbar navbar-view-selected="vm.navbarViewSelected"></minibadge-navbar>
     <div class="minibadge-container flex-row f-column">
         <minibadge-container-header container-header="vm.containerHeader"
-                                    open-chart-lightbox="vm.openChartLightbox()"></minibadge-container-header>
+                                    open-chart-lightbox="vm.openChartLightbox()"
+                                    show-chart-lightbox="vm.isAllowedToUseMinibadge"></minibadge-container-header>
         <container template="main"></container>
     </div>
-    <minibadge-chart is-lightbox-opened="vm.isChartLightboxOpened"
-                     is-chart-accepted="vm.isChartAccepted"
-                     is-minibadge-accepted="vm.isMinibadgeAccepted"
-                     chart-validate="vm.chartValidate()"
-                     on-close="vm.resetChartValues()"></minibadge-chart>
+    <minibadge-chart
+            ng-if="vm.isAllowedToUseMinibadge"
+            is-lightbox-opened="vm.isChartLightboxOpened"
+            is-chart-accepted="vm.isChartAccepted"
+            is-minibadge-accepted="vm.isMinibadgeAccepted"
+            chart-validate="vm.chartValidate()"
+            on-close="vm.resetChartValues()"></minibadge-chart>
 </portal>
 </body>
 

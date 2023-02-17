@@ -13,6 +13,7 @@ interface IViewModel {
 
 interface IDirectiveProperties {
     containerHeader?: ContainerHeader;
+    showChartLightbox?: boolean;
     openChartLightbox(): void;
 }
 
@@ -46,7 +47,8 @@ function directive(): IDirective {
         templateUrl: `${RootsConst.directive}/container-header/container-header.html`,
         scope: {
             openChartLightbox: '&',
-            containerHeader: '=?'
+            containerHeader: '=?',
+            showChartLightbox: '=?'
         },
         controllerAs: 'vm',
         bindToController: true,
