@@ -190,7 +190,7 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
                         " WHERE is_structure_receiver IS TRUE %s " +
                         " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
-                        " GROUP BY bt.id, b.count_refused  ORDER BY count_refused DESC LIMIT %s",
+                        " GROUP BY bt.id, b.count_refused HAVING count_refused > 0 ORDER BY count_refused DESC LIMIT %s",
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
                 DefaultBadgeService.BADGE_DISABLED_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
