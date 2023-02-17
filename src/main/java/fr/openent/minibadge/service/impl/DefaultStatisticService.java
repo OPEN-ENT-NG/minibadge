@@ -134,8 +134,8 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s ba on ba.id = bas.badge_assigned_id " +
                         " INNER JOIN %s b on b.id = ba.badge_id " +
                         " WHERE is_structure_assigner IS TRUE AND %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
+                DefaultBadgeAssignedService.BADGE_ASSIGNED_TABLE,
+                DefaultBadgeService.BADGE_TABLE,
                 SqlHelper.filterStructuresWithNull(structureIds, params));
 
 
