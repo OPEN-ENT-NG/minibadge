@@ -1,4 +1,4 @@
-import {Behaviours, idiom as lang, ng, notify} from 'entcore';
+import {Behaviours, idiom as lang, model, ng, notify} from 'entcore';
 
 import {IBadgeTypeService} from "../services";
 import {BadgeType} from "../models/badge-type.model";
@@ -13,6 +13,7 @@ import {ContainerHeader, IContainerHeaderResponse} from "../models/container-hea
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
 import {toLocaleString} from "../utils/number.utils";
 import {translate} from "../utils/string.utils";
+import {rights} from "../core/constants/rights.const";
 
 
 interface ViewModel {
@@ -90,7 +91,7 @@ class Controller implements ng.IController, ViewModel {
     displayItemImg = (user: User): string => `/userbook/avatar/${user.id}?thumbnail=48x48`;
 
     getBadgeTypeAssigners = async (): Promise<void> => {
-        if (this.badgeType)
+        if (this.badgeType && this.$scope.setting.userPermissions.canReceive())
             this.badgeTypeService.getBadgeTypeAssigners(this.badgeType, this.assignersPayload)
                 .then((data: User[]) => {
                     if (data) {

@@ -1,4 +1,6 @@
 import {MinibadgeModel} from "./model";
+import {model} from "entcore";
+import {rights} from "../core/constants/rights.const";
 
 export interface IChartResponse {
     acceptChart?: string;
@@ -22,6 +24,9 @@ export class Chart extends MinibadgeModel<Chart> {
         this.acceptReceive = data.acceptReceive;
         return this;
     }
+
+    canAssign = (): boolean => model.me.hasWorkflow(rights.workflow.assign) && !!this.acceptAssign;
+    canReceive = (): boolean => model.me.hasWorkflow(rights.workflow.receive) && !!this.acceptReceive;
 
     toModel(model: any): Chart {
         return new Chart(model)
