@@ -64,6 +64,7 @@
   "minibadge.statistics.most.awarded.users": "Most awarded users",
   "minibadge.statistics.most.refused.badges": "Top %s badges refused",
   "minibadge.statistics.participation": "Participation",
+  "minibadge.statistics.refused.times": "Refused {0} times",
   "minibadge.statistics.top": "Top {0}",
   "minibadge.student": "Student",
   "minibadge.the": "",

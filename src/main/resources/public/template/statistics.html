@@ -107,8 +107,21 @@
                         <div class="flex-row">
                             <div ng-repeat="type in vm.statistics.mostRefusedTypes"
                                  class="flex-row flex-one justify-center">
-                                <minibadge-card-type badge-type="type" class="minibadge-card-simple flex-one">
-                                </minibadge-card-type>
+                                <minibadge-card class="minibadge-card-simple flex-one">
+                                    <container-body class="flex-row f-column">
+                                        <div class="minibadge-card-picture flex-row justify-center">
+                                            <img ng-src="/minibadge/public/img/[[type.pictureId]]"/>
+                                        </div>
+                                        <div class="flex-row justify-center align-center">
+                                            [[type.label]]
+                                        </div>
+                                    </container-body>
+                                    <container-footer>
+                                        <div class="flex-row justify-center align-center">
+                                            [[vm.translate('minibadge.statistics.refused.times', [type.countRefused])]]
+                                        </div>
+                                    </container-footer>
+                                </minibadge-card>
                             </div>
                         </div>
                     </container-body>

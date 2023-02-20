@@ -135,7 +135,7 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s b on b.id = ba.badge_id " +
                         " WHERE is_structure_assigner IS TRUE AND %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
+                DefaultBadgeService.BADGE_TABLE,
                 SqlHelper.filterStructuresWithNull(structureIds, params));
 
 
@@ -161,14 +161,15 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s bas on ba.id = bas.badge_assigned_id " +
                         " WHERE is_structure_assigner IS TRUE %s " +
                         " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
-                        " GROUP BY bt.id, b.count_assigned HAVING count_assigned > 0 " +
+                        " GROUP BY bt.id, b.count_assigned %s " +
                         " ORDER BY count_assigned %s LIMIT %s",
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
+                DefaultBadgeService.BADGE_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
                 SqlHelper.andFilterStructures(structureIds, params),
                 SqlHelper.filterStructuresWithNull(structureIds, params),
+                (Boolean.TRUE.equals(isDesc) ? "HAVING count_assigned > 0" : ""),
                 (Boolean.TRUE.equals(isDesc) ? "DESC" : ""),
                 limit);
 
@@ -266,7 +267,7 @@ public class DefaultStatisticService implements StatisticService {
                 userSelector,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
+                DefaultBadgeService.BADGE_TABLE,
                 DefaultBadgeTypeService.BADGE_TYPE_TABLE,
                 (isStructureAssigner ? Field.IS_STRUCTURE_ASSIGNER : Field.IS_STRUCTURE_RECEIVER),
                 SqlHelper.andFilterStructures(structureIds, params, "bas"),
@@ -335,7 +336,7 @@ public class DefaultStatisticService implements StatisticService {
                         " ORDER BY count_assigned DESC LIMIT %s",
                 BADGE_ASSIGNED_STRUCTURE_TABLE,
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE,
+                DefaultBadgeService.BADGE_TABLE,
                 SqlHelper.andFilterStructures(structureIds, params),
                 config.mostAssigningStructureListSize());
 
