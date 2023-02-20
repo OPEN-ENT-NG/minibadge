@@ -8,7 +8,8 @@
                 ng-click="vm.buttonClick(button)">
             <i ng-if="!!button.icon" ng-class="button.icon"></i>&nbsp;<span>[[vm.lang.translate(button.label)]]</span>
         </button>
-        <button class="minibadge-button-title-settings desktop-disabled minibadge-mobile-padding-x"
+        <button ng-if="vm.showChartLightbox"
+                class="minibadge-button-title-settings desktop-disabled minibadge-mobile-padding-x"
                 ng-click="vm.openChartLightbox()">
             <i class="settings"></i>&nbsp;<i18n>minibadge.settings</i18n>
         </button>

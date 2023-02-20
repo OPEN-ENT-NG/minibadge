@@ -22,6 +22,7 @@ interface ViewModel {
     isChartLightboxOpened: boolean;
     isChartAccepted: boolean;
     isMinibadgeAccepted: boolean;
+    isAllowedToUseMinibadge: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -42,6 +43,7 @@ class Controller implements ng.IController, ViewModel {
     isChartLightboxOpened: boolean;
     isChartAccepted: boolean;
     isMinibadgeAccepted: boolean;
+    isAllowedToUseMinibadge: boolean;
 
     subscriptions: Subscription = new Subscription();
 
@@ -104,12 +106,12 @@ class Controller implements ng.IController, ViewModel {
                 this.$scope.setting.userPermissions = await this.chartService.getChart();
                 Behaviours.applicationsBehaviours[MINIBADGE_APP].chartEventsService
                     .validateChart(this.$scope.setting.userPermissions)
-                this.resetChartValues();
+                await this.resetChartValues();
             })
             .catch(() => notify.error('minibadge.error.chart.validate'));
     }
 
-    resetChartValues = (): void => {
+    resetChartValues = async (): Promise<void> => {
         this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
         this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
             || !!this.$scope.setting.userPermissions.acceptReceive;
@@ -121,17 +123,20 @@ class Controller implements ng.IController, ViewModel {
 
     private async initInfos() {
         this.$scope.me = new User(<IUserResponse>model.me);
-        await Promise.all([this.getSettings(), this.chartService.getUserChart()])
-            .then((data: [Setting, Chart]) => {
+        await Promise.all([this.getSettings(), this.chartService.getUserChart(),
+            model.me.hasWorkflow(rights.workflow.assign), model.me.hasWorkflow(rights.workflow.receive)])
+            .then((data: [Setting, Chart, boolean, boolean]) => {
                 let setting: Setting = data[0];
                 setting.userPermissions = data[1];
                 this.$scope.setting = setting;
+                this.isAllowedToUseMinibadge = data[2] || data[3];
 
-                this.isChartLightboxOpened = !this.$scope.setting.userPermissions.acceptChart;
+                this.isChartLightboxOpened = this.isAllowedToUseMinibadge &&
+                    !this.$scope.setting.userPermissions.acceptChart;
                 this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
                 this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptChart
                     && (!!this.$scope.setting.userPermissions.acceptAssign
-                    || !!this.$scope.setting.userPermissions.acceptReceive);
+                        || !!this.$scope.setting.userPermissions.acceptReceive);
             });
     }
 
