@@ -109,7 +109,7 @@ class Controller implements ng.IController, ViewModel {
     private privatizeOption(badge: Badge): ActionOption {
         return new ActionOption(<IActionOptionResponse>{
             label: Controller.privatizeOption,
-            icon: 'lock',
+            icon: 'eye-off',
             action: () => this.badgeService.privatizeBadgeType(badge.badgeType.id)
                 .then(async () => await this.initBadges()),
         });
@@ -127,7 +127,7 @@ class Controller implements ng.IController, ViewModel {
     private publicOption(badge: Badge): ActionOption {
         return new ActionOption(<IActionOptionResponse>{
             label: Controller.publicOption,
-            icon: 'earth',
+            icon: 'icon-eye',
             action: () => this.badgeService.publishBadgeType(badge.badgeType.id)
                 .then(async () => await this.initBadges()),
         });
@@ -136,7 +136,7 @@ class Controller implements ng.IController, ViewModel {
     private acceptOption(badge: Badge): ActionOption {
         return new ActionOption(<IActionOptionResponse>{
             label: Controller.acceptOption,
-            icon: 'check-circle',
+            icon: 'icon-eye',
             action: () => this.badgeService.publishBadgeType(badge.badgeType.id)
                 .then(async () => await this.initBadges()),
         });
