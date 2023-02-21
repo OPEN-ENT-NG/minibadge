@@ -36,8 +36,7 @@ public class BadgeController extends ControllerHelper {
         String query = request.params().get(Request.QUERY);
 
         UserUtils.getUserInfos(eb, request, user -> badgeService.getBadges(user.getUserId(), query)
-                .onSuccess(badges -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), badges))
-                )
+                .onSuccess(badges -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), badges)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
 

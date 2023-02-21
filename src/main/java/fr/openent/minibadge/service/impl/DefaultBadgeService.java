@@ -88,16 +88,18 @@ public class DefaultBadgeService implements BadgeService {
 
         JsonArray params = new JsonArray()
                 .add(ownerId);
-        String request = String.format("SELECT b.id, b.owner_id, b.badge_type_id, privatized_at, refused_at, disabled_at, " +
-                        " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, " +
-                        " (SELECT COUNT(DISTINCT ba.id) FROM %s ba  WHERE ba.badge_id = b.id) as count_assigned " +
-                        " FROM %s b INNER JOIN %s bt ON b.badge_type_id = bt.id " +
-                        " WHERE b.owner_id = ? AND (SELECT COUNT(DISTINCT ba.id)FROM %s ba  WHERE ba.badge_id = b.id )   > 0  " +
-                        " %s %s ",
+
+        String request = String.format(" WITH assign as (SELECT ba.badge_id, " +
+                " COUNT(ba.id) over (partition by ba.badge_id)       as count_assigned, " +
+                " MAX(ba.created_at) over (partition by ba.badge_id) as last_assign_created " +
+                " FROM %s ba) " +
+                " SELECT DISTINCT b.id, b.owner_id, b.badge_type_id, privatized_at, refused_at, disabled_at, " +
+                " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, ba.count_assigned, " +
+                " ba.last_assign_created " +
+                " FROM %s b INNER JOIN assign ba on ba.badge_id = b.id INNER JOIN %s bt ON b.badge_type_id = bt.id " +
+                " WHERE b.owner_id = ? AND ba.count_assigned > 0 %s %s ORDER BY last_assign_created DESC",
                 DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
-                DefaultBadgeTypeService.BADGE_TYPE_TABLE,
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
-                (query != null && !query.isEmpty()) ? "AND" : "",
+                DefaultBadgeTypeService.BADGE_TYPE_TABLE, (query != null && !query.isEmpty()) ? "AND" : "",
                 SqlHelper.searchQueryInColumns(query, Collections.singletonList(String.format("%s%s", "bt.", Database.LABEL)), params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
