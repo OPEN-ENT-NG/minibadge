@@ -63,7 +63,7 @@ public class UsersAssignRight implements ResourcesProvider {
                         return getUserPermissions(cachedPermissionsFuture.result(), userInfos, request);
                     })
                     .compose(permissions -> {
-                        if (permissions.acceptChart() == null)
+                        if (permissions.acceptChart() == null || permissions.acceptAssign() == null)
                             return Future.failedFuture(
                                     String.format("[Minibadge@%s::authorize] User is not allowed to assign.",
                                             this.getClass().getSimpleName()));
@@ -76,7 +76,7 @@ public class UsersAssignRight implements ResourcesProvider {
                                 .isAuthorizedToAssign(new User(userInfos), receivers, typeSetting);
                         boolean canUsersReceive = receivers.stream()
                                 .allMatch(user ->
-                                        user.permissions().acceptChart() == null
+                                        user.permissions().validateChart() == null
                                                 || user.permissions().acceptReceive() != null);
                         handler.handle(ownerIds.size() == receivers.size() && isAuthorizedToAssign && canUsersReceive);
                     })

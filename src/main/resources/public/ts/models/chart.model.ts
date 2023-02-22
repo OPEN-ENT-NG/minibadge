@@ -6,12 +6,16 @@ export interface IChartResponse {
     acceptChart?: string;
     acceptAssign?: string;
     acceptReceive?: string;
+    readChart?: string;
+    validateChart?: string;
 }
 
 export class Chart extends MinibadgeModel<Chart> {
     acceptChart?: string;
     acceptAssign?: string;
     acceptReceive?: string;
+    readChart?: string;
+    validateChart?: string;
 
     constructor(data?: IChartResponse) {
         super();
@@ -22,6 +26,8 @@ export class Chart extends MinibadgeModel<Chart> {
         this.acceptChart = data.acceptChart;
         this.acceptAssign = data.acceptAssign;
         this.acceptReceive = data.acceptReceive;
+        this.readChart = data.readChart;
+        this.validateChart = data.validateChart;
         return this;
     }
 

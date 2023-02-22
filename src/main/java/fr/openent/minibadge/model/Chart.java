@@ -8,6 +8,8 @@ public class Chart implements Model<Chart> {
     private String acceptChart;
     private String acceptAssign;
     private String acceptReceive;
+    private String readChart;
+    private String validateChart;
 
     public Chart() {
     }
@@ -23,6 +25,8 @@ public class Chart implements Model<Chart> {
         this.acceptChart = permissions.getString(Field.ACCEPTCHART, chart.getString(Field.ACCEPTCHART)) ;
         this.acceptAssign = permissions.getString(Field.ACCEPTASSIGN, chart.getString(Field.ACCEPTASSIGN)) ;
         this.acceptReceive = permissions.getString(Field.ACCEPTRECEIVE, chart.getString(Field.ACCEPTRECEIVE));
+        this.readChart = permissions.getString(Field.READCHART, chart.getString(Field.READCHART));
+        this.validateChart = permissions.getString(Field.VALIDATECHART, chart.getString(Field.VALIDATECHART));
         return this;
     }
 
@@ -31,7 +35,9 @@ public class Chart implements Model<Chart> {
         return new JsonObject()
                 .put(Field.ACCEPTCHART, this.acceptChart)
                 .put(Field.ACCEPTASSIGN, this.acceptAssign)
-                .put(Field.ACCEPTRECEIVE, this.acceptReceive);
+                .put(Field.ACCEPTRECEIVE, this.acceptReceive)
+                .put(Field.READCHART, this.readChart)
+                .put(Field.VALIDATECHART, this.validateChart);
     }
 
     @Override
@@ -49,5 +55,8 @@ public class Chart implements Model<Chart> {
 
     public String acceptReceive() {
         return acceptReceive;
+    }
+    public String validateChart() {
+        return validateChart;
     }
 }

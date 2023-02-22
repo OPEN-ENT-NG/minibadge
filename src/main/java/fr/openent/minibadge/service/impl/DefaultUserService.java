@@ -82,7 +82,7 @@ public class DefaultUserService implements UserService {
     private List<User> mapToAuthorizedAssignUsers(UserInfos user, JsonArray users) {
         return new User().toList(users)
                 .stream().filter(queriedUser ->
-                        queriedUser.permissions().acceptChart() == null
+                        queriedUser.permissions().validateChart() == null
                                 || queriedUser.permissions().acceptReceive() != null
                                 // We currently consider that all types have default setting
                                 && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
