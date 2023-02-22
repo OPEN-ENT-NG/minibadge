@@ -47,7 +47,7 @@ public class MinibadgeController extends ControllerHelper {
     @ApiDoc("Accept Minibadge module. enable badges assigned status for current user")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ReceiveRight.class)
-    @Trace(Actions.CHART_ACCEPT)
+    @Trace(value = Actions.CHART_ACCEPT, body = false)
     public void acceptBadge(HttpServerRequest request) {
         UserUtils.getUserInfos(eb, request, user -> badgeService.enableBadges(user.getUserId())
                 .onSuccess(badge -> renderJson(request, new JsonObject()))
@@ -58,7 +58,7 @@ public class MinibadgeController extends ControllerHelper {
     @ApiDoc("Refuse Minibadge module. disable badges assigned status for current user")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ReceiveRight.class)
-    @Trace(Actions.CHART_REFUSE)
+    @Trace(value = Actions.CHART_REFUSE, body = false)
     public void refuseMinibadge(HttpServerRequest request) {
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);

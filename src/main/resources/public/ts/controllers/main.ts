@@ -9,6 +9,7 @@ import {MINIBADGE_APP} from "../minibadgeBehaviours";
 import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
 import {Subscription} from "rxjs";
 import {rights} from "../core/constants/rights.const";
+import {safeApply} from "../utils/safe-apply.utils";
 
 interface ViewModel {
     openChartLightbox(): void;
@@ -115,6 +116,7 @@ class Controller implements ng.IController, ViewModel {
         this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
         this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
             || !!this.$scope.setting.userPermissions.acceptReceive;
+        safeApply(this.$scope);
     }
 
     redirectMainView = (): void => {
