@@ -5,6 +5,7 @@
     <div class="minibadge-margin-top no-margin-bottom">
         <button ng-repeat="button in vm.containerHeader.buttons"
                 class="minibadge-mobile-padding-x"
+                ng-if="button.show()"
                 ng-click="vm.buttonClick(button)">
             <i ng-if="!!button.icon" ng-class="button.icon"></i>&nbsp;<span>[[vm.lang.translate(button.label)]]</span>
         </button>

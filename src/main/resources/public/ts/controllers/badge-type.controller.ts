@@ -1,4 +1,4 @@
-import {Behaviours, idiom as lang, model, ng, notify} from 'entcore';
+import {Behaviours, idiom as lang, ng, notify} from 'entcore';
 
 import {IBadgeTypeService} from "../services";
 import {BadgeType} from "../models/badge-type.model";
@@ -13,7 +13,6 @@ import {ContainerHeader, IContainerHeaderResponse} from "../models/container-hea
 import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
 import {toLocaleString} from "../utils/number.utils";
 import {translate} from "../utils/string.utils";
-import {rights} from "../core/constants/rights.const";
 
 
 interface ViewModel {
@@ -136,6 +135,7 @@ class Controller implements ng.IController, ViewModel {
                             label: `${this.lang.translate('minibadge.badge')} ${this.badgeType.label}`,
                             buttons: [new ActionOption(<IActionOptionResponse>{
                                 label: 'minibadge.badge.assign',
+                                show: () => this.$scope.setting.userPermissions.canAssign(),
                                 action: () => this.onOpenLightbox(),
                             })]
                         }));
