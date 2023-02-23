@@ -13,6 +13,7 @@ import org.entcore.common.storage.StorageFactory;
 public class Minibadge extends BaseServer {
     public static final int PAGE_SIZE = 20;
     public static final int PAGE_SIZE_MAX = 100;
+    public static final String MINIBADGE = "minibadge";
 
     public static String dbSchema;
     public static Config modelConfig;

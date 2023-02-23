@@ -12,10 +12,15 @@ public class Field {
     public static final String BADGE_TYPE_ID = "badge_type_id";
     public static final String BADGETYPEID = "badgeTypeId";
     public static final String BADGE_TYPE_LABEL = "badge_type_label";
+    public static final String BADGETYPELABEL = "badgeTypeLabel";
+    public static final String BADGETYPELINK = "badgeTypeLink";
     public static final String BADGE_TYPE_PICTURE_ID = "badge_type_picture_id";
     public static final String PICTUREID = "pictureId";
     public static final String PICTURE_ID = "picture_id";
     public static final String LABEL = "label";
+    public static final String TITLE = "title";
+    public static final String BODY = "body";
+    public static final String PUSHNOTIF = "pushNotif";
     public static final String DESCRIPTION = "description";
     public static final String DESCRIPTION_SHORT = "description_short";
     public static final String DESCRIPTIONSHORT = "descriptionShort";

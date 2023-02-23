@@ -6,6 +6,7 @@ import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.security.UsersAssignRight;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
+import fr.openent.minibadge.service.NotifyService;
 import fr.openent.minibadge.service.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
@@ -29,11 +30,13 @@ public class BadgeAssignedController extends ControllerHelper {
 
     private final EventStore eventStore;
     private final BadgeAssignedService badgeAssignedService;
+    private final NotifyService notifyService;
 
     public BadgeAssignedController(ServiceFactory serviceFactory) {
         super();
         this.eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
         this.badgeAssignedService = serviceFactory.badgeAssignedService();
+        this.notifyService = serviceFactory.notifyService();
     }
 
     @Put("/revoked/given/:badgeId")
@@ -80,6 +83,7 @@ public class BadgeAssignedController extends ControllerHelper {
             UserUtils.getUserInfos(eb, request, user -> badgeAssignedService.assign(typeId, ownerIds, user)
                     .onSuccess(badgeType -> {
                         eventStore.createAndStoreEvent(EventBusConst.CREATE_EVENT, request);
+                        notifyService.notifyBadgeAssigned(request, user, ownerIds, typeId);
                         renderJson(request, new JsonObject());
                     })
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));

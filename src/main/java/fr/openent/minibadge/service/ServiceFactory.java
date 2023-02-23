@@ -7,6 +7,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.neo4j.Neo4j;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.storage.Storage;
 
@@ -55,6 +56,10 @@ public class ServiceFactory {
         return new DefaultStatisticService(sql, new Config(config), userService(), structureService());
     }
 
+    public DefaultNotifyService notifyService() {
+        return new DefaultNotifyService(timelineHelper(), badgeTypeService());
+    }
+
     public UserService userService() {
         return new DefaultUserService(sql, neo4j, this.eventBus());
     }
@@ -67,4 +72,9 @@ public class ServiceFactory {
     public Vertx vertx() {
         return this.vertx;
     }
+
+    public TimelineHelper timelineHelper() {
+        return new TimelineHelper(vertx, vertx.eventBus(), vertx.getOrCreateContext().config());
+    }
+
 }
