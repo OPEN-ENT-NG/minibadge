@@ -62,10 +62,14 @@ class Controller implements ng.IController, ViewModel {
     initBadges = async (): Promise<void> => {
         this.payload.query = this.searchQuery;
         this.badges = [];
+        this.publishedBadges = [];
+        this.privatizedBadges = [];
+        this.refusedBadges = [];
         await this.getBadges();
     }
 
     getBadges = async (): Promise<void> => {
+        if (!this.$scope.setting.userPermissions.canReceive()) return;
         this.badgeService.getBadges(this.payload)
             .then((data: Badge[]) => {
                 if (data && data.length > 0) {
