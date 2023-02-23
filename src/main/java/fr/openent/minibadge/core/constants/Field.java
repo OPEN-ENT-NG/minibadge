@@ -74,6 +74,8 @@ public class Field {
     public static final String ACCEPTCHART = "acceptChart";
     public static final String ACCEPTASSIGN = "acceptAssign";
     public static final String ACCEPTRECEIVE = "acceptReceive";
+    public static final String READCHART = "readChart";
+    public static final String VALIDATECHART = "validateChart";
     public static final String PERMISSIONS = "permissions";
 
     //USER

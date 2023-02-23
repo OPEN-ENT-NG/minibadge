@@ -7,6 +7,8 @@ import {rights} from "../core/constants/rights.const";
 export interface IChartService {
     saveChart(isChartAccepted: boolean, isMinibadgeAccepted: boolean): Promise<[void, AxiosResponse]>;
 
+    viewChart(): Promise<void>;
+
     getChart(): Promise<Chart>;
 
     getUserChart(): Promise<Chart>
@@ -29,16 +31,16 @@ export const chartService: IChartService = {
         let [isAssignWorkflow, isReceiveWorkflow]: boolean[] =
             await Promise.all([model.me.hasWorkflow(rights.workflow.assign), model.me.hasWorkflow(rights.workflow.receive)]);
 
-        let oldChart: IChartResponse = Me.preferences[PREFERENCES.CHART];
+        let oldChart: IChartResponse = {...Me.preferences[PREFERENCES.CHART]};
 
         let isNewlyAccepted: boolean = isChartAccepted && isMinibadgeAccepted
-            && (!oldChart || !oldChart.acceptChart || (!oldChart.acceptAssign && !oldChart.acceptReceive));
+            && (!oldChart.acceptChart || (!oldChart.acceptAssign && !oldChart.acceptReceive));
 
         let isChartNewlyAccepted: boolean = isChartAccepted && (!oldChart || !oldChart.acceptChart);
         let isChartNewlyRefused: boolean = !isChartAccepted && !!oldChart && !!oldChart.acceptChart;
 
         let isNewlyRefused: boolean = (!isChartAccepted || !isMinibadgeAccepted)
-            && oldChart && !!oldChart.acceptChart;
+            && !!oldChart.acceptChart;
 
         let isReceivedNewlyRefused: boolean = isNewlyRefused && !!oldChart.acceptReceive;
         let isAssignNewlyRefused: boolean = isNewlyRefused && !!oldChart.acceptAssign;
@@ -51,7 +53,11 @@ export const chartService: IChartService = {
                 : (!isAssignNewlyRefused ? oldChart.acceptAssign : null),
 
             acceptReceive: isNewlyAccepted && isReceiveWorkflow ? new Date().toISOString()
-                : (!isReceivedNewlyRefused ? oldChart.acceptReceive : null)
+                : (!isReceivedNewlyRefused ? oldChart.acceptReceive : null),
+
+            readChart: new Date().toISOString(),
+
+            validateChart: new Date().toISOString()
         };
 
         let chartRequest: AxiosPromise;
@@ -60,6 +66,16 @@ export const chartService: IChartService = {
 
         return Promise.all([Me.savePreference(PREFERENCES.CHART), chartRequest])
             .then((values: [void, AxiosResponse]) => values);
+    },
+
+    viewChart: async (): Promise<void> => {
+        let oldChart: IChartResponse = {...Me.preferences[PREFERENCES.CHART]};
+        if (!oldChart.readChart) {
+            Me.preferences[PREFERENCES.CHART] = {oldChart, readChart: new Date().toISOString()}
+            oldChart.readChart = new Date().toISOString();
+            return await Me.savePreference(PREFERENCES.CHART)
+        }
+        return;
     },
 
     getChart: async (): Promise<Chart> => Me.preference(PREFERENCES.CHART)

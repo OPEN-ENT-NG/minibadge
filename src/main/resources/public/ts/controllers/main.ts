@@ -14,7 +14,7 @@ import {safeApply} from "../utils/safe-apply.utils";
 interface ViewModel {
     openChartLightbox(): void;
 
-    chartValidate(): Promise<void>;
+    chartValidate(isValidate?: boolean): Promise<void>;
 
     resetChartValues(): void;
 
@@ -106,13 +106,14 @@ class Controller implements ng.IController, ViewModel {
             .then(async () => {
                 this.$scope.setting.userPermissions = await this.chartService.getChart();
                 Behaviours.applicationsBehaviours[MINIBADGE_APP].chartEventsService
-                    .validateChart(this.$scope.setting.userPermissions)
+                    .validateChart(this.$scope.setting.userPermissions);
                 await this.resetChartValues();
             })
             .catch(() => notify.error('minibadge.error.chart.validate'));
     }
 
     resetChartValues = async (): Promise<void> => {
+        await this.chartService.viewChart();
         this.$scope.vm.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
         this.$scope.vm.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptAssign
             || !!this.$scope.setting.userPermissions.acceptReceive;
@@ -134,6 +135,7 @@ class Controller implements ng.IController, ViewModel {
                 this.isAllowedToUseMinibadge = data[2] || data[3];
 
                 this.isChartLightboxOpened = this.isAllowedToUseMinibadge &&
+                    !this.$scope.setting.userPermissions.readChart &&
                     !this.$scope.setting.userPermissions.acceptChart;
                 this.isChartAccepted = !!this.$scope.setting.userPermissions.acceptChart;
                 this.isMinibadgeAccepted = !!this.$scope.setting.userPermissions.acceptChart
