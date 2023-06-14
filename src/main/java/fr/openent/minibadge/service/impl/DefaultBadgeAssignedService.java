@@ -2,6 +2,7 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Database;
+import fr.openent.minibadge.helper.ModelHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
@@ -10,7 +11,6 @@ import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.BadgeAssignedService;
 import fr.openent.minibadge.service.BadgeService;
 import fr.openent.minibadge.service.UserService;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
@@ -27,7 +27,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static fr.openent.minibadge.core.constants.Field.*;
-import static fr.openent.minibadge.service.impl.DefaultBadgeService.*;
+import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_PUBLIC_TABLE;
+import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
 import static fr.openent.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
 import static fr.openent.minibadge.service.impl.DefaultUserService.USER_TABLE;
 
@@ -52,8 +53,10 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         badgeService
                 .createBadges(typeId, ownerIds)
                 .compose(badgeResult -> createBadgeAssignedRequest(typeId, ownerIds, assignor))
-                .compose(badgeTypes -> createBadgeAssignedStructures(typeId, ownerIds, assignor))
-                .onSuccess(badgeTypes -> promise.complete())
+                .onSuccess(badgeTypes -> {
+                    promise.complete();
+                    createBadgeAssignedStructures(badgeTypes, ownerIds, assignor);
+                })
                 .onFailure(promise::fail);
         return promise.future();
     }
@@ -109,36 +112,39 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
 
-    private Future<JsonArray> createBadgeAssignedRequest(long typeId,
-                                                         List<String> ownerIds, UserInfos assignor) {
-        Promise<JsonArray> promise = Promise.promise();
+    private Future<List<BadgeAssigned>> createBadgeAssignedRequest(long typeId,
+                                                                   List<String> ownerIds, UserInfos assignor) {
+        Promise<List<BadgeAssigned>> promise = Promise.promise();
 
-        String request = String.format("INSERT INTO %s (badge_id, assignor_id) " +
-                        " SELECT id as badge_id, ? as assignor_id FROM %s " +
-                        " WHERE badge_type_id = ? AND owner_id IN %s", BADGE_ASSIGNED_TABLE,
-                DefaultBadgeService.BADGE_ASSIGNABLE_TABLE, Sql.listPrepared(ownerIds));
+        String request = "WITH inserted_badge_assigned AS ( " +
+                " INSERT INTO " + BADGE_ASSIGNED_TABLE + " (badge_id, assignor_id) " +
+                " SELECT id as badge_id, ? as assignor_id FROM  " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE +
+                " WHERE badge_type_id = ? AND owner_id IN " + Sql.listPrepared(ownerIds) + " RETURNING *) " +
+                " SELECT iba.*, b.badge_type_id, b.owner_id " +
+                " FROM inserted_badge_assigned iba  JOIN " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE + " b " +
+                " ON iba.badge_id = b.id";
 
         JsonArray params = new JsonArray()
                 .add(assignor.getUserId())
                 .add(typeId)
                 .addAll(new JsonArray(ownerIds));
 
-        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+        sql.prepared(request, params, SqlResult.validResultHandler(ModelHelper.sqlResultToModel(promise,
+                BadgeAssigned.class,
                 String.format("[Minibadge@%s::createBadgeAssignedRequest] Fail to create badge assigned",
                         this.getClass().getSimpleName()))));
 
         return promise.future();
     }
 
-    private Future<Void> createBadgeAssignedStructures(long typeId,
+    private Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned,
                                                        List<String> ownerIds, UserInfos assignor) {
         Promise<Void> promise = Promise.promise();
 
         Future<List<User>> ownersFuture = userService.getUsers(ownerIds);
-        Future<List<BadgeAssigned>> badgesAssignedFuture = getBadgeAssigned(typeId, ownerIds, assignor);
 
-        CompositeFuture.all(ownersFuture, badgesAssignedFuture)
-                .compose(result -> createBadgeAssignedStructuresRequest(badgesAssignedFuture.result(),
+        userService.getUsers(ownerIds)
+                .compose(result -> createBadgeAssignedStructuresRequest(badgeAssigned,
                         ownersFuture.result(), assignor))
                 .onSuccess(result -> promise.complete())
                 .onFailure(promise::fail);
