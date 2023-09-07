@@ -38,6 +38,7 @@ public interface UserService {
 
     /**
      * Replace user name by a default disable name if he refuse to use minibadges
+     *
      * @param userId
      * @param host
      * @param language
@@ -48,9 +49,9 @@ public interface UserService {
     /**
      * Count users that gave me this (:typeId) badge typed
      *
-     * @param typeId type identifier
-     * @param assigner assigner that assigned this id typed badge
-     * @param  receiverIds that potentially received this typed badge by current assigner
+     * @param typeId      type identifier
+     * @param assigner    assigner that assigned this id typed badge
+     * @param receiverIds that potentially received this typed badge by current assigner
      * @return return future containing list of users that received the typed badge from current assigner
      */
     Future<List<User>> getUnassignableUserIds(long typeId, UserInfos assigner, List<String> receiverIds);

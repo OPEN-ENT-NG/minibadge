@@ -8,6 +8,7 @@ public interface SettingService {
 
     /**
      * get global settings
+     *
      * @return global settings
      */
     Future<GlobalSettings> getGlobalSettings(UserInfos user);

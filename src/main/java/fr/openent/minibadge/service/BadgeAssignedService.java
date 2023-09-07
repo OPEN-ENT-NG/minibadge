@@ -1,7 +1,7 @@
 package fr.openent.minibadge.service;
 
-import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.BadgeAssigned;
+import fr.openent.minibadge.model.User;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -13,7 +13,7 @@ public interface BadgeAssignedService {
     /**
      * Create badge assigned with badge creation if not exists
      *
-     * @param typeId type identifier
+     * @param typeId   type identifier
      * @param ownerIds list of badge owners identifier
      * @param assignor user that is assigning
      * @return return future
@@ -46,10 +46,10 @@ public interface BadgeAssignedService {
     /**
      * Get users that gave me this (:typeId) badge typed
      *
-     * @param typeId type identifier
+     * @param typeId     type identifier
      * @param badgeOwner owner that received this id typed badge
-     * @param limit max number of occurrences
-     * @param offset position from where getting occurrences
+     * @param limit      max number of occurrences
+     * @param offset     position from where getting occurrences
      * @return return future containing list of users
      */
     Future<List<User>> getBadgeTypeAssigners(long typeId, UserInfos badgeOwner, int limit, Integer offset);
@@ -57,7 +57,7 @@ public interface BadgeAssignedService {
     /**
      * Count users that gave me this (:typeId) badge typed
      *
-     * @param typeId type identifier
+     * @param typeId     type identifier
      * @param badgeOwner owner that received this id typed badge
      * @return return future containing assigners count
      */

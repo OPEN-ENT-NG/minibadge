@@ -18,7 +18,7 @@ public class DefaultNotifyService implements NotifyService {
     private final TimelineHelper timelineHelper;
     private final BadgeTypeService badgeTypeService;
 
-    public DefaultNotifyService(TimelineHelper timelineHelper, BadgeTypeService badgeTypeService) {
+    protected DefaultNotifyService(TimelineHelper timelineHelper, BadgeTypeService badgeTypeService) {
         this.timelineHelper = timelineHelper;
         this.badgeTypeService = badgeTypeService;
     }
