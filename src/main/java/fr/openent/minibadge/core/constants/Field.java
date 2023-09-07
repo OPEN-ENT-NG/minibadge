@@ -21,6 +21,7 @@ public class Field {
     public static final String TITLE = "title";
     public static final String BODY = "body";
     public static final String PUSHNOTIF = "pushNotif";
+    public static final String RESOURCEURI = "resourceUri";
     public static final String DESCRIPTION = "description";
     public static final String DESCRIPTION_SHORT = "description_short";
     public static final String DESCRIPTIONSHORT = "descriptionShort";

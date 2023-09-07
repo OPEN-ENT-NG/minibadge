@@ -30,10 +30,12 @@ public class DefaultNotifyService implements NotifyService {
 
         badgeTypeService.getBadgeType(assigner.getStructures(), typeId, host, language)
                 .onSuccess(badgeType -> {
+                    String uri = String.format("/minibadge#/badge-types/%s", badgeType.id());
                     JsonObject params = new JsonObject()
                             .put(Field.USERNAME, assigner.getUsername())
                             .put(Field.BADGETYPELABEL, badgeType.label())
-                            .put(Field.BADGETYPELINK, String.format("/minibadge#/badge-types/%s", badgeType.id()))
+                            .put(Field.BADGETYPELINK, uri)
+                            .put(Field.RESOURCEURI, uri)
                             .put(Field.PUSHNOTIF, new JsonObject()
                                     .put(Field.TITLE, "minibadge.new.badge.assigned.title").put(Field.BODY, ""));
 
