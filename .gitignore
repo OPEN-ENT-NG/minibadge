@@ -10,6 +10,7 @@
 node_modules
 *.iml
 */build
+/src/main/resources/public/css/
 /src/main/resources/public/dist
 /src/main/resources/public/temp
 /src/main/resources/public/js
@@ -28,3 +29,5 @@ minibadge/src/main/resources/public/font
 /src/main/resources/public/template/entcore/*
 /src/main/resources/public/template/entcore/
 /src/main/resources/public/js/
+/package-lock.json
+/yarn.lock
