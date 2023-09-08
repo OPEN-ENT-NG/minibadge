@@ -23,6 +23,10 @@ minibadge-card-type {
         line-height: 24px;
         left: 0;
 
+        &:hover {
+          color: $minibadge-orange;
+        }
+
         @include mobile {
           padding: 5px;
         }
@@ -150,6 +154,12 @@ minibadge-card-type {
         .minibadge-type-footer {
           height: 100%;
         }
+      }
+    }
+
+    &:hover {
+      .minibadge-icon-right {
+        color: $minibadge-orange;
       }
     }
   }
