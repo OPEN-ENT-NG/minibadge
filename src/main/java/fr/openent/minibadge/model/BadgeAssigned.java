@@ -3,7 +3,7 @@ package fr.openent.minibadge.model;
 import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
 
-public class BadgeAssigned implements Model<BadgeAssigned>{
+public class BadgeAssigned implements Model<BadgeAssigned> {
     private Long id;
     private User assignor;
     private String assignorId;
@@ -25,13 +25,14 @@ public class BadgeAssigned implements Model<BadgeAssigned>{
         return new Badge(
                 new JsonObject()
                         .put(Field.ID, idBadge)
-                        .put(Field.BADGE_TYPE_ID,idBadgeType)
+                        .put(Field.BADGE_TYPE_ID, idBadgeType)
                         .put(Field.BADGE_TYPE_LABEL, typeLabel)
                         .put(Field.BADGE_TYPE_PICTURE_ID, pictureId)
-                        .put(Field.OWNER_ID,ownerId)
-                .put(Field.DISPLAYNAME,displayName)
+                        .put(Field.OWNER_ID, ownerId)
+                        .put(Field.DISPLAYNAME, displayName)
         );
     }
+
     @Override
     public BadgeAssigned model(JsonObject badgeAssigned) {
         return new BadgeAssigned(badgeAssigned);
@@ -46,13 +47,13 @@ public class BadgeAssigned implements Model<BadgeAssigned>{
         this.acceptedAt = badgeAssigned.getString(Field.ACCEPTED_AT, badgeAssigned.getString(Field.ACCEPTEDAT));
         this.revokedAt = badgeAssigned.getString(Field.REVOKED_AT, badgeAssigned.getString(Field.REVOKEDAT));
         this.badge = setBadge(
-                badgeAssigned.getLong(Field.BADGE_ID,badgeAssigned.getLong(Field.BADGEID)) ,
-                badgeAssigned.getLong(Field.BADGE_TYPE_ID,badgeAssigned.getLong(Field.BADGETYPEID)),
+                badgeAssigned.getLong(Field.BADGE_ID, badgeAssigned.getLong(Field.BADGEID)),
+                badgeAssigned.getLong(Field.BADGE_TYPE_ID, badgeAssigned.getLong(Field.BADGETYPEID)),
                 badgeAssigned.getString(Field.LABEL),
-                badgeAssigned.getString(Field.PICTURE_ID,badgeAssigned.getString(Field.PICTUREID)),
-                badgeAssigned.getString(Field.OWNER_ID,badgeAssigned.getString(Field.OWNERID)),
+                badgeAssigned.getString(Field.PICTURE_ID, badgeAssigned.getString(Field.PICTUREID)),
+                badgeAssigned.getString(Field.OWNER_ID, badgeAssigned.getString(Field.OWNERID)),
                 badgeAssigned.getString(Field.DISPLAYNAME, badgeAssigned.getString(Field.DISPLAY_NAME))
-                );
+        );
 
         return this;
     }
@@ -108,6 +109,7 @@ public class BadgeAssigned implements Model<BadgeAssigned>{
     public void setBadge(Badge badge) {
         this.badge = badge;
     }
+
     public String assignorId() {
         return assignorId;
     }

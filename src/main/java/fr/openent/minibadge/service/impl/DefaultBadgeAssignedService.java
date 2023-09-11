@@ -8,9 +8,7 @@ import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.service.BadgeAssignedService;
-import fr.openent.minibadge.service.BadgeService;
-import fr.openent.minibadge.service.UserService;
+import fr.openent.minibadge.service.*;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
@@ -24,10 +22,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static fr.openent.minibadge.core.constants.Field.*;
-import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_PUBLIC_TABLE;
 import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
 import static fr.openent.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
 import static fr.openent.minibadge.service.impl.DefaultUserService.USER_TABLE;
@@ -40,11 +36,14 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     private final Sql sql;
     private final BadgeService badgeService;
     private final UserService userService;
+    private final BadgeAssignedStructureService badgeAssignedStructureService;
 
-    public DefaultBadgeAssignedService(Sql sql, BadgeService badgeService, UserService userService) {
+    protected DefaultBadgeAssignedService(Sql sql, BadgeService badgeService, UserService userService,
+                                       BadgeAssignedStructureService badgeAssignedStructureService) {
         this.sql = sql;
         this.badgeService = badgeService;
         this.userService = userService;
+        this.badgeAssignedStructureService = badgeAssignedStructureService;
     }
 
     @Override
@@ -55,7 +54,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                 .compose(badgeResult -> createBadgeAssignedRequest(typeId, ownerIds, assignor))
                 .onSuccess(badgeTypes -> {
                     promise.complete();
-                    createBadgeAssignedStructures(badgeTypes, ownerIds, assignor);
+                    badgeAssignedStructureService.createBadgeAssignedStructures(badgeTypes, ownerIds, assignor);
                 })
                 .onFailure(promise::fail);
         return promise.future();
@@ -135,124 +134,6 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                         this.getClass().getSimpleName()))));
 
         return promise.future();
-    }
-
-    private Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned,
-                                                       List<String> ownerIds, UserInfos assignor) {
-        Promise<Void> promise = Promise.promise();
-
-        Future<List<User>> ownersFuture = userService.getUsers(ownerIds);
-
-        userService.getUsers(ownerIds)
-                .compose(result -> createBadgeAssignedStructuresRequest(badgeAssigned,
-                        ownersFuture.result(), assignor))
-                .onSuccess(result -> promise.complete())
-                .onFailure(promise::fail);
-
-        return promise.future();
-    }
-
-    private Future<List<BadgeAssigned>> getBadgeAssigned(long typeId, List<String> ownerIds, UserInfos assignor) {
-        Promise<List<BadgeAssigned>> promise = Promise.promise();
-        getBadgeAssignedRequest(typeId, ownerIds, assignor)
-                .onSuccess(badgesAssigned -> promise.complete(new BadgeAssigned().toList(badgesAssigned)))
-                .onFailure(promise::fail);
-
-        return promise.future();
-    }
-
-    private Future<JsonArray> getBadgeAssignedRequest(long typeId, List<String> ownerIds, UserInfos assignor) {
-        Promise<JsonArray> promise = Promise.promise();
-        String request = String.format(" SELECT bav.id as id, bp.badge_type_id as badge_type_id, bp.owner_id as owner_id, " +
-                        " bav.assignor_id as assignor_id " +
-                        " FROM %s bav INNER JOIN %s bp on bav.badge_id = bp.id " +
-                        " WHERE badge_type_id = ? AND owner_id IN %s AND assignor_id = ?",
-                BADGE_ASSIGNED_VALID_TABLE, BADGE_PUBLIC_TABLE, Sql.listPrepared(ownerIds));
-
-        JsonArray params = new JsonArray()
-                .add(typeId)
-                .addAll(new JsonArray(ownerIds))
-                .add(assignor.getUserId());
-
-        sql.prepared(request, params,
-                SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                        String.format("[Minibadge@%s::getBadgeAssignedRequest] " +
-                                        "Fail to retrieve badge assigned",
-                                this.getClass().getSimpleName()))));
-
-        return promise.future();
-    }
-
-    private Future<JsonArray> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> owners,
-                                                                   UserInfos assignor) {
-        Promise<JsonArray> promise = Promise.promise();
-
-        JsonArray params = new JsonArray();
-        String request = String.format("INSERT INTO %s (badge_assigned_id, structure_id, is_structure_assigner, " +
-                        " is_structure_receiver) VALUES %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
-                badgeAssignedStructureToValuesInsert(badgesAssigned, owners, assignor, params));
-
-        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::createBadgeAssignedStructuresRequest] Fail to create badge assigned " +
-                                "structures",
-                        this.getClass().getSimpleName()))));
-
-        return promise.future();
-    }
-
-    private String badgeAssignedStructureToValuesInsert(List<BadgeAssigned> badgesAssigned, List<User> owners,
-                                                        UserInfos assignor, JsonArray params) {
-        return badgesAssigned
-                .stream().map(badgeAssigned ->
-                        owners.stream()
-                                .filter(owner -> owner.getUserId().equals(badgeAssigned.badge().ownerId()))
-                                .findFirst()
-                                .map(owner -> {
-                                    List<String> commonStructureIds = owner.getStructures().stream()
-                                            .filter(structureId -> assignor.getStructures().contains(structureId))
-                                            .collect(Collectors.toList());
-                                    return badgeAssignedStructureToValuesInsert(assignor, owner, badgeAssigned,
-                                            commonStructureIds, params);
-                                })
-                                .orElse("")
-                )
-                .collect(Collectors.joining(", "));
-    }
-
-    private String badgeAssignedStructureToValuesInsert(UserInfos assignor, User owner, BadgeAssigned badgeAssigned,
-                                                        List<String> commonStructureIds, JsonArray params) {
-        if (commonStructureIds.isEmpty()) {
-            return Stream.concat(
-                    owner.getStructures().stream()
-                            .map(structureId -> badgeAssignedStructureToValueInsert(
-                                    badgeAssigned.id(), structureId, false,
-                                    true, params)),
-                    assignor.getStructures().stream()
-                            .map(structureId -> badgeAssignedStructureToValueInsert(
-                                    badgeAssigned.id(), structureId, true,
-                                    false, params))
-            ).collect(Collectors.joining(", "));
-        }
-
-        return commonStructureIds.stream()
-                .map(structureId ->
-                        badgeAssignedStructureToValueInsert(badgeAssigned.id(), structureId,
-                                true, true, params))
-                .collect(Collectors.joining(", "));
-    }
-
-    private String badgeAssignedStructureToValueInsert(Long badgeAssignedId, String structureId,
-                                                       Boolean isStructureAssigner, Boolean isStructureReceiver,
-                                                       JsonArray params) {
-        JsonArray paramsValues = new JsonArray()
-                .add(badgeAssignedId)
-                .add(structureId)
-                .add(isStructureAssigner)
-                .add(isStructureReceiver);
-
-        params.addAll(paramsValues);
-
-        return Sql.listPrepared(paramsValues);
     }
 
     @Override

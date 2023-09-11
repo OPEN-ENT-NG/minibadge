@@ -13,9 +13,12 @@ public interface Model<I extends Model<I>> {
 
     I set(JsonObject model);
 
-    @SuppressWarnings("unchecked")
     default List<I> toList(JsonArray results) {
-        return ((List<JsonObject>) results.getList()).stream().map(this::model).collect(Collectors.toList());
+        return results.stream()
+                .filter(JsonObject.class::isInstance)
+                .map(JsonObject.class::cast)
+                .map(this::model)
+                .collect(Collectors.toList());
     }
 
     default JsonArray toArray(List<I> models) {

@@ -16,7 +16,7 @@ import java.util.List;
 public class DefaultStructureService implements StructureService {
     private final Neo4j neo;
 
-    public DefaultStructureService(Neo4j neo) {
+    protected DefaultStructureService(Neo4j neo) {
         this.neo = neo;
     }
 

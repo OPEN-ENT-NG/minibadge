@@ -2,7 +2,7 @@ package fr.openent.minibadge;
 
 import fr.openent.minibadge.controller.*;
 import fr.openent.minibadge.model.Config;
-import fr.openent.minibadge.service.ServiceFactory;
+import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.wseduc.mongodb.MongoDb;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.neo4j.Neo4j;

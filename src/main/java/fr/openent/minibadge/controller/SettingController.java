@@ -2,7 +2,7 @@ package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.security.ViewRight;
-import fr.openent.minibadge.service.ServiceFactory;
+import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.openent.minibadge.service.SettingService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;

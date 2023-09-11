@@ -4,7 +4,7 @@ import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.security.AssignRight;
-import fr.openent.minibadge.service.ServiceFactory;
+import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;

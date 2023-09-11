@@ -33,7 +33,7 @@ public class DefaultUserService implements UserService {
     private final Sql sql;
     private final Neo4j neo;
 
-    public DefaultUserService(Sql sql, Neo4j neo, EventBus eb) {
+    protected DefaultUserService(Sql sql, Neo4j neo, EventBus eb) {
         this.sql = sql;
         this.neo = neo;
         this.eb = eb;

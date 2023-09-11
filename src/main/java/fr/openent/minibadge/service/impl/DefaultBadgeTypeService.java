@@ -28,7 +28,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
     private final Sql sql;
     private final EventBus eb;
 
-    public DefaultBadgeTypeService(Sql sql, EventBus eb) {
+    protected DefaultBadgeTypeService(Sql sql, EventBus eb) {
         this.sql = sql;
         this.eb = eb;
     }
