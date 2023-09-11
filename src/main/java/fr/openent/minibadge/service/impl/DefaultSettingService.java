@@ -20,7 +20,7 @@ import java.util.List;
 
 public class DefaultSettingService implements SettingService {
 
-    public DefaultSettingService() {
+    protected DefaultSettingService() {
         // At this moment, this service is not other service dependant
     }
 

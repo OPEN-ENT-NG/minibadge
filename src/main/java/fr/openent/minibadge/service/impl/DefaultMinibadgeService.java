@@ -7,7 +7,7 @@ public class DefaultMinibadgeService implements MinibadgeService {
 
     private final Sql sql;
 
-    public DefaultMinibadgeService(Sql sql) {
+    protected DefaultMinibadgeService(Sql sql) {
        this.sql = sql;
     }
 }

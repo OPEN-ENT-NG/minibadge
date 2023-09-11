@@ -33,7 +33,7 @@ public class DefaultStatisticService implements StatisticService {
     private final StructureService structureService;
 
 
-    public DefaultStatisticService(Sql sql, Config config, UserService userService, StructureService structureService) {
+    protected DefaultStatisticService(Sql sql, Config config, UserService userService, StructureService structureService) {
         this.sql = sql;
         this.config = config;
         this.userService = userService;

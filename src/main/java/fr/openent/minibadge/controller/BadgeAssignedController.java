@@ -7,7 +7,7 @@ import fr.openent.minibadge.security.UsersAssignRight;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
 import fr.openent.minibadge.service.NotifyService;
-import fr.openent.minibadge.service.ServiceFactory;
+import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;

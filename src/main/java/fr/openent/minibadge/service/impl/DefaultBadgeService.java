@@ -32,7 +32,7 @@ public class DefaultBadgeService implements BadgeService {
     private final UserService userService;
     private final Sql sql;
 
-    public DefaultBadgeService(Sql sql, UserService userService) {
+    protected DefaultBadgeService(Sql sql, UserService userService) {
         this.sql = sql;
         this.userService = userService;
     }
