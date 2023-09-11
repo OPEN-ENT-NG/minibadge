@@ -6,7 +6,7 @@
       font-weight: bold;
     }
 
-    &-body > container-body {
+    &-body > container-body, .minibadge-statistics-cards, .minibadge-statistics-badges {
       gap: 50px
     }
   }
@@ -27,6 +27,7 @@
     .minibadge-container-card {
       flex: 1;
       justify-content: center;
+      padding: 30px;
 
       .minibadge-title {
         font-size: 30px;
@@ -45,7 +46,14 @@
 
   &-top-structures {
     flex: 5;
+  }
 
+  &-top-assigning, &-top-receiving {
+    flex: 1;
+  }
+
+
+  &-top-structures, &-top-assigning, &-top-receiving {
     .minibadge-card {
       background: $minibadge-white;
       border: none;
@@ -68,7 +76,7 @@
     }
   }
 
-  &-most-allowed {
+  &-top-most-allowed {
     flex: 5;
 
     .check-circle {
@@ -76,8 +84,18 @@
     }
   }
 
-  &-most-refused {
+  &-top-most-refused {
     flex: 4;
+
+    .minibadge-card {
+      width: 100%;
+      background: $minibadge-white;
+      border: none;
+
+      container-body {
+        font-weight: bold;
+      }
+    }
 
     .close-circle {
       color: $minibadge-red;
@@ -94,32 +112,69 @@
 
       .minibadge-most-assigned {
         padding: 10px;
-        align-items: stretch;
+        align-items: center;
+
+        &-detail {
+          flex: 3;
+        }
+
+        &-others {
+          flex: 3;
+        }
+
+        minibadge-card-type {
+          flex: 2;
+        }
+
+        .minibadge-list-item-display, .minibadge-list-item-distinction {
+          flex: 1;
+          overflow: auto;
+        }
       }
     }
 
-    .minibadge-most-assigned-detail, .minibadge-most-assigned-others {
-      flex: 1;
+    .minibadge-most-assigned-detail {
+      flex: 2;
+    }
+
+    .minibadge-most-assigned-others {
+      flex: 3;
     }
 
     minibadge-card-type {
       .minibadge-card {
-        height: 146px;
-        width: 176px;
+        height: 176px;
+        width: 100%;
       }
     }
 
   }
+
+  .minibadge-statistics-most-allowed {
+    i.trophy {
+      color: $minibadge-orange;
+    }
+  }
+
 }
 
 minibadge-card-type-statistic {
+  padding: 10px;
+
   .minibadge-card {
     height: auto;
+
     .minibadge-card-body {
-      flex: revert;
+      align-self: stretch;
+
+      container-body {
+        align-self: stretch;
+      }
+
       .minibadge-card-picture {
         flex: revert;
         @include marginX(10px);
+        height: 100%;
       }
     }
   }
