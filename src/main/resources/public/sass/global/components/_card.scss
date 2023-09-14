@@ -21,6 +21,14 @@
     background: $minibadge-white;
     gap: 15px;
     @include paddingY(15px);
+
+    minibadge-card-type {
+      .minibadge-card {
+        &-body-icon:hover {
+          color: $minibadge-orange;
+        }
+      }
+    }
   }
 
   height: 232px;

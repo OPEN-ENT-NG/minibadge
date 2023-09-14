@@ -23,10 +23,6 @@ minibadge-card-type {
         line-height: 24px;
         left: 0;
 
-        &:hover {
-          color: $minibadge-orange;
-        }
-
         @include mobile {
           padding: 5px;
         }

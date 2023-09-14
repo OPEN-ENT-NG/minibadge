@@ -1,3 +1,7 @@
+$grey: #8c939e !default;
+$shadow: rgba(0, 0, 0, 0.26) !default;
+$white: #FFFFFF !default;
+
 $minibadge-blue-dark: #368daf;
 $minibadge-blue: #67add1;
 $minibadge-blue-light: #eff8fc;
@@ -16,6 +20,14 @@ $minibadge-shadow-light: transparentize($minibadge-shadow, 0.3);
 $minibadge-shadow-lighter: transparentize($minibadge-shadow, 0.7);
 
 $minibadge-font-secondary: 'Comfortaa', cursive;
+
+@mixin fonticon {
+  font-family: "generic-icons";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: none;
+  font-weight: normal!important;
+}
 
 @mixin mobile {
   @media (max-width: 768px) {
