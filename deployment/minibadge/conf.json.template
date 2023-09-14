@@ -1,5 +1,5 @@
     {
-      "name": "fr.openent~minibadge~1.0.5",
+      "name": "fr.openent~minibadge~1.0-SNAPSHOT",
       "config": {
         "main" : "fr.openent.minibadge.Minibadge",
         "port" : 8131,
