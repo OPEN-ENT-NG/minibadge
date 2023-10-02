@@ -3,8 +3,10 @@ package fr.openent.minibadge.service.impl;
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.helper.PromiseHelper;
-import fr.openent.minibadge.model.*;
-import fr.openent.minibadge.service.*;
+import fr.openent.minibadge.model.BadgeAssigned;
+import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.service.BadgeAssignedStructureService;
+import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +14,9 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,14 +62,16 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
         Promise<Void> promise = Promise.promise();
 
         getAssignationsWithoutStructuresLinked()
-                .compose(assignations ->
-                        createBadgeAssignedStructures(assignations,
-                        assignations.stream()
-                                .flatMap(badgeAssigned -> Stream.of(badgeAssigned.badge().ownerId(), badgeAssigned.assignorId()))
-                                .filter(Objects::nonNull)
-                                .distinct()
-                                .collect(Collectors.toList())
-                ))
+                .compose(assignations -> {
+                    if (assignations.isEmpty()) return Future.succeededFuture();
+                    return createBadgeAssignedStructures(assignations,
+                            assignations.stream()
+                                    .flatMap(badgeAssigned -> Stream.of(badgeAssigned.badge().ownerId(), badgeAssigned.assignorId()))
+                                    .filter(Objects::nonNull)
+                                    .distinct()
+                                    .collect(Collectors.toList())
+                    );
+                })
                 .onSuccess(users -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -73,7 +79,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
     }
 
     private Future<Void> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users,
-                                                                   UserInfos assignor) {
+                                                              UserInfos assignor) {
         Promise<Void> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
