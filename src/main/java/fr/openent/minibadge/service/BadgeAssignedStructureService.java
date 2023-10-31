@@ -1,5 +1,6 @@
 package fr.openent.minibadge.service;
 
+import fr.openent.minibadge.core.enums.MessageRenderRequest;
 import fr.openent.minibadge.model.BadgeAssigned;
 import io.vertx.core.Future;
 import org.entcore.common.user.UserInfos;
@@ -26,14 +27,14 @@ public interface BadgeAssignedStructureService {
      * @param users         list of users related to all badgeAssigned
      * @return return future testifying success of the procedure
      */
-    Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned, List<String> users);
+    Future<MessageRenderRequest> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned, List<String> users);
 
     /**
      * Create association between badges assignations and structure(s) related when it does not exist
      *
      * @return return future containing a list of <BadgeAssigned>
      */
-    Future<Void> synchronizeAssignationsWithoutStructures();
+    Future<MessageRenderRequest> synchronizeAssignationsWithoutStructures();
 
     /**
      * Get badges assignations list that have not been associated with structure
