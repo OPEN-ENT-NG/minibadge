@@ -3,9 +3,9 @@ package fr.openent.minibadge.controller;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.security.StatisticsViewRight;
 import fr.openent.minibadge.service.BadgeAssignedStructureService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.openent.minibadge.service.StatisticService;
 import fr.openent.minibadge.service.UserService;
+import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
@@ -54,7 +54,7 @@ public class StatisticController extends ControllerHelper {
     @ResourceFilter(SuperAdminFilter.class)
     public void statisticsSynchronize(HttpServerRequest request) {
         badgeAssignedStructureService.synchronizeAssignationsWithoutStructures()
-                .onSuccess(statistics -> renderJson(request, new JsonObject()))
+                .onSuccess(message -> render(request, message.toJson(request), message.code()))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
     }
 }

@@ -166,10 +166,13 @@ public class DefaultUserService implements UserService {
 
         String query = " MATCH (u:User) " +
                 " WHERE u.id IN {userIds} " +
-                " OPTIONAL MATCH u-[:IN]->(pg:ProfileGroup)-[:HAS_PROFILE]->(profile:Profile) " +
-                " OPTIONAL MATCH pg-[:DEPENDS]->(s:Structure) " +
+                " OPTIONAL MATCH (u)-[:ADMINISTRATIVE_ATTACHMENT]->(sAdminAttach:Structure) " +
+                " OPTIONAL MATCH (u)-[:IN]->(pg:ProfileGroup)-[:HAS_PROFILE]->(profile:Profile) " +
+                " OPTIONAL MATCH (pg)-[:DEPENDS]->(sProfile:Structure) " +
+                " WITH u, profile, COLLECT(distinct sProfile.id) + COLLECT(distinct sAdminAttach.id) as concatStructureIds " +
+                " UNWIND concatStructureIds as structures " +
                 " RETURN distinct u.id as id, u.login as login," +
-                " u.displayName as username, profile.name as type, COLLECT(distinct s.id) as structureIds " +
+                " u.displayName as username, profile.name as type, COLLECT(distinct structures) as structureIds " +
                 " ORDER BY username ";
         JsonObject params = new JsonObject();
         params.put("userIds", userIds);

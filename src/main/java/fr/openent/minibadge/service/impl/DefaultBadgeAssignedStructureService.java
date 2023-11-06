@@ -2,9 +2,12 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Database;
+import fr.openent.minibadge.core.enums.MessageRenderRequest;
 import fr.openent.minibadge.helper.PromiseHelper;
-import fr.openent.minibadge.model.*;
-import fr.openent.minibadge.service.*;
+import fr.openent.minibadge.model.BadgeAssigned;
+import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.service.BadgeAssignedStructureService;
+import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +15,9 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,38 +47,41 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
     }
 
     @Override
-    public Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned, List<String> users) {
-        Promise<Void> promise = Promise.promise();
+    public Future<MessageRenderRequest> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned, List<String> users) {
+        Promise<MessageRenderRequest> promise = Promise.promise();
 
         userService.getUsers(users)
                 .compose(owners -> createBadgeAssignedStructuresRequest(badgeAssigned, owners))
-                .onSuccess(result -> promise.complete())
+                .onSuccess(result -> promise.complete(MessageRenderRequest.SUCCESS_WITHOUT_RESPONSE_BODY))
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
     @Override
-    public Future<Void> synchronizeAssignationsWithoutStructures() {
-        Promise<Void> promise = Promise.promise();
+    public Future<MessageRenderRequest> synchronizeAssignationsWithoutStructures() {
+        Promise<MessageRenderRequest> promise = Promise.promise();
 
         getAssignationsWithoutStructuresLinked()
-                .compose(assignations ->
-                        createBadgeAssignedStructures(assignations,
-                        assignations.stream()
-                                .flatMap(badgeAssigned -> Stream.of(badgeAssigned.badge().ownerId(), badgeAssigned.assignorId()))
-                                .filter(Objects::nonNull)
-                                .distinct()
-                                .collect(Collectors.toList())
-                ))
-                .onSuccess(users -> promise.complete())
+                .compose(assignations -> {
+                    if (assignations == null || assignations.isEmpty())
+                        return Future.succeededFuture(MessageRenderRequest.STATISTICS_SYNCHRONIZE_UNNECESSARY);
+                    return createBadgeAssignedStructures(assignations,
+                            assignations.stream()
+                                    .flatMap(badgeAssigned -> Stream.of(badgeAssigned.badge().ownerId(), badgeAssigned.assignorId()))
+                                    .filter(Objects::nonNull)
+                                    .distinct()
+                                    .collect(Collectors.toList())
+                    );
+                })
+                .onSuccess(promise::complete)
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
     private Future<Void> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users,
-                                                                   UserInfos assignor) {
+                                                              UserInfos assignor) {
         Promise<Void> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
@@ -100,8 +108,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
                 .stream().map(badgeAssigned -> {
                     User assignor = getCorrespondingUser(users, badgeAssigned.assignorId()).orElse(null);
                     User owner = getCorrespondingUser(users, badgeAssigned.badge().ownerId()).orElse(null);
-                    return assignor == null || owner == null ? null :
-                            assignedStructuresToValueInsert(badgeAssigned, owner, assignor, params);
+                    return assignedStructuresToValueInsert(badgeAssigned, owner, assignor, params);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining(", "));
@@ -115,7 +122,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
                                 .map(owner -> assignedStructuresToValueInsert(badgeAssigned, owner, assignor, params))
                                 .orElse(null)
                 )
-                .filter(Objects::nonNull)
+                .filter(values -> Objects.nonNull(values) && !values.trim().isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
@@ -127,9 +134,17 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
 
     private String assignedStructuresToValueInsert(BadgeAssigned badgeAssigned, UserInfos owner,
                                                    UserInfos assignor, JsonArray params) {
-        List<String> commonStructureIds = owner.getStructures().stream()
-                .filter(structureId -> assignor.getStructures().contains(structureId))
-                .collect(Collectors.toList());
+        List<String> commonStructureIds;
+        boolean isEmptyOwnerStructure = owner == null || owner.getStructures().isEmpty();
+        boolean isEmptyAssignorStructure = assignor == null || assignor.getStructures().isEmpty();
+
+        if (isEmptyOwnerStructure && isEmptyAssignorStructure) return "";
+        else if (isEmptyOwnerStructure) commonStructureIds = assignor.getStructures();
+        else if (isEmptyAssignorStructure) commonStructureIds = owner.getStructures();
+        else commonStructureIds = owner.getStructures().stream()
+                    .filter(structureId -> assignor.getStructures().contains(structureId))
+                    .collect(Collectors.toList());
+
         return badgeAssignedStructuresToValuesInsert(assignor, owner, badgeAssigned,
                 commonStructureIds, params);
     }
@@ -138,21 +153,24 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
                                                          List<String> commonStructureIds, JsonArray params) {
         if (commonStructureIds.isEmpty()) {
             return Stream.concat(
-                    owner.getStructures().stream()
-                            .map(structureId -> badgeAssignedStructureToValueInsert(
-                                    badgeAssigned.id(), structureId, false,
-                                    true, params)),
-                    assignor.getStructures().stream()
-                            .map(structureId -> badgeAssignedStructureToValueInsert(
-                                    badgeAssigned.id(), structureId, true,
-                                    false, params))
-            ).collect(Collectors.joining(", "));
+                            owner != null ? owner.getStructures().stream()
+                                    .map(structureId -> badgeAssignedStructureToValueInsert(
+                                            badgeAssigned.id(), structureId, false,
+                                            true, params)) : Stream.<String>empty(),
+                            assignor != null ? assignor.getStructures().stream()
+                                    .map(structureId -> badgeAssignedStructureToValueInsert(
+                                            badgeAssigned.id(), structureId, true,
+                                            false, params)) : Stream.<String>empty()
+                    )
+                    .filter(values -> Objects.nonNull(values) && !values.trim().isEmpty())
+                    .collect(Collectors.joining(", "));
         }
 
         return commonStructureIds.stream()
                 .map(structureId ->
                         badgeAssignedStructureToValueInsert(badgeAssigned.id(), structureId,
                                 true, true, params))
+                .filter(values -> !values.trim().isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
