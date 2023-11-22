@@ -52,7 +52,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
 
         userService.getUsers(users)
                 .compose(owners -> createBadgeAssignedStructuresRequest(badgeAssigned, owners))
-                .onSuccess(result -> promise.complete(MessageRenderRequest.SUCCESS_WITHOUT_RESPONSE_BODY))
+                .onSuccess(promise::complete)
                 .onFailure(promise::fail);
 
         return promise.future();
@@ -80,17 +80,21 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
         return promise.future();
     }
 
-    private Future<Void> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users,
-                                                              UserInfos assignor) {
-        Promise<Void> promise = Promise.promise();
-
+    private Future<MessageRenderRequest> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users,
+                                                                              UserInfos assignor) {
         JsonArray params = new JsonArray();
+        String insertValues = assignor != null ? badgeAssignedStructuresToValuesInsert(badgesAssigned, users, assignor, params) :
+                badgeAssignedStructuresToValuesInsert(badgesAssigned, users, params);
+
+        if (insertValues.trim().isEmpty())
+            return Future.succeededFuture(MessageRenderRequest.STATISTICS_SYNCHRONIZE_UNNECESSARY);
+
+        Promise<MessageRenderRequest> promise = Promise.promise();
         String request = String.format("INSERT INTO %s (badge_assigned_id, structure_id, is_structure_assigner, " +
                         " is_structure_receiver) VALUES %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
-                assignor != null ? badgeAssignedStructuresToValuesInsert(badgesAssigned, users, assignor, params) :
-                        badgeAssignedStructuresToValuesInsert(badgesAssigned, users, params));
+                insertValues);
 
-        sql.prepared(request, params, PromiseHelper.validResultHandler(promise,
+        sql.prepared(request, params, PromiseHelper.validResultHandler(promise, MessageRenderRequest.SUCCESS_WITHOUT_RESPONSE_BODY,
                 String.format("[Minibadge@%s::createBadgeAssignedStructuresRequest] Fail to create badge assigned " +
                                 "structures",
                         this.getClass().getSimpleName())));
@@ -98,7 +102,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
         return promise.future();
     }
 
-    private Future<Void> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users) {
+    private Future<MessageRenderRequest> createBadgeAssignedStructuresRequest(List<BadgeAssigned> badgesAssigned, List<User> users) {
         return createBadgeAssignedStructuresRequest(badgesAssigned, users, null);
     }
 
@@ -110,7 +114,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
                     User owner = getCorrespondingUser(users, badgeAssigned.badge().ownerId()).orElse(null);
                     return assignedStructuresToValueInsert(badgeAssigned, owner, assignor, params);
                 })
-                .filter(Objects::nonNull)
+                .filter(values -> Objects.nonNull(values) && !values.trim().isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
