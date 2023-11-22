@@ -1,6 +1,7 @@
 package fr.openent.minibadge.helper;
 
 import fr.openent.minibadge.core.constants.Request;
+import fr.openent.minibadge.core.enums.MessageRenderRequest;
 import fr.openent.minibadge.model.Model;
 import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
@@ -135,6 +136,27 @@ public class PromiseHelper {
             JsonObject body = event.body();
             if (Request.OK.equals(body.getString(Request.STATUS))) {
                 promise.complete();
+                return;
+            }
+            fail(promise, message, body.getString(Request.MESSAGE));
+        };
+    }
+
+    /**
+     * complete MessageRenderRequest Promise from JsonObject Message result
+     *
+     * @param promise to answer on
+     * @param messageRender message you want to return to the client request
+     * @param message failure message
+     * @return MessageRenderRequest message result.
+     */
+    public static Handler<Message<JsonObject>> validResultHandler(Promise<MessageRenderRequest> promise,
+                                                                  final MessageRenderRequest messageRender,
+                                                                  final String message) {
+        return event -> {
+            JsonObject body = event.body();
+            if (Request.OK.equals(body.getString(Request.STATUS))) {
+                promise.complete(messageRender);
                 return;
             }
             fail(promise, message, body.getString(Request.MESSAGE));
