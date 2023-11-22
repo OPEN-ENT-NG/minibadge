@@ -110,7 +110,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
                     User owner = getCorrespondingUser(users, badgeAssigned.badge().ownerId()).orElse(null);
                     return assignedStructuresToValueInsert(badgeAssigned, owner, assignor, params);
                 })
-                .filter(Objects::nonNull)
+                .filter(values -> Objects.nonNull(values) && !values.trim().isEmpty())
                 .collect(Collectors.joining(", "));
     }
 
