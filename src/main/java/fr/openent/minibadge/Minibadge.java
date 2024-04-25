@@ -4,6 +4,7 @@ import fr.openent.minibadge.controller.*;
 import fr.openent.minibadge.model.Config;
 import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.wseduc.mongodb.MongoDb;
+import io.vertx.core.Promise;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.neo4j.Neo4j;
 import org.entcore.common.sql.Sql;
@@ -19,8 +20,8 @@ public class Minibadge extends BaseServer {
     public static Config modelConfig;
 
     @Override
-    public void start() throws Exception {
-        super.start();
+    public void start(Promise<Void> startPromise) throws Exception {
+        super.start(startPromise);
 
         modelConfig = new Config(config);
         dbSchema = config.getString("db-schema");
@@ -37,6 +38,7 @@ public class Minibadge extends BaseServer {
         addController(new StatisticController(serviceFactory));
         addController(new UserController(serviceFactory));
         addController(new ConfigController());
+        startPromise.tryComplete();
     }
 
 }
