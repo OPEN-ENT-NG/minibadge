@@ -9,7 +9,6 @@ import fr.openent.minibadge.model.*;
 import fr.openent.minibadge.service.StatisticService;
 import fr.openent.minibadge.service.StructureService;
 import fr.openent.minibadge.service.UserService;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -57,7 +56,7 @@ public class DefaultStatisticService implements StatisticService {
                 config.lessAssignedTypeListSize());
         Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
 
-        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
+        Future.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
                         mostRefusedTypesFuture)
                 .compose(result -> {
                     statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
@@ -65,7 +64,7 @@ public class DefaultStatisticService implements StatisticService {
                     statistics.setLessAssignedTypes(lessAssignedTypesFuture.result());
                     statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
 
-                    return CompositeFuture.all(setUsersOnFirstMostAssignedType(statistics, structureIds),
+                    return Future.all(setUsersOnFirstMostAssignedType(statistics, structureIds),
                             setStructures(statistics, structureIds));
                 })
                 .onSuccess(result -> promise.complete(statistics))
@@ -99,7 +98,7 @@ public class DefaultStatisticService implements StatisticService {
 
         List<User> mostAssigningUsersCounts = new ArrayList<>();
 
-        CompositeFuture.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
+        Future.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
                         mostRefusedTypesFuture, topAssigningUsersFuture, topReceivingUserFuture)
                 .compose(result -> {
                     statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
