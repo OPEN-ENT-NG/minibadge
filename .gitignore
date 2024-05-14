@@ -31,3 +31,7 @@ minibadge/src/main/resources/public/font
 /src/main/resources/public/js/
 /package-lock.json
 /yarn.lock
+.env
+target
+dependency-reduced-pom.xml
+
