@@ -18,7 +18,6 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
@@ -85,7 +84,7 @@ public class BadgeTypeController extends ControllerHelper {
             Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
             Future<Integer> countAssignersFuture = badgeAssignedService.countTotalAssigners(typeId, user);
 
-            CompositeFuture.all(assignersFuture, countAssignersFuture)
+            Future.all(assignersFuture, countAssignersFuture)
                     .onSuccess(users -> {
                         JsonObject response = RequestHelper.formatResponse(page, countAssignersFuture.result(), limit,
                                 assignersFuture.result());
@@ -111,7 +110,7 @@ public class BadgeTypeController extends ControllerHelper {
         Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
         Future<Integer> countReceiversFuture = badgeService.countTotalReceivers(typeId);
 
-        UserUtils.getUserInfos(eb, request, user -> CompositeFuture.all(receiversFuture, countReceiversFuture)
+        UserUtils.getUserInfos(eb, request, user -> Future.all(receiversFuture, countReceiversFuture)
                 .onSuccess(users -> {
                     JsonObject response = RequestHelper.formatResponse(page, countReceiversFuture.result(), limit,
                             receiversFuture.result());

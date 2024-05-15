@@ -7,7 +7,6 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.impl.CompositeFutureImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -164,6 +163,6 @@ public class PromiseHelper {
     }
 
     public static <T> CompositeFuture all(List<Future<T>> futures) {
-        return CompositeFutureImpl.all(futures.toArray(new Future[futures.size()]));
+        return Future.all(futures);
     }
 }
