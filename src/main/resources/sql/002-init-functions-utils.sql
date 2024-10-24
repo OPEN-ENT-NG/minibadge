@@ -7,7 +7,7 @@ BEGIN
     -- 3. lowercase unaccented text
     -- 4. replace non-alphanumeric (excluding hyphen, underscore) with a hyphen
     -- 5. trim leading and trailing hyphens
-RETURN trim(BOTH '_' FROM regexp_replace(upper(unaccent(trim(value))), '[^a-z0-9\\-_]+', '_', 'gi'));
+RETURN trim(BOTH '_' FROM regexp_replace(upper(public.unaccent(trim(value))), '[^a-z0-9\\-_]+', '_', 'gi'));
 END;
 $BODY$
 LANGUAGE plpgsql;
