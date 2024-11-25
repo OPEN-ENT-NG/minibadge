@@ -6,6 +6,7 @@ import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.impl.*;
 import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -84,12 +85,12 @@ public class DefaultBadgeAssignedStructureServiceTest {
                 .add(badgeAssignedList.get(1).id()).add("structure1").add(true).add(false);
 
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
-        doNothing().when(sql).prepared(any(), any(), any());
+        doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
         badgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user2", "user3"), assignor);
 
-        verify(sql).prepared(eq(queryExpected), eq(expectedParams), any());
+        verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
     }
 
     @Test
@@ -103,12 +104,12 @@ public class DefaultBadgeAssignedStructureServiceTest {
                 .add(badgeAssignedList.get(1).id()).add("structure1").add(true).add(false);
 
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
-        doNothing().when(sql).prepared(any(), any(), any());
+        doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
         badgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user1", "user2", "user3"));
 
-        verify(sql).prepared(eq(queryExpected), eq(expectedParams), any());
+        verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
     }
 
     @Test
@@ -120,8 +121,8 @@ public class DefaultBadgeAssignedStructureServiceTest {
                 " LEFT JOIN " + DefaultBadgeAssignedStructureService.BADGE_ASSIGNED_STRUCTURE_TABLE + " bas on ba.id = bas.badge_assigned_id " +
                 " WHERE bas.badge_assigned_id IS NULL";
 
-        doNothing().when(sql).prepared(any(), any(), any());
+        doNothing().when(sql).prepared(any(), any(), any(Handler.class));
         badgeAssignedStructureService.getAssignationsWithoutStructuresLinked();
-        verify(sql).prepared(eq(queryExpected), eq(new JsonArray()), any());
+        verify(sql).prepared(eq(queryExpected), eq(new JsonArray()), any(Handler.class));
     }
 }
