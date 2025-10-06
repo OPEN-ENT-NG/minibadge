@@ -1,15 +1,18 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.BadgeType;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
+import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.BadgeTypeService;
 import fr.wseduc.webutils.I18n;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
@@ -19,56 +22,96 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static fr.openent.minibadge.core.constants.Database.*;
+
 public class DefaultBadgeTypeService implements BadgeTypeService {
 
-    public static final String BADGE_TYPE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_TYPE);
     private final Sql sql;
     private final EventBus eb;
+    private final BadgeCategoryService badgeCategoryService;
 
-    protected DefaultBadgeTypeService(Sql sql, EventBus eb) {
-        this.sql = sql;
-        this.eb = eb;
+    protected DefaultBadgeTypeService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
+        this.eb = serviceFactory.eventBus();
+        this.badgeCategoryService = serviceFactory.badgeCategoryService();
     }
 
     @Override
-    public Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset) {
+    public Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset, Long badgeCategoryId) {
         Promise<List<BadgeType>> promise = Promise.promise();
 
-        getBadgesTypesRequest(structureIds, query, limit, offset)
+        getBadgesTypesRequest(structureIds, query, limit, offset, badgeCategoryId)
                 .onSuccess(badgeTypesArray -> {
                     List<BadgeType> badgeTypes = new BadgeType().toList(badgeTypesArray);
                     badgeTypes.forEach(badgeType -> badgeType.setSetting(SettingHelper.getDefaultTypeSetting()));
-                    promise.complete(badgeTypes);
+
+                    List<Future> categoryFutures = new ArrayList<>();
+
+                    for (BadgeType badgeType : badgeTypes) {
+                        Future<List<BadgeCategory>> future = badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id())
+                                .onSuccess(badgeType::setCategories);
+                        categoryFutures.add(future);
+                    }
+
+                    CompositeFuture.all(categoryFutures)
+                            .onSuccess(cf -> promise.complete(badgeTypes))
+                            .onFailure(promise::fail);
                 })
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
-    private Future<JsonArray> getBadgesTypesRequest(List<String> structureIds, String query, int limit, Integer offset) {
+    private Future<JsonArray> getBadgesTypesRequest(List<String> structureIds, String queryText, int limit, Integer offset, Long badgeCategoryId) {
+        String functionName = "getBadgesTypesRequest";
+
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
 
-        String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, " +
-                        " description_short FROM %s WHERE (%s %s structure_id IS NULL) %s %s ORDER BY UNACCENT(label) %s",
-                BADGE_TYPE_TABLE,
-                SqlHelper.filterStructures(structureIds, params),
-                (structureIds != null && !structureIds.isEmpty()) ? "OR" : "",
-                (query != null && !query.isEmpty()) ? "AND" : "",
-                SqlHelper.searchQueryInColumns(query, Collections.singletonList(Database.LABEL), params),
-                SqlHelper.addLimitOffset(limit, offset, params));
+        // Base SELECT
+        String query = "SELECT bt.id, bt.slug, bt.structure_id, bt.owner_id, bt.picture_id, bt.label, bt.description, bt.description_short " +
+                "FROM " + BADGE_TYPE_TABLE + " bt";
 
+        // Optional JOIN if categoryId is present
+        if (badgeCategoryId != null) {
+            query += " JOIN " + REL_BADGE_CATEGORY_BADGE_TYPE_TABLE + " rbcbt ON bt.id = rbcbt.badge_type_id";
+        }
 
-        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::getBadgesTypesRequest] Fail to retrieve badge types",
-                        this.getClass().getSimpleName()))));
+        // WHERE clauses
+        query += " WHERE (";
+        query += SqlHelper.filterStructures(structureIds, params);
+        if (structureIds != null && !structureIds.isEmpty()) {
+            query += " OR ";
+        }
+        query += "bt.structure_id IS NULL)";
+
+        // Optional text search
+        if (queryText != null && !queryText.isEmpty()) {
+            query += " AND " + SqlHelper.searchQueryInColumns(queryText, Collections.singletonList("bt.label"), params);
+        }
+
+        // Optional category filter
+        if (badgeCategoryId != null) {
+            query += " AND rbcbt.badge_category_id = ?";
+            params.add(badgeCategoryId);
+        }
+
+        // ORDER BY + LIMIT/OFFSET
+        query += " ORDER BY UNACCENT(bt.label) " + SqlHelper.addLimitOffset(limit, offset, params);
+
+        // Execute SQL
+        String errorMessage = "Fail to retrieve badge types";
+        String completeLog = LoggerHelper.getCompleteLog(this.getClass(), functionName, errorMessage);
+        sql.prepared(query, params, SqlResult.validResultHandler(PromiseHelper.handler(promise, completeLog)));
 
         return promise.future();
     }
+
 
     @Override
     public Future<BadgeType> getBadgeType(List<String> structureIds, long typeId, String host, String language) {
@@ -80,9 +123,13 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                     badgeType.set(badgeTypeJson);
                     return getOwner(badgeType, host, language);
                 })
-                .onSuccess(user -> {
+                .compose(user -> {
                     badgeType.setOwner(user);
                     badgeType.setSetting(SettingHelper.getDefaultTypeSetting());
+                    return badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id());
+                })
+                .onSuccess(badgeCategories -> {
+                    badgeType.setCategories(badgeCategories);
                     promise.complete(badgeType);
                 })
                 .onFailure(promise::fail);

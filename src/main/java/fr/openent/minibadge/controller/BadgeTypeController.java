@@ -28,6 +28,8 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.List;
 
+import static fr.openent.minibadge.core.constants.Database.*;
+
 public class BadgeTypeController extends ControllerHelper {
 
     private final BadgeTypeService badgeTypeService;
@@ -50,7 +52,21 @@ public class BadgeTypeController extends ControllerHelper {
         int limit = RequestHelper.cappingLimit(request.params());
         String query = request.params().get(Request.QUERY);
 
-        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset)
+        String categoryIdParam = request.params().get(CATEGORYID);
+        Long categoryId = null;
+
+        if (categoryIdParam != null) {
+            try {
+                categoryId = Long.parseLong(categoryIdParam);
+            } catch (NumberFormatException e) {
+                renderError(request, new JsonObject().put(Request.MESSAGE, "Invalid categoryId"));
+                return;
+            }
+        }
+
+        Long finalCategoryId = categoryId;
+
+        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset, finalCategoryId)
                 .onSuccess(badgeTypes -> renderJson(request, RequestHelper.formatResponse(limit, offset, badgeTypes)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

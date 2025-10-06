@@ -2,10 +2,13 @@ package fr.openent.minibadge.model;
 
 import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.model.entity.BadgeCategory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class BadgeType implements Model<BadgeType> {
@@ -23,6 +26,7 @@ public class BadgeType implements Model<BadgeType> {
     private Integer countRefused;
     private List<User> mostAssigningUsers;
     private TypeSetting setting = new TypeSetting();
+    private List<BadgeCategory> categories = new ArrayList<>();
 
     public BadgeType() {
     }
@@ -119,6 +123,10 @@ public class BadgeType implements Model<BadgeType> {
         this.setting = setting;
     }
 
+    public void setCategories(List<BadgeCategory> categories) {
+        this.categories = categories;
+    }
+
     @Override
     public JsonObject toJson() {
         JsonObject badgeType = new JsonObject()
@@ -132,7 +140,8 @@ public class BadgeType implements Model<BadgeType> {
                 .put(Field.DESCRIPTIONSHORT, this.descriptionShort)
                 .put(Field.COUNTASSIGNED, this.countAssigned)
                 .put(Field.COUNTREFUSED, this.countRefused)
-                .put(Field.SETTING, this.setting.toJson());
+                .put(Field.SETTING, this.setting.toJson())
+                .put(Field.CATEGORIES, this.categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()));
         if (this.owner != null)
             badgeType.put(Field.OWNER, this.owner.toJson());
 

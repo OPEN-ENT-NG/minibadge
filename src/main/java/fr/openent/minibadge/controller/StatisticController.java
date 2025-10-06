@@ -25,7 +25,7 @@ public class StatisticController extends ControllerHelper {
 
     public StatisticController(ServiceFactory serviceFactory) {
         super();
-        this.statisticService = serviceFactory.statisticServiceService();
+        this.statisticService = serviceFactory.statisticService();
         this.badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
         this.userService = serviceFactory.userService();
     }

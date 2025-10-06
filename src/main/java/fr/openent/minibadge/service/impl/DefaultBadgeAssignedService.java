@@ -8,6 +8,7 @@ import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.*;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -23,27 +24,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static fr.openent.minibadge.core.constants.Database.*;
 import static fr.openent.minibadge.core.constants.Field.*;
-import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
-import static fr.openent.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
-import static fr.openent.minibadge.service.impl.DefaultUserService.USER_TABLE;
 
 public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
-    public static final String BADGE_ASSIGNED_VALID_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_VALID);
-    public static final String BADGE_ASSIGNED_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED);
-    public static final String BADGE_ASSIGNED_STRUCTURE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_STRUCTURE);
     private final Sql sql;
     private final BadgeService badgeService;
     private final UserService userService;
     private final BadgeAssignedStructureService badgeAssignedStructureService;
 
-    protected DefaultBadgeAssignedService(Sql sql, BadgeService badgeService, UserService userService,
-                                       BadgeAssignedStructureService badgeAssignedStructureService) {
-        this.sql = sql;
-        this.badgeService = badgeService;
-        this.userService = userService;
-        this.badgeAssignedStructureService = badgeAssignedStructureService;
+    protected DefaultBadgeAssignedService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
+        this.badgeService = serviceFactory.badgeService();
+        this.userService = serviceFactory.userService();
+        this.badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
     }
 
     @Override
@@ -117,10 +112,10 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
         String request = "WITH inserted_badge_assigned AS ( " +
                 " INSERT INTO " + BADGE_ASSIGNED_TABLE + " (badge_id, assignor_id) " +
-                " SELECT id as badge_id, ? as assignor_id FROM  " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE +
+                " SELECT id as badge_id, ? as assignor_id FROM  " + BADGE_ASSIGNABLE_TABLE +
                 " WHERE badge_type_id = ? AND owner_id IN " + Sql.listPrepared(ownerIds) + " RETURNING *) " +
                 " SELECT iba.*, b.badge_type_id, b.owner_id " +
-                " FROM inserted_badge_assigned iba  JOIN " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE + " b " +
+                " FROM inserted_badge_assigned iba  JOIN " + BADGE_ASSIGNABLE_TABLE + " b " +
                 " ON iba.badge_id = b.id";
 
         JsonArray params = new JsonArray()
@@ -164,7 +159,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
                         " WHERE owner_id = ? AND badge_type_id = ? " +
                         " ORDER BY bav.created_at DESC %s", BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_PUBLIC_TABLE, SqlHelper.addLimitOffset(limit, offset, params));
+                        BADGE_PUBLIC_TABLE, SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params,
                 SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -196,7 +191,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         String request = String.format(" SELECT COUNT(DISTINCT(assignor_id)) " +
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
                         " WHERE owner_id = ? AND badge_type_id = ?", BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_PUBLIC_TABLE);
+                        BADGE_PUBLIC_TABLE);
 
         sql.prepared(request, params,
                 SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,

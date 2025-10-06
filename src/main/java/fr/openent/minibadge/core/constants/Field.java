@@ -15,6 +15,7 @@ public class Field {
     public static final String BADGETYPELABEL = "badgeTypeLabel";
     public static final String BADGETYPELINK = "badgeTypeLink";
     public static final String BADGE_TYPE_PICTURE_ID = "badge_type_picture_id";
+    public static final String CATEGORIES = "categories";
     public static final String PICTUREID = "pictureId";
     public static final String PICTURE_ID = "picture_id";
     public static final String LABEL = "label";
@@ -38,6 +39,7 @@ public class Field {
     public static final String Q = "q";
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
+    public static final String SLUG = "slug";
     public static final String STRUCTUREIDS = "structureIds";
     public static final String VALUE = "value";
 
@@ -135,6 +137,9 @@ public class Field {
     public static final String TOP_ASSIGNING_USER_LIST_SIZE = "top_most_assigning_user_list_size";
     public static final String TOP_RECEIVING_USER_LIST_SIZE = "top_most_receiving_user_list_size";
     public static final String TYPE_LISTS_USERS_SIZE = "type_lists_users_size";
+
+    //LOG
+    public static final String MINIBADGE = "Minibadge";
 
     private Field() {
         throw new IllegalStateException("Utility class");

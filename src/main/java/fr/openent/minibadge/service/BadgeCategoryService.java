@@ -1,0 +1,23 @@
+package fr.openent.minibadge.service;
+
+import fr.openent.minibadge.model.entity.BadgeCategory;
+import io.vertx.core.Future;
+
+import java.util.List;
+
+public interface BadgeCategoryService {
+    /**
+     * Retrieves a list of BadgeCategory entities associated with a specific badge type ID.
+     *
+     * @param badgeTypeId The ID of the badge type for which the categories are to be retrieved.
+     * @return A Future containing a list of BadgeCategory entities.
+     */
+    Future<List<BadgeCategory>> getBadgeCategoriesByBadgeTypeId(long badgeTypeId);
+
+    /**
+     * Retrieves all BadgeCategory entities.
+     *
+     * @return A Future containing a list of all BadgeCategory entities.
+     */
+    Future<List<BadgeCategory>> getAllBadgeCategories();
+}

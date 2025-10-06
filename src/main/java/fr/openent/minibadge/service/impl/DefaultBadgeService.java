@@ -7,6 +7,7 @@ import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.Badge;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.BadgeService;
 import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
@@ -23,18 +24,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static fr.openent.minibadge.core.constants.Database.*;
+
 public class DefaultBadgeService implements BadgeService {
 
-    public static final String BADGE_PUBLIC_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_PUBLIC);
-    public static final String BADGE_ASSIGNABLE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNABLE);
-    public static final String BADGE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE);
-    public static final String BADGE_DISABLED_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_DISABLED);
     private final UserService userService;
     private final Sql sql;
 
-    protected DefaultBadgeService(Sql sql, UserService userService) {
-        this.sql = sql;
-        this.userService = userService;
+    protected DefaultBadgeService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
+        this.userService = serviceFactory.userService();
     }
 
     @Override
@@ -98,9 +97,9 @@ public class DefaultBadgeService implements BadgeService {
                 " ba.last_assign_created " +
                 " FROM %s b INNER JOIN assign ba on ba.badge_id = b.id INNER JOIN %s bt ON b.badge_type_id = bt.id " +
                 " WHERE b.owner_id = ? AND ba.count_assigned > 0 %s %s ORDER BY last_assign_created DESC",
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
-                DefaultBadgeTypeService.BADGE_TYPE_TABLE, (query != null && !query.isEmpty()) ? "AND" : "",
-                SqlHelper.searchQueryInColumns(query, Collections.singletonList(String.format("%s%s", "bt.", Database.LABEL)), params));
+                BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
+                BADGE_TYPE_TABLE, (query != null && !query.isEmpty()) ? "AND" : "",
+                SqlHelper.searchQueryInColumns(query, Collections.singletonList("bt.label"), params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::getBadgesRequest] Fail to retrieve badges",
@@ -247,7 +246,7 @@ public class DefaultBadgeService implements BadgeService {
                         " WHERE badge_type_id = ? " +
                         " GROUP BY owner_id, bav.created_at, bav.id " +
                         " ORDER BY last_created_at DESC %s ",
-                BADGE_PUBLIC_TABLE, DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE,
+                BADGE_PUBLIC_TABLE, BADGE_ASSIGNED_VALID_TABLE,
                 SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -279,7 +278,7 @@ public class DefaultBadgeService implements BadgeService {
                         " FROM %s bp " +
                         " INNER JOIN %s bav on bav.badge_id = bp.id " +
                         " WHERE badge_type_id = ? ",
-                BADGE_PUBLIC_TABLE, DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE);
+                BADGE_PUBLIC_TABLE, BADGE_ASSIGNED_VALID_TABLE);
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::countBadgeTypeReceiverIdsRequest] Fail to count badge types receivers",

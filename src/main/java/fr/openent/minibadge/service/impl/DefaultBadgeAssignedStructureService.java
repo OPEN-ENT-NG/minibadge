@@ -6,6 +6,7 @@ import fr.openent.minibadge.core.enums.MessageRenderRequest;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.BadgeAssignedStructureService;
 import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
@@ -21,15 +22,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static fr.openent.minibadge.core.constants.Database.*;
+
 public class DefaultBadgeAssignedStructureService implements BadgeAssignedStructureService {
-    public static final String BADGE_ASSIGNED_STRUCTURE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_STRUCTURE);
     private final Sql sql;
     private final UserService userService;
 
 
-    protected DefaultBadgeAssignedStructureService(Sql sql, UserService userService) {
-        this.sql = sql;
-        this.userService = userService;
+    protected DefaultBadgeAssignedStructureService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
+        this.userService = serviceFactory.userService();
     }
 
     @Override
@@ -197,8 +199,8 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
     public Future<List<BadgeAssigned>> getAssignationsWithoutStructuresLinked() {
         Promise<List<BadgeAssigned>> promise = Promise.promise();
         String request = "SELECT b.id as badge_id, owner_id, ba.id as id, assignor_id" +
-                " FROM  " + DefaultBadgeService.BADGE_TABLE + " b " +
-                " INNER JOIN " + DefaultBadgeAssignedService.BADGE_ASSIGNED_TABLE + " ba ON b.id = ba.badge_id " +
+                " FROM  " + BADGE_TABLE + " b " +
+                " INNER JOIN " + BADGE_ASSIGNED_TABLE + " ba ON b.id = ba.badge_id " +
                 " LEFT JOIN " + BADGE_ASSIGNED_STRUCTURE_TABLE + " bas on ba.id = bas.badge_assigned_id " +
                 " WHERE bas.badge_assigned_id IS NULL";
 

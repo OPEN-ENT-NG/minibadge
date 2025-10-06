@@ -7,6 +7,7 @@ import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.GlobalSettings;
 import fr.openent.minibadge.model.ThresholdSetting;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.SettingService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -20,8 +21,10 @@ import java.util.List;
 
 public class DefaultSettingService implements SettingService {
 
-    protected DefaultSettingService() {
-        // At this moment, this service is not other service dependant
+    private final Sql sql;
+
+    protected DefaultSettingService(RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
     }
 
     public Future<GlobalSettings> getGlobalSettings(UserInfos user) {
@@ -55,7 +58,7 @@ public class DefaultSettingService implements SettingService {
         JsonArray params = new JsonArray();
         String request = String.format(" SELECT %s", SqlHelper.getCTEThresholdsRequests(thresholdSettings, user, params));
 
-        Sql.getInstance().prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::getThresholdsByPeriodRequest] Fail to get threshold status",
                         this.getClass().getSimpleName()))));
 

@@ -8,6 +8,7 @@ import fr.openent.minibadge.helper.Neo4jHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
@@ -26,17 +27,18 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static fr.openent.minibadge.core.constants.Database.*;
+
 public class DefaultUserService implements UserService {
 
-    public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
     private final EventBus eb;
     private final Sql sql;
     private final Neo4j neo;
 
-    protected DefaultUserService(Sql sql, Neo4j neo, EventBus eb) {
-        this.sql = sql;
-        this.neo = neo;
-        this.eb = eb;
+    protected DefaultUserService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
+        this.sql = repositoryFactory.sql();
+        this.neo = repositoryFactory.neo4j();
+        this.eb = serviceFactory.eventBus();
     }
 
     @Override
@@ -132,7 +134,7 @@ public class DefaultUserService implements UserService {
         return String.format(" SELECT DISTINCT(owner_id) as id " +
                         " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
                         " WHERE assignor_id = ? AND badge_type_id = ? AND owner_id IN %s",
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, DefaultBadgeService.BADGE_TABLE, Sql.listPrepared(receiverIds));
+                        BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE, Sql.listPrepared(receiverIds));
     }
 
     private String getDisabledBadgeOwnerIdsQuery(long typeId, List<String> receiverIds, JsonArray params) {
@@ -142,7 +144,7 @@ public class DefaultUserService implements UserService {
         return String.format(" SELECT DISTINCT(owner_id) as id " +
                         " FROM %s b " +
                         " WHERE badge_type_id = ? AND owner_id IN %s",
-                DefaultBadgeService.BADGE_DISABLED_TABLE, Sql.listPrepared(receiverIds));
+                        BADGE_DISABLED_TABLE, Sql.listPrepared(receiverIds));
     }
 
     private List<User> filterUsersNotAssignedYet(List<User> allUsers, List<User> receivedUsers) {

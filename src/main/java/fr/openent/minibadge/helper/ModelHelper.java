@@ -9,11 +9,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ModelHelper {
@@ -131,5 +133,63 @@ public class ModelHelper {
                  InvocationTargetException e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Generic convert an {@link Model} to {@link JsonObject}.
+     * Classes that do not implement any {@link #validJsonClasses} class or Model implementation will be ignored.
+     * Except {@link List} and {@link Enum}
+     *
+     * @param ignoreNull If true ignore, fields that are null will not be put in the result
+     * @param Model Instance of {@link Model} to convert to {@link JsonObject}
+     * @return {@link JsonObject}
+     */
+    public static JsonObject toJson(Model<?> Model, boolean ignoreNull, boolean snakeCase) {
+        JsonObject statisticsData = new JsonObject();
+        final List<Field> declaredFields = getAllFields(Model);
+        declaredFields.forEach(field -> {
+            boolean accessibility = field.isAccessible();
+            field.setAccessible(true);
+            try {
+                Object object = field.get(Model);
+                String fieldName = snakeCase ? StringHelper.camelToSnake(field.getName()) : field.getName();
+                if (object == null) {
+                    if (!ignoreNull) statisticsData.putNull(fieldName);
+                }
+                else if (object instanceof Model) {
+                    statisticsData.put(fieldName, ((Model<?>)object).toJson());
+                } else if (validJsonClasses.stream().anyMatch(aClass -> aClass.isInstance(object))) {
+                    statisticsData.put(fieldName, object);
+                } else if (object instanceof Enum) {
+                    statisticsData.put(fieldName, object);
+                } else if (object instanceof List) {
+                    statisticsData.put(fieldName, listToJsonArray(((List<?>)object)));
+                } else if (object instanceof LocalDate) {
+                    statisticsData.put(fieldName, DateHelper.formatDate((LocalDate) object));
+                } else if (object instanceof LocalTime) {
+                    statisticsData.put(fieldName, DateHelper.formatTime((LocalTime) object));
+                } else if (object instanceof LocalDateTime) {
+                    statisticsData.put(fieldName, DateHelper.formatDateTime((LocalDateTime) object));
+                } else if (object instanceof Duration) {
+                    statisticsData.put(fieldName, DateHelper.formatDuration((Duration) object));
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            field.setAccessible(accessibility);
+        });
+        return statisticsData;
+    }
+
+    private static List<Field> getAllFields(Model<?> iModel) {
+        List<Field> fields = new ArrayList<>();
+        Class<?> clazz = iModel.getClass();
+
+        while (clazz != null) {
+            Collections.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
+        }
+
+        return fields;
     }
 }

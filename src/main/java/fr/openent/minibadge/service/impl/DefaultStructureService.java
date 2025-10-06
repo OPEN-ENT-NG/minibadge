@@ -3,6 +3,7 @@ package fr.openent.minibadge.service.impl;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.model.Structure;
+import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.StructureService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -16,8 +17,8 @@ import java.util.List;
 public class DefaultStructureService implements StructureService {
     private final Neo4j neo;
 
-    protected DefaultStructureService(Neo4j neo) {
-        this.neo = neo;
+    protected DefaultStructureService(RepositoryFactory repositoryFactory) {
+        this.neo = repositoryFactory.neo4j();
     }
 
     @Override
