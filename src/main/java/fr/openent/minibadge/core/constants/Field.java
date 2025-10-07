@@ -34,9 +34,11 @@ public class Field {
     public static final String LASTNAME = "lastName";
     public static final String NAME = "name";
     public static final String USERNAME = "username";
-    public static final String IDUSERS = "idUsers";
     public static final String COUNT = "count";
     public static final String Q = "q";
+    public static final String ICON_NAME = "icon_name";
+    public static final String ICONNAME = "iconName";
+    public static final String ICONCSSCLASS = "iconCssClass";
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
     public static final String SLUG = "slug";

@@ -2,6 +2,7 @@ CREATE TABLE minibadge.badge_category (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) UNIQUE NOT NULL,
+    icon_name VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -25,14 +26,11 @@ CREATE TABLE minibadge.rel_badge_category_badge_type (
     PRIMARY KEY (badge_category_id, badge_type_id)
 );
 
-INSERT INTO minibadge.badge_category (name, slug) VALUES
-    ('Appétence',      'APPETENCE'),
-    ('Compétence',     'COMPETENCE'),
-    ('Engagement',     'ENGAGEMENT'),
-    ('Établissement',  'ETABLISSEMENT'),
-    ('Gratitude',      'GRATITUDE'),
-    ('Territoire',     'TERRITOIRE');
-
+INSERT INTO minibadge.badge_category (name, slug, icon_name) VALUES
+    ('Appétence',      'APPETENCE',     'BRAIN'),
+    ('Compétence',     'COMPETENCE',     'SCHOOL'),
+    ('Engagement',     'ENGAGEMENT',     'ARM_FLEX'),
+    ('Gratitude',      'GRATITUDE',      'MEDAL');
 
 INSERT INTO minibadge.rel_badge_category_badge_type (badge_category_id, badge_type_id)
 SELECT

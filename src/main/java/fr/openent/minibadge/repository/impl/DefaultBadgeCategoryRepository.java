@@ -26,7 +26,7 @@ public class DefaultBadgeCategoryRepository implements BadgeCategoryRepository {
         Promise <List<BadgeCategory>> promise = Promise.promise();
 
         String query =
-            "SELECT bc.id, bc.name, bc.slug, bc.created_at, bc.updated_at " +
+            "SELECT bc.id, bc.name, bc.slug, bc.icon_name, bc.created_at, bc.updated_at " +
             "FROM minibadge.badge_category bc " +
             "INNER JOIN minibadge.rel_badge_category_badge_type rbcbt " +
                 "ON bc.id = rbcbt.badge_category_id " +

@@ -2,7 +2,7 @@ package fr.openent.minibadge.model.entity;
 
 import java.time.LocalDateTime;
 
-import fr.openent.minibadge.helper.ModelHelper;
+import fr.openent.minibadge.core.enums.BadgeCategoryIcon;
 import fr.openent.minibadge.model.Model;
 import io.vertx.core.json.JsonObject;
 
@@ -12,9 +12,9 @@ public class BadgeCategory implements Model<BadgeCategory> {
     private Long id;
     private String name;
     private String slug;
+    private BadgeCategoryIcon icon;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 
     public BadgeCategory(JsonObject badgeCategoryJson) {
         this.set(badgeCategoryJson);
@@ -30,6 +30,7 @@ public class BadgeCategory implements Model<BadgeCategory> {
         this.id = badgeCategoryJson.getLong(ID, 0L);
         this.name = badgeCategoryJson.getString(NAME, "");
         this.slug = badgeCategoryJson.getString(SLUG, "");
+        this.icon = BadgeCategoryIcon.fromName(badgeCategoryJson.getString(ICON_NAME, ""));
         this.createdAt = LocalDateTime.parse(badgeCategoryJson.getString(CREATED_AT));
         this.updatedAt = LocalDateTime.parse(badgeCategoryJson.getString(UPDATED_AT));
         return this;
@@ -64,6 +65,15 @@ public class BadgeCategory implements Model<BadgeCategory> {
         return this;
     }
 
+    public BadgeCategoryIcon getIcon() {
+        return icon;
+    }
+
+    public BadgeCategory setIcon(BadgeCategoryIcon icon) {
+        this.icon = icon;
+        return this;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -90,6 +100,8 @@ public class BadgeCategory implements Model<BadgeCategory> {
         json.put(ID, this.id);
         json.put(NAME, this.name);
         json.put(SLUG, this.slug);
+        json.put(ICONNAME, this.icon.getName());
+        json.put(ICONCSSCLASS, this.icon.getCssClass());
         return json;
     }
 }
