@@ -3,19 +3,27 @@
     <div class="minibadge-type-data flex-row f-column">
         <div>
             <i class="user-circle"></i>
-            <i18n>minibadge.created.by</i18n>&Tab;<span>[[vm.badgeType.owner.getDisplayName()]]</span></div>
+            <i18n>minibadge.created.by</i18n>&Tab;
+            <span>[[vm.badgeType.owner.getDisplayName()]]</span>
+        </div>
         <div>
             <i class="calendar-range"></i>
-            <i18n>minibadge.the</i18n>&Tab;<span
-                ng-bind="vm.badgeType.createdAt | date:vm.DATE_FORMAT.DAY_MONTH_YEAR_KEBAB"></span></div>
+            <i18n>minibadge.the</i18n>&Tab;
+            <span ng-bind="vm.badgeType.createdAt | date:vm.DATE_FORMAT.DAY_MONTH_YEAR_KEBAB"></span>
+        </div>
+        <div ng-if="vm.badgeType.categories.length>0">
+            <i ng-class="vm.badgeType.categories[0].iconCssClass"></i>
+            <span ng-bind="vm.badgeType.categories[0].name"></span>
+        </div>
         <div>
             <i class="target"></i>
-            <i18n>minibadge.gave.level</i18n>&nbsp;:&nbsp;<span
-                ng-bind="vm.badgeType.displayReceivers()"></span></div>
+            <i18n>minibadge.gave.level</i18n>&nbsp;:&nbsp;
+            <span ng-bind="vm.badgeType.displayReceivers()"></span>
+        </div>
         <div>
             <i class="human-arrow"></i>
             <i18n>minibadge.assignable.by</i18n>&Tab;:
-            <span
-                    ng-bind=" vm.badgeType.displayAssignors()"></span></div>
+            <span ng-bind=" vm.badgeType.displayAssignors()"></span>
+        </div>
     </div>
 </div>
