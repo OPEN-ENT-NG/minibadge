@@ -6,7 +6,7 @@ import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Put;
@@ -21,12 +21,7 @@ import org.entcore.common.user.UserUtils;
 
 public class BadgeController extends ControllerHelper {
 
-    private final BadgeService badgeService;
-
-    public BadgeController(ServiceFactory serviceFactory) {
-        super();
-        this.badgeService = serviceFactory.badgeService();
-    }
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
 
     @Get("/badges")
     @ApiDoc("Retrieve badge list")

@@ -4,7 +4,7 @@ import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.security.AssignRight;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
@@ -18,13 +18,7 @@ import org.entcore.common.user.UserUtils;
 
 public class UserController extends ControllerHelper {
 
-
-    private final UserService userService;
-
-    public UserController(ServiceFactory serviceFactory) {
-        super();
-        this.userService = serviceFactory.userService();
-    }
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
 
     @Get("type/:typeId/users-search")
     @ApiDoc("Get users from query")

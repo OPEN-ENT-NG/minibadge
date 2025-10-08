@@ -1,13 +1,11 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.enums.MessageRenderRequest;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.BadgeAssignedStructureService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -25,14 +23,17 @@ import java.util.stream.Stream;
 import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultBadgeAssignedStructureService implements BadgeAssignedStructureService {
-    private final Sql sql;
-    private final UserService userService;
 
-
-    protected DefaultBadgeAssignedStructureService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.userService = serviceFactory.userService();
+    private static BadgeAssignedStructureService instance = new DefaultBadgeAssignedStructureService(Sql.getInstance());
+    public DefaultBadgeAssignedStructureService(Sql sql) {
+        this.sql = sql;
     }
+    public static BadgeAssignedStructureService getInstance() {
+        return instance;
+    }
+
+    private final Sql sql;
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
 
     @Override
     public Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned,

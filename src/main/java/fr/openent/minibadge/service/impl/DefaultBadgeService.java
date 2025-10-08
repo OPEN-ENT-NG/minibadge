@@ -1,14 +1,13 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.Badge;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.BadgeService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -28,13 +27,14 @@ import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultBadgeService implements BadgeService {
 
-    private final UserService userService;
-    private final Sql sql;
-
-    protected DefaultBadgeService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.userService = serviceFactory.userService();
+    private static final BadgeService instance = new DefaultBadgeService();
+    private DefaultBadgeService() {}
+    public static BadgeService getInstance() {
+        return instance;
     }
+
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
+    private final Sql sql = Sql.getInstance();
 
     @Override
     public Future<Void> createBadges(long typeId, List<String> ownerIds) {

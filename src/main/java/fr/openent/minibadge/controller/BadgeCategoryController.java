@@ -2,10 +2,9 @@ package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.LoggerHelper;
-import fr.openent.minibadge.model.entity.BadgeCategory;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeCategoryService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
@@ -17,11 +16,7 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
 public class BadgeCategoryController extends ControllerHelper {
-    private final BadgeCategoryService badgeCategoryService;
-
-    public BadgeCategoryController(ServiceFactory serviceFactory) {
-        this.badgeCategoryService = serviceFactory.badgeCategoryService();
-    }
+    private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
 
     @Get("/categories")
     @ApiDoc("Retrieve all badge categories")

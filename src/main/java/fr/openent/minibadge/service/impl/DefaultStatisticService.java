@@ -1,12 +1,11 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.*;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.StatisticService;
 import fr.openent.minibadge.service.StructureService;
 import fr.openent.minibadge.service.UserService;
@@ -28,18 +27,17 @@ import java.util.stream.Stream;
 import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultStatisticService implements StatisticService {
-    private final Sql sql;
-    private final Config config;
-    private final UserService userService;
-    private final StructureService structureService;
 
-
-    protected DefaultStatisticService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.config = serviceFactory.config();
-        this.userService = serviceFactory.userService();
-        this.structureService = serviceFactory.structureService();
+    private static final StatisticService instance = new DefaultStatisticService();
+    private DefaultStatisticService() {}
+    public static StatisticService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
+    private final Config config = Minibadge.minibadgeConfig;
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
+    private final StructureService structureService = ServiceRegistry.getService(StructureService.class);
 
     @Override
     public Future<Statistics> getGlobalStatistics() {

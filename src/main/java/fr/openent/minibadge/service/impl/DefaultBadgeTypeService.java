@@ -1,5 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
+import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
@@ -8,9 +9,9 @@ import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.BadgeType;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.entity.BadgeCategory;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.BadgeTypeService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -30,15 +31,15 @@ import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultBadgeTypeService implements BadgeTypeService {
 
-    private final Sql sql;
-    private final EventBus eb;
-    private final BadgeCategoryService badgeCategoryService;
-
-    protected DefaultBadgeTypeService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.eb = serviceFactory.eventBus();
-        this.badgeCategoryService = serviceFactory.badgeCategoryService();
+    private static final BadgeTypeService instance = new DefaultBadgeTypeService();
+    private DefaultBadgeTypeService() {}
+    public static BadgeTypeService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
+    private final EventBus eb = Minibadge.eventBus;
+    private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
 
     @Override
     public Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset, Long badgeCategoryId) {

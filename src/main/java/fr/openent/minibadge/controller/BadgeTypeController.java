@@ -11,7 +11,7 @@ import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
 import fr.openent.minibadge.service.BadgeService;
 import fr.openent.minibadge.service.BadgeTypeService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
@@ -32,16 +32,9 @@ import static fr.openent.minibadge.core.constants.Database.*;
 
 public class BadgeTypeController extends ControllerHelper {
 
-    private final BadgeTypeService badgeTypeService;
-    private final BadgeAssignedService badgeAssignedService;
-    private final BadgeService badgeService;
-
-    public BadgeTypeController(ServiceFactory serviceFactory) {
-        super();
-        this.badgeTypeService = serviceFactory.badgeTypeService();
-        this.badgeAssignedService = serviceFactory.badgeAssignedService();
-        this.badgeService = serviceFactory.badgeService();
-    }
+    private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
+    private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
 
     @Get("/types")
     @ApiDoc("Retrieve badge type list")
@@ -92,7 +85,7 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeAssigners(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
+        int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
         long typeId = Long.parseLong(params.get(Database.TYPEID));
 
@@ -119,7 +112,7 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeReceivers(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
+        int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
         long typeId = Long.parseLong(params.get(Database.TYPEID));
 

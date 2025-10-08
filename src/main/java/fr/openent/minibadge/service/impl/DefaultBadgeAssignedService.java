@@ -1,14 +1,11 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.helper.ModelHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.*;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -29,17 +26,16 @@ import static fr.openent.minibadge.core.constants.Field.*;
 
 public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
-    private final Sql sql;
-    private final BadgeService badgeService;
-    private final UserService userService;
-    private final BadgeAssignedStructureService badgeAssignedStructureService;
-
-    protected DefaultBadgeAssignedService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.badgeService = serviceFactory.badgeService();
-        this.userService = serviceFactory.userService();
-        this.badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
+    private static final BadgeAssignedService instance = new DefaultBadgeAssignedService();
+    private DefaultBadgeAssignedService() {}
+    public static BadgeAssignedService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
+    private final BadgeAssignedStructureService badgeAssignedStructureService = ServiceRegistry.getService(BadgeAssignedStructureService.class);
 
     @Override
     public Future<Void> assign(long typeId, List<String> ownerIds, UserInfos assignor) {

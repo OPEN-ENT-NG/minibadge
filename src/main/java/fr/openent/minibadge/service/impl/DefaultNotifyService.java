@@ -5,6 +5,7 @@ import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Notify;
 import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.NotifyService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.http.HttpServerRequest;
@@ -15,13 +16,15 @@ import org.entcore.common.user.UserInfos;
 import java.util.List;
 
 public class DefaultNotifyService implements NotifyService {
-    private final TimelineHelper timelineHelper;
-    private final BadgeTypeService badgeTypeService;
 
-    protected DefaultNotifyService(ServiceFactory serviceFactory) {
-        this.timelineHelper = serviceFactory.timelineHelper();
-        this.badgeTypeService = serviceFactory.badgeTypeService();
+    private static final NotifyService instance = new DefaultNotifyService();
+    private DefaultNotifyService() {}
+    public static NotifyService getInstance() {
+        return instance;
     }
+
+    private final TimelineHelper timelineHelper = Minibadge.timelineHelper;
+    private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
 
     @Override
     public void notifyBadgeAssigned(HttpServerRequest request, UserInfos assigner, List<String> ownerIds, long typeId) {

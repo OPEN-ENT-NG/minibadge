@@ -8,7 +8,6 @@ import fr.openent.minibadge.helper.Neo4jHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.Future;
@@ -31,15 +30,15 @@ import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultUserService implements UserService {
 
-    private final EventBus eb;
-    private final Sql sql;
-    private final Neo4j neo;
-
-    protected DefaultUserService(ServiceFactory serviceFactory, RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
-        this.neo = repositoryFactory.neo4j();
-        this.eb = serviceFactory.eventBus();
+    private static final UserService instance = new DefaultUserService();
+    private DefaultUserService() {}
+    public static UserService getInstance() {
+        return instance;
     }
+
+    private final EventBus eb = Minibadge.eventBus;
+    private final Sql sql = Sql.getInstance();
+    private final Neo4j neo = Neo4j.getInstance();
 
     @Override
     public Future<List<User>> search(HttpServerRequest request, UserInfos user, Long typeId, String query) {

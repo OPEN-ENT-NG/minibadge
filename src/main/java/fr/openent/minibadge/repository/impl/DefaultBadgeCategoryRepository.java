@@ -15,11 +15,8 @@ import java.util.List;
 
 public class DefaultBadgeCategoryRepository implements BadgeCategoryRepository {
 
-    private final Sql sql;
+    private final Sql sql = Sql.getInstance();
 
-    DefaultBadgeCategoryRepository(RepositoryFactory factory) {
-        this.sql = factory.sql();
-    }
 
     @Override
     public Future<List<BadgeCategory>> findByBadgeTypeId(long badgeTypeId) {

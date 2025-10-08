@@ -2,14 +2,11 @@ package fr.openent.minibadge.service;
 
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.model.BadgeAssigned;
-import fr.openent.minibadge.model.Config;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.impl.*;
 import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -35,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(VertxUnitRunner.class)
-@PrepareForTest({ServiceFactory.class, DefaultUserService.class})
+@PrepareForTest({Sql.class, DefaultUserService.class})
 public class DefaultBadgeAssignedStructureServiceTest {
     private static final List<BadgeAssigned> badgeAssignedList = Arrays.asList(
             new BadgeAssigned().set(new JsonObject().put(Field.ID, 1L).put(Field.ASSIGNOR_ID, "user1")
@@ -64,17 +61,16 @@ public class DefaultBadgeAssignedStructureServiceTest {
 
     @Mock
     private DefaultUserService userService;
-    private BadgeAssignedStructureService badgeAssignedStructureService;
+    private DefaultBadgeAssignedStructureService defaultBadgeAssignedStructureService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         PowerMockito.spy(DefaultUserService.class);
-        PowerMockito.spy(ServiceFactory.class);
         PowerMockito.whenNew(DefaultUserService.class).withAnyArguments().thenReturn(userService);
-        RepositoryFactory repositoryFactory = new RepositoryFactory(sql, neo4j);
-        ServiceFactory serviceFactory = new ServiceFactory(repositoryFactory, Vertx.vertx(), storage, new Config(new JsonObject()), Vertx.vertx().eventBus());
-        badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
+        PowerMockito.spy(Sql.class);
+        ServiceRegistry.registerService(UserService.class, userService);
+        defaultBadgeAssignedStructureService = new DefaultBadgeAssignedStructureService(sql);
     }
 
     @Test
@@ -91,7 +87,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
-        badgeAssignedStructureService
+        defaultBadgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user2", "user3"), assignor);
 
         verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
@@ -110,7 +106,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
-        badgeAssignedStructureService
+        defaultBadgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user1", "user2", "user3"));
 
         verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
@@ -126,7 +122,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
                 " WHERE bas.badge_assigned_id IS NULL";
 
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
-        badgeAssignedStructureService.getAssignationsWithoutStructuresLinked();
+        defaultBadgeAssignedStructureService.getAssignationsWithoutStructuresLinked();
         verify(sql).prepared(eq(queryExpected), eq(new JsonArray()), any(Handler.class));
     }
 }

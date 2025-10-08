@@ -7,7 +7,7 @@ import fr.openent.minibadge.security.UsersAssignRight;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
 import fr.openent.minibadge.service.NotifyService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
@@ -29,14 +29,12 @@ import java.util.List;
 public class BadgeAssignedController extends ControllerHelper {
 
     private final EventStore eventStore;
-    private final BadgeAssignedService badgeAssignedService;
-    private final NotifyService notifyService;
+    private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
+    private final NotifyService notifyService = ServiceRegistry.getService(NotifyService.class);
 
-    public BadgeAssignedController(ServiceFactory serviceFactory) {
+    public BadgeAssignedController() {
         super();
         this.eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
-        this.badgeAssignedService = serviceFactory.badgeAssignedService();
-        this.notifyService = serviceFactory.notifyService();
     }
 
     @Put("/revoked/given/:badgeId")

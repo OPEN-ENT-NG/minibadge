@@ -59,8 +59,8 @@ public class SettingHelper {
     public static List<ThresholdSetting> getDefaultBadgeSettings() {
         return Collections.singletonList(new ThresholdSetting(
                 new JsonObject()
-                        .put(Field.MAXASSIGNABLE, Minibadge.modelConfig.defaultMaxAssignable())
-                        .put(Field.PERIODASSIGNABLE, Minibadge.modelConfig.defaultPeriodAssignable())
+                        .put(Field.MAXASSIGNABLE, Minibadge.minibadgeConfig.defaultMaxAssignable())
+                        .put(Field.PERIODASSIGNABLE, Minibadge.minibadgeConfig.defaultPeriodAssignable())
         ));
     }
 

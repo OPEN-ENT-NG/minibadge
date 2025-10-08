@@ -1,29 +1,19 @@
 package fr.openent.minibadge.repository.impl;
 
 import fr.openent.minibadge.repository.BadgeCategoryRepository;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.sql.Sql;
 
-public class RepositoryFactory {
+public final class RepositoryFactory {
 
-    private final Sql sql;
-    private final Neo4j neo4j;
+    private static final RepositoryFactory instance = new RepositoryFactory();
 
     private final BadgeCategoryRepository badgeCategoryRepository;
 
-    public RepositoryFactory(Sql sql, Neo4j neo4j) {
-        this.sql = sql;
-        this.neo4j = neo4j;
-
-        this.badgeCategoryRepository = new DefaultBadgeCategoryRepository(this);
+    private RepositoryFactory() {
+        this.badgeCategoryRepository = new DefaultBadgeCategoryRepository();
     }
 
-    public Sql sql() {
-        return sql;
-    }
-
-    public Neo4j neo4j() {
-        return neo4j;
+    public static RepositoryFactory getInstance() {
+        return instance;
     }
 
     public BadgeCategoryRepository badgeCategoryRepository() {

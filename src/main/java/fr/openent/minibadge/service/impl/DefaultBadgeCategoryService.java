@@ -2,18 +2,21 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.model.entity.BadgeCategory;
 import fr.openent.minibadge.repository.BadgeCategoryRepository;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
+import fr.openent.minibadge.service.AbstractService;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import io.vertx.core.Future;
 
 import java.util.List;
 
-public class DefaultBadgeCategoryService implements BadgeCategoryService {
-    private final BadgeCategoryRepository badgeCategoryRepository;
+public class DefaultBadgeCategoryService extends AbstractService implements BadgeCategoryService {
 
-    public DefaultBadgeCategoryService(RepositoryFactory repositoryFactory) {
-        this.badgeCategoryRepository = repositoryFactory.badgeCategoryRepository();
+    private static final BadgeCategoryService instance = new DefaultBadgeCategoryService();
+    private DefaultBadgeCategoryService() {}
+    public static BadgeCategoryService getInstance() {
+        return instance;
     }
+
+    private final BadgeCategoryRepository badgeCategoryRepository = repositories.badgeCategoryRepository();
 
     @Override
     public Future<List<BadgeCategory>> getBadgeCategoriesByBadgeTypeId(long badgeTypeId) {

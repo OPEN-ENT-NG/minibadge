@@ -7,7 +7,6 @@ import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.GlobalSettings;
 import fr.openent.minibadge.model.ThresholdSetting;
-import fr.openent.minibadge.repository.impl.RepositoryFactory;
 import fr.openent.minibadge.service.SettingService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -21,11 +20,13 @@ import java.util.List;
 
 public class DefaultSettingService implements SettingService {
 
-    private final Sql sql;
-
-    protected DefaultSettingService(RepositoryFactory repositoryFactory) {
-        this.sql = repositoryFactory.sql();
+    private static final SettingService instance = new DefaultSettingService();
+    private DefaultSettingService() {}
+    public static SettingService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
 
     public Future<GlobalSettings> getGlobalSettings(UserInfos user) {
         Promise<GlobalSettings> promise = Promise.promise();
