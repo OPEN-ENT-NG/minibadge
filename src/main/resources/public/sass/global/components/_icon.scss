@@ -117,4 +117,24 @@ i {
     font-family: 'minibadge-icons';
     content: "\F06D1";
   }
+
+  &.brain::before {
+    font-family: 'minibadge-icons';
+    content: "\F09D1";
+  }
+
+  &.school::before {
+    font-family: 'minibadge-icons';
+    content: "\F0474";
+  }
+
+  &.arm-flex::before {
+    font-family: 'minibadge-icons';
+    content: "\F0FD7";
+  }
+
+  &.medal::before {
+    font-family: 'minibadge-icons';
+    content: "\F0987";
+  }
 }
