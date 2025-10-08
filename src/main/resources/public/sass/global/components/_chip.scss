@@ -1,0 +1,34 @@
+.chip-badge-category {
+  display: flex;
+  align-items: center;
+  background-color: #dadcdf;
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  color: black;
+
+  i {
+    margin-right: 6px;
+    color: #767676;
+  }
+
+  &:hover {
+    background-color: #cacbce;
+  }
+
+  &.selected {
+    background-color: $minibadge-blue-dark;
+    color: $white;
+
+    i {
+      color: $white;
+    }
+
+    &:hover {
+      background-color: $minibadge-blue-darker;
+    }
+  }
+}

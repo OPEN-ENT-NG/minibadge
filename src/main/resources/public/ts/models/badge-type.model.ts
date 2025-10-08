@@ -1,11 +1,11 @@
 import { idiom as lang } from "entcore";
+import { BadgeCategory, IBadgeCategoryResponse } from "./badge-category.model";
 import { IGraphItem } from "./graph.model";
 import { MinibadgeModel } from "./model";
 import { RelationSetting } from "./protagonist-setting.model";
 import { ILimitOffsetPayload, IPaginatedResponses } from "./request.model";
 import { ITypeSettingResponse, TypeSettings } from "./type-settings.model";
 import { IUserResponse, User } from "./user.model";
-import { BadgeCategory, IBadgeCategoryResponse } from "./badge-category.model";
 
 export interface IBadgeTypeResponse {
     id?: number;
@@ -27,6 +27,7 @@ export interface IBadgeTypeResponse {
 }
 
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
+    categoryId?: number;
 }
 
 export interface IBadgeTypesResponses extends IPaginatedResponses<IBadgeTypeResponse> {
