@@ -1,7 +1,6 @@
 package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Actions;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.security.ViewRight;
@@ -18,6 +17,8 @@ import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.filter.Trace;
 import org.entcore.common.user.UserUtils;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class BadgeController extends ControllerHelper {
 
@@ -41,7 +42,7 @@ public class BadgeController extends ControllerHelper {
     @ResourceFilter(ViewRight.class)
     @Trace(Actions.BADGE_PUBLISH)
     public void publishBadge(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> badgeService.publishBadge(user.getUserId(), typeId)
                 .onSuccess(badge -> renderJson(request, new JsonObject()))
@@ -54,7 +55,7 @@ public class BadgeController extends ControllerHelper {
     @ResourceFilter(ViewRight.class)
     @Trace(Actions.BADGE_PRIVATIZE)
     public void privatizeBadge(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> badgeService.privatizeBadge(user.getUserId(), typeId)
                 .onSuccess(badge -> renderJson(request, new JsonObject()))
@@ -67,7 +68,7 @@ public class BadgeController extends ControllerHelper {
     @ResourceFilter(ViewRight.class)
     @Trace(Actions.BADGE_REFUSE)
     public void refuseBadge(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> badgeService.refuseBadge(user.getUserId(), typeId)
                 .onSuccess(badge -> renderJson(request, new JsonObject()))

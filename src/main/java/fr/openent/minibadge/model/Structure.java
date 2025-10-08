@@ -1,8 +1,8 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class Structure implements Model<Structure> {
     private String id;
@@ -24,9 +24,9 @@ public class Structure implements Model<Structure> {
 
     @Override
     public Structure set(JsonObject model) {
-        this.id = model.getString(Field.ID, model.getString(Database.STRUCTURE_ID, model.getString(Database.STRUCTUREID)));
-        this.name = model.getString(Field.NAME);
-        this.countAssigned = model.getInteger(Field.COUNT_ASSIGNED);
+        this.id = model.getString(ID, model.getString(STRUCTURE_ID, model.getString(STRUCTUREID)));
+        this.name = model.getString(NAME);
+        this.countAssigned = model.getInteger(COUNT_ASSIGNED);
         return this;
     }
 
@@ -45,8 +45,8 @@ public class Structure implements Model<Structure> {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Field.ID, this.id)
-                .put(Field.NAME, this.name)
-                .put(Field.COUNTASSIGNED, this.countAssigned);
+                .put(ID, this.id)
+                .put(NAME, this.name)
+                .put(COUNTASSIGNED, this.countAssigned);
     }
 }

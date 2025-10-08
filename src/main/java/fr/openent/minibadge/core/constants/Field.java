@@ -42,8 +42,14 @@ public class Field {
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
     public static final String SLUG = "slug";
+    public static final String STRUCTUREID = "structureId";
+    public static final String STRUCTURE_ID = "structure_id";
     public static final String STRUCTUREIDS = "structureIds";
     public static final String VALUE = "value";
+    public static final String CATEGORYID = "categoryId";
+    public static final String NOW_SQL_FUNCTION = "now()";
+    public static final String NULL = "null";
+    public static final String TYPEID = "typeId";
 
 
     //BadgeAssigned
@@ -61,6 +67,7 @@ public class Field {
     public static final String BADGE_ID = "badge_id";
     public static final String BADGEID = "badgeId";
     public static final String BADGE = "badge";
+    public static final String MINIBADGECHART = "minibadgechart";
 
     //BadgeAssignedStructure
     public static final String IS_STRUCTURE_ASSIGNER = "is_structure_assigner";

@@ -2,6 +2,7 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
@@ -26,8 +27,6 @@ import org.entcore.common.user.UserUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultBadgeTypeService implements BadgeTypeService {
 
@@ -76,11 +75,11 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
         // Base SELECT
         String query = "SELECT bt.id, bt.slug, bt.structure_id, bt.owner_id, bt.picture_id, bt.label, bt.description, bt.description_short " +
-                "FROM " + BADGE_TYPE_TABLE + " bt";
+                "FROM " + SqlTable.BADGE_TYPE.getName() + " bt";
 
         // Optional JOIN if categoryId is present
         if (badgeCategoryId != null) {
-            query += " JOIN " + REL_BADGE_CATEGORY_BADGE_TYPE_TABLE + " rbcbt ON bt.id = rbcbt.badge_type_id";
+            query += " JOIN " + SqlTable.REL_BADGE_CATEGORY_BADGE_TYPE.getName() + " rbcbt ON bt.id = rbcbt.badge_type_id";
         }
 
         // WHERE clauses
@@ -144,7 +143,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
         JsonArray params = new JsonArray();
         String request = String.format("SELECT id, slug, structure_id, owner_id, picture_id, label, description, " +
                         " description_short, created_at " +
-                        " FROM %s WHERE (%s %s structure_id IS NULL) AND id = ?", BADGE_TYPE_TABLE,
+                        " FROM %s WHERE (%s %s structure_id IS NULL) AND id = ?", SqlTable.BADGE_TYPE.getName(),
                 SqlHelper.filterStructures(structureIds, params),
                 (structureIds != null && !structureIds.isEmpty()) ? "OR" : "");
 

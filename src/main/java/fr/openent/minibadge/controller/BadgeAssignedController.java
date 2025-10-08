@@ -26,16 +26,13 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.List;
 
+import static fr.openent.minibadge.core.constants.Field.*;
+
 public class BadgeAssignedController extends ControllerHelper {
 
-    private final EventStore eventStore;
+    private final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
     private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
     private final NotifyService notifyService = ServiceRegistry.getService(NotifyService.class);
-
-    public BadgeAssignedController() {
-        super();
-        this.eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
-    }
 
     @Put("/revoked/given/:badgeId")
     @ApiDoc("revoke a badge the user has given")
@@ -43,7 +40,7 @@ public class BadgeAssignedController extends ControllerHelper {
     @ResourceFilter(ViewRight.class)
     @Trace(Actions.BADGE_ASSIGN_REVOKE)
     public void revoke(HttpServerRequest request) {
-        long idBadge = Long.parseLong(request.params().get(Database.BADGEID));
+        long idBadge = Long.parseLong(request.params().get(BADGEID));
         UserUtils.getUserInfos(eb, request, user -> badgeAssignedService.revoke(user.getUserId(), idBadge)
                 .onSuccess(event -> request.response().setStatusCode(200).end())
                 .onFailure(error -> badRequest(request, error.getMessage())));
@@ -74,7 +71,7 @@ public class BadgeAssignedController extends ControllerHelper {
     @Trace(Actions.BADGE_ASSIGN)
     @SuppressWarnings("unchecked")
     public void assign(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
 
         RequestUtils.bodyToJson(request, String.format("%s%s", pathPrefix, "badgeAssignedCreate"), body -> {
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();

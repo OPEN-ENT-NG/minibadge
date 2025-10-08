@@ -1,6 +1,7 @@
 package fr.openent.minibadge.helper;
 
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.model.ThresholdSetting;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -11,8 +12,6 @@ import org.entcore.common.user.UserInfos;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static fr.openent.minibadge.core.constants.Database.BADGE_ASSIGNED_VALID_TABLE;
 
 public class SqlHelper {
     private SqlHelper() {
@@ -116,6 +115,6 @@ public class SqlHelper {
         params.add(user.getUserId());
         return String.format("SELECT COUNT(id) FROM %s " +
                         " WHERE to_char(now(), '%s') = to_char(created_at, '%s') AND assignor_id = ?",
-                        BADGE_ASSIGNED_VALID_TABLE, formatDate, formatDate);
+                        SqlTable.BADGE_ASSIGNED_VALID.getName(), formatDate, formatDate);
     }
 }

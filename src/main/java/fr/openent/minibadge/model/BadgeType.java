@@ -1,7 +1,5 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.model.entity.BadgeCategory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -9,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 
 public class BadgeType implements Model<BadgeType> {
@@ -37,17 +37,17 @@ public class BadgeType implements Model<BadgeType> {
 
     @Override
     public BadgeType set(JsonObject badgeType) {
-        this.id = badgeType.getLong(Field.ID);
-        this.structureId = badgeType.getString(Database.STRUCTURE_ID, badgeType.getString(Database.STRUCTUREID));
-        this.ownerId = badgeType.getString(Field.OWNER_ID, badgeType.getString(Field.OWNERID));
-        this.pictureId = badgeType.getString(Field.PICTURE_ID, badgeType.getString(Field.PICTUREID));
-        this.label = badgeType.getString(Field.LABEL);
-        this.description = badgeType.getString(Field.DESCRIPTION);
-        this.descriptionShort = badgeType.getString(Field.DESCRIPTION_SHORT, badgeType.getString(Field.DESCRIPTIONSHORT));
-        this.countAssigned = badgeType.getInteger(Field.COUNT_ASSIGNED);
-        this.countRefused = badgeType.getInteger(Field.COUNT_REFUSED);
-        this.mostAssigningUsers = new User().toList(badgeType.getJsonArray(Field.MOST_ASSIGNING_USERS, new JsonArray()));
-        this.createdAt = badgeType.getString(Field.CREATED_AT, badgeType.getString(Field.CREATEDAT));
+        this.id = badgeType.getLong(ID);
+        this.structureId = badgeType.getString(STRUCTURE_ID, badgeType.getString(STRUCTUREID));
+        this.ownerId = badgeType.getString(OWNER_ID, badgeType.getString(OWNERID));
+        this.pictureId = badgeType.getString(PICTURE_ID, badgeType.getString(PICTUREID));
+        this.label = badgeType.getString(LABEL);
+        this.description = badgeType.getString(DESCRIPTION);
+        this.descriptionShort = badgeType.getString(DESCRIPTION_SHORT, badgeType.getString(DESCRIPTIONSHORT));
+        this.countAssigned = badgeType.getInteger(COUNT_ASSIGNED);
+        this.countRefused = badgeType.getInteger(COUNT_REFUSED);
+        this.mostAssigningUsers = new User().toList(badgeType.getJsonArray(MOST_ASSIGNING_USERS, new JsonArray()));
+        this.createdAt = badgeType.getString(CREATED_AT, badgeType.getString(CREATEDAT));
         return this;
     }
 
@@ -130,23 +130,23 @@ public class BadgeType implements Model<BadgeType> {
     @Override
     public JsonObject toJson() {
         JsonObject badgeType = new JsonObject()
-                .put(Field.ID, this.id)
-                .put(Database.STRUCTUREID, this.structureId)
-                .put(Field.OWNERID, this.ownerId)
-                .put(Field.PICTUREID, this.pictureId)
-                .put(Field.LABEL, this.label)
-                .put(Field.CREATEDAT, this.createdAt)
-                .put(Field.DESCRIPTION, this.description)
-                .put(Field.DESCRIPTIONSHORT, this.descriptionShort)
-                .put(Field.COUNTASSIGNED, this.countAssigned)
-                .put(Field.COUNTREFUSED, this.countRefused)
-                .put(Field.SETTING, this.setting.toJson())
-                .put(Field.CATEGORIES, this.categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()));
+                .put(ID, this.id)
+                .put(STRUCTUREID, this.structureId)
+                .put(OWNERID, this.ownerId)
+                .put(PICTUREID, this.pictureId)
+                .put(LABEL, this.label)
+                .put(CREATEDAT, this.createdAt)
+                .put(DESCRIPTION, this.description)
+                .put(DESCRIPTIONSHORT, this.descriptionShort)
+                .put(COUNTASSIGNED, this.countAssigned)
+                .put(COUNTREFUSED, this.countRefused)
+                .put(SETTING, this.setting.toJson())
+                .put(CATEGORIES, this.categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()));
         if (this.owner != null)
-            badgeType.put(Field.OWNER, this.owner.toJson());
+            badgeType.put(OWNER, this.owner.toJson());
 
         if (this.mostAssigningUsers != null)
-            badgeType.put(Field.MOSTASSIGNINGUSERS, new User().toArray(this.mostAssigningUsers));
+            badgeType.put(MOSTASSIGNINGUSERS, new User().toArray(this.mostAssigningUsers));
 
         return badgeType;
     }

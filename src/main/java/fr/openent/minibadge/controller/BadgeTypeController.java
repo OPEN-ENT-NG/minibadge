@@ -1,7 +1,6 @@
 package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
@@ -28,7 +27,7 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.List;
 
-import static fr.openent.minibadge.core.constants.Database.*;
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class BadgeTypeController extends ControllerHelper {
 
@@ -69,7 +68,7 @@ public class BadgeTypeController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ViewRight.class)
     public void getBadgeType(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
 
@@ -87,7 +86,7 @@ public class BadgeTypeController extends ControllerHelper {
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
         int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
-        long typeId = Long.parseLong(params.get(Database.TYPEID));
+        long typeId = Long.parseLong(params.get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> {
             Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
@@ -114,7 +113,7 @@ public class BadgeTypeController extends ControllerHelper {
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
         int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
-        long typeId = Long.parseLong(params.get(Database.TYPEID));
+        long typeId = Long.parseLong(params.get(TYPEID));
 
         Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
         Future<Integer> countReceiversFuture = badgeService.countTotalReceivers(typeId);

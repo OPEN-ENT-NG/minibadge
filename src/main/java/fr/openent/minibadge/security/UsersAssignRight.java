@@ -1,6 +1,5 @@
 package fr.openent.minibadge.security;
 
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.core.constants.Rights;
@@ -29,6 +28,8 @@ import org.entcore.common.user.UserUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static fr.openent.minibadge.core.constants.Field.MINIBADGECHART;
 
 public class UsersAssignRight implements ResourcesProvider {
     private static final List<String> PERMISSIONS_FIELDS = Arrays.asList(Field.ACCEPTCHART, Field.ACCEPTASSIGN,
@@ -91,7 +92,7 @@ public class UsersAssignRight implements ResourcesProvider {
             request.resume();
             promise.complete(new JsonObject(session.getJsonObject(Request.CACHE, new JsonObject())
                     .getJsonObject(Request.PREFERENCES, new JsonObject())
-                    .getString(Database.MINIBADGECHART, "{}")));
+                    .getString(MINIBADGECHART, "{}")));
         });
         return promise.future();
     }
@@ -146,7 +147,7 @@ public class UsersAssignRight implements ResourcesProvider {
         String customReturn = String.format(" %s RETURN distinct %s.id as id, %s.%s as permissions, profile.name as type ",
                 Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
-                userAlias, prefAlias, Database.MINIBADGECHART);
+                userAlias, prefAlias, MINIBADGECHART);
 
         UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, false, true,
                 String.format(" %s %s ", "AND", preFilter),
@@ -174,7 +175,7 @@ public class UsersAssignRight implements ResourcesProvider {
 
                     promise.complete(new Chart(new JsonObject(preferences.getJsonObject(Request.PREFERENCES,
                                     new JsonObject())
-                            .getString(Database.MINIBADGECHART, "{}"))));
+                            .getString(MINIBADGECHART, "{}"))));
                 })
                 .onFailure(err -> {
                     log.error(

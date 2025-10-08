@@ -1,6 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.core.constants.Database;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.helper.UserHelper;
@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static fr.openent.minibadge.core.constants.Database.*;
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class DefaultBadgeService implements BadgeService {
 
@@ -54,7 +54,7 @@ public class DefaultBadgeService implements BadgeService {
         JsonArray params = new JsonArray();
         String request = String.format("INSERT INTO %s (owner_id, badge_type_id) " +
                         " VALUES %s " +
-                        " ON CONFLICT DO NOTHING;", BADGE_TABLE,
+                        " ON CONFLICT DO NOTHING;", SqlTable.BADGE.getName(),
                 ownerIds.stream()
                         .map(ownerId -> {
                             params.add(ownerId)
@@ -97,8 +97,8 @@ public class DefaultBadgeService implements BadgeService {
                 " ba.last_assign_created " +
                 " FROM %s b INNER JOIN assign ba on ba.badge_id = b.id INNER JOIN %s bt ON b.badge_type_id = bt.id " +
                 " WHERE b.owner_id = ? AND ba.count_assigned > 0 %s %s ORDER BY last_assign_created DESC",
-                BADGE_ASSIGNED_VALID_TABLE, BADGE_TABLE,
-                BADGE_TYPE_TABLE, (query != null && !query.isEmpty()) ? "AND" : "",
+                SqlTable.BADGE_ASSIGNED_VALID.getName(), SqlTable.BADGE.getName(),
+                SqlTable.BADGE_TYPE.getName(), (query != null && !query.isEmpty()) ? "AND" : "",
                 SqlHelper.searchQueryInColumns(query, Collections.singletonList("bt.label"), params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -124,7 +124,7 @@ public class DefaultBadgeService implements BadgeService {
 
         String request = String.format("UPDATE %s " +
                 " SET privatized_at = null, refused_at = null, disabled_at = null" +
-                " WHERE owner_id = ? AND badge_type_id = ?", BADGE_TABLE);
+                " WHERE owner_id = ? AND badge_type_id = ?", SqlTable.BADGE.getName());
 
         JsonArray params = new JsonArray()
                 .add(ownerId)
@@ -142,7 +142,7 @@ public class DefaultBadgeService implements BadgeService {
     public Future<Void> privatizeBadge(String ownerId, long typeId) {
         Promise<Void> promise = Promise.promise();
 
-        updateTimePropertyRequest(ownerId, typeId, Database.PRIVATIZED_AT)
+        updateTimePropertyRequest(ownerId, typeId, PRIVATIZED_AT)
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -153,7 +153,7 @@ public class DefaultBadgeService implements BadgeService {
     public Future<Void> refuseBadge(String ownerId, long typeId) {
         Promise<Void> promise = Promise.promise();
 
-        updateTimePropertyRequest(ownerId, typeId, Database.REFUSED_AT)
+        updateTimePropertyRequest(ownerId, typeId, REFUSED_AT)
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -166,7 +166,7 @@ public class DefaultBadgeService implements BadgeService {
 
         String request = String.format("UPDATE %s " +
                 " SET %s = now() " +
-                " WHERE owner_id = ? AND badge_type_id = ?", BADGE_TABLE, timeProperty);
+                " WHERE owner_id = ? AND badge_type_id = ?", SqlTable.BADGE.getName(), timeProperty);
 
         JsonArray params = new JsonArray()
                 .add(ownerId)
@@ -183,7 +183,7 @@ public class DefaultBadgeService implements BadgeService {
     public Future<Void> disableBadges(String ownerId, String host, String language) {
         Promise<Void> promise = Promise.promise();
         userService.anonimyzeUser(ownerId, host, language)
-                .compose(event -> changeDisableBadgesRequest(ownerId, Database.NOW_SQL_FUNCTION))
+                .compose(event -> changeDisableBadgesRequest(ownerId, NOW_SQL_FUNCTION))
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -194,7 +194,7 @@ public class DefaultBadgeService implements BadgeService {
     public Future<Void> enableBadges(String ownerId) {
         Promise<Void> promise = Promise.promise();
         userService.upsert(Collections.singletonList(ownerId))
-                .compose(event -> changeDisableBadgesRequest(ownerId, Database.NULL))
+                .compose(event -> changeDisableBadgesRequest(ownerId, NULL))
                 .onSuccess(badge -> promise.complete())
                 .onFailure(promise::fail);
 
@@ -204,7 +204,7 @@ public class DefaultBadgeService implements BadgeService {
     private Future<JsonObject> changeDisableBadgesRequest(String ownerId, String disableValue) {
         Promise<JsonObject> promise = Promise.promise();
 
-        String request = String.format("UPDATE %s SET disabled_at = %s WHERE owner_id = ?", BADGE_TABLE, disableValue);
+        String request = String.format("UPDATE %s SET disabled_at = %s WHERE owner_id = ?", SqlTable.BADGE.getName(), disableValue);
 
         JsonArray params = new JsonArray().add(ownerId);
 
@@ -246,7 +246,7 @@ public class DefaultBadgeService implements BadgeService {
                         " WHERE badge_type_id = ? " +
                         " GROUP BY owner_id, bav.created_at, bav.id " +
                         " ORDER BY last_created_at DESC %s ",
-                BADGE_PUBLIC_TABLE, BADGE_ASSIGNED_VALID_TABLE,
+                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_VALID.getName(),
                 SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -278,7 +278,7 @@ public class DefaultBadgeService implements BadgeService {
                         " FROM %s bp " +
                         " INNER JOIN %s bav on bav.badge_id = bp.id " +
                         " WHERE badge_type_id = ? ",
-                BADGE_PUBLIC_TABLE, BADGE_ASSIGNED_VALID_TABLE);
+                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_VALID.getName());
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::countBadgeTypeReceiverIdsRequest] Fail to count badge types receivers",

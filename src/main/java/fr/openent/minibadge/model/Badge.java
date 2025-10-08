@@ -1,8 +1,8 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 
 public class Badge implements Model<Badge> {
@@ -32,30 +32,30 @@ public class Badge implements Model<Badge> {
 
     @Override
     public Badge set(JsonObject badge) {
-        this.id = badge.getLong(Field.ID);
-        this.typeId = badge.getLong(Field.BADGE_TYPE_ID, badge.getLong(Field.BADGETYPEID));
-        this.ownerId = badge.getString(Field.OWNER_ID, badge.getString(Field.OWNERID));
-        this.privatizedAt = badge.getString(Field.PRIVATIZED_AT, badge.getString(Field.PRIVATIZEDAT));
-        this.refusedAt = badge.getString(Field.REFUSED_AT, badge.getString(Field.REFUSEDAT));
-        this.disabledAt = badge.getString(Field.DISABLED_AT, badge.getString(Field.DISABLEDAT));
+        this.id = badge.getLong(ID);
+        this.typeId = badge.getLong(BADGE_TYPE_ID, badge.getLong(BADGETYPEID));
+        this.ownerId = badge.getString(OWNER_ID, badge.getString(OWNERID));
+        this.privatizedAt = badge.getString(PRIVATIZED_AT, badge.getString(PRIVATIZEDAT));
+        this.refusedAt = badge.getString(REFUSED_AT, badge.getString(REFUSEDAT));
+        this.disabledAt = badge.getString(DISABLED_AT, badge.getString(DISABLEDAT));
         this.badgeCounts = new BadgeCounts(badge);
-        this.badgeType = setBadgeType(badge.getString(Field.BADGE_TYPE_LABEL),
-                badge.getString(Field.BADGE_TYPE_PICTURE_ID));
-        this.owner = setOwner(badge.getString(Field.OWNER_ID,badge.getString(Field.OWNERID)),
-                       badge.getString(Field.DISPLAYNAME, badge.getString(Field.DISPLAY_NAME)));
+        this.badgeType = setBadgeType(badge.getString(BADGE_TYPE_LABEL),
+                badge.getString(BADGE_TYPE_PICTURE_ID));
+        this.owner = setOwner(badge.getString(OWNER_ID,badge.getString(OWNERID)),
+                       badge.getString(DISPLAYNAME, badge.getString(DISPLAY_NAME)));
         return this;
     }
 
     private User setOwner(String ownerId, String displayName) {
-        return new User(new JsonObject().put(Field.ID,ownerId).put(Field.USERNAME,displayName));
+        return new User(new JsonObject().put(ID,ownerId).put(USERNAME,displayName));
     }
 
     public BadgeType setBadgeType(String typeLabel, String pictureId) {
         return new BadgeType(
                 new JsonObject()
-                        .put(Field.ID, this.typeId)
-                        .put(Field.LABEL, typeLabel)
-                        .put(Field.PICTUREID, pictureId)
+                        .put(ID, this.typeId)
+                        .put(LABEL, typeLabel)
+                        .put(PICTUREID, pictureId)
         );
     }
 
@@ -94,18 +94,18 @@ public class Badge implements Model<Badge> {
     @Override
     public JsonObject toJson() {
         JsonObject badge = new JsonObject()
-                .put(Field.ID, this.id)
-                .put(Database.STRUCTUREID, this.structureId)
-                .put(Field.BADGETYPEID, this.typeId)
-                .put(Field.OWNERID, this.ownerId)
-                .put(Field.PRIVATIZEDAT, this.privatizedAt)
-                .put(Field.REFUSEDAT, this.refusedAt)
-                .put(Field.DISABLEDAT, this.disabledAt)
-                .put(Field.COUNTS, this.badgeCounts.toJson())
-                .put(Field.BADGETYPE, this.badgeType.toJson());
+                .put(ID, this.id)
+                .put(STRUCTUREID, this.structureId)
+                .put(BADGETYPEID, this.typeId)
+                .put(OWNERID, this.ownerId)
+                .put(PRIVATIZEDAT, this.privatizedAt)
+                .put(REFUSEDAT, this.refusedAt)
+                .put(DISABLEDAT, this.disabledAt)
+                .put(COUNTS, this.badgeCounts.toJson())
+                .put(BADGETYPE, this.badgeType.toJson());
 
         if (this.owner != null)
-            badge.put(Field.OWNER, this.owner.toJson());
+            badge.put(OWNER, this.owner.toJson());
 
         return badge;
     }
@@ -126,7 +126,7 @@ public class Badge implements Model<Badge> {
         @Override
         public JsonObject toJson() {
             return new JsonObject()
-                    .put(Field.ASSIGNED, this.assigned);
+                    .put(ASSIGNED, this.assigned);
         }
 
         @Override
@@ -136,7 +136,7 @@ public class Badge implements Model<Badge> {
 
         @Override
         public BadgeCounts set(JsonObject badgeCounts) {
-            this.assigned = badgeCounts.getInteger(Field.COUNT_ASSIGNED);
+            this.assigned = badgeCounts.getInteger(COUNT_ASSIGNED);
             return this;
         }
     }

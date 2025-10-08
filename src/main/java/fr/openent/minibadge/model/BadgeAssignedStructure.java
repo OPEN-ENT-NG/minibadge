@@ -1,8 +1,8 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class BadgeAssignedStructure implements Model<BadgeAssignedStructure> {
     private Long id;
@@ -35,11 +35,11 @@ public class BadgeAssignedStructure implements Model<BadgeAssignedStructure> {
 
     @Override
     public BadgeAssignedStructure set(JsonObject badgeAssignedStructure) {
-        this.id = badgeAssignedStructure.getLong(Field.ID);
-        this.badgeAssignedId = badgeAssignedStructure.getLong(Field.BADGE_ASSIGNED_ID);
-        this.structureId = badgeAssignedStructure.getString(Database.STRUCTURE_ID);
-        this.isStructureAssigner = badgeAssignedStructure.getBoolean(Field.IS_STRUCTURE_ASSIGNER);
-        this.isStructureReceiver = badgeAssignedStructure.getBoolean(Field.IS_STRUCTURE_RECEIVER);
+        this.id = badgeAssignedStructure.getLong(ID);
+        this.badgeAssignedId = badgeAssignedStructure.getLong(BADGE_ASSIGNED_ID);
+        this.structureId = badgeAssignedStructure.getString(STRUCTURE_ID);
+        this.isStructureAssigner = badgeAssignedStructure.getBoolean(IS_STRUCTURE_ASSIGNER);
+        this.isStructureReceiver = badgeAssignedStructure.getBoolean(IS_STRUCTURE_RECEIVER);
         return this;
     }
 
@@ -66,10 +66,10 @@ public class BadgeAssignedStructure implements Model<BadgeAssignedStructure> {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Field.ID, this.id)
-                .put(Field.ASSIGNORID, this.badgeAssignedId)
-                .put(Field.CREATEDAT, this.structureId)
-                .put(Field.UPDATEDAT, this.isStructureAssigner)
-                .put(Field.REVOKEDAT, this.isStructureReceiver);
+                .put(ID, this.id)
+                .put(ASSIGNORID, this.badgeAssignedId)
+                .put(CREATEDAT, this.structureId)
+                .put(UPDATEDAT, this.isStructureAssigner)
+                .put(REVOKEDAT, this.isStructureReceiver);
     }
 }

@@ -1,6 +1,7 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.core.enums.MessageRenderRequest;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
@@ -19,8 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultBadgeAssignedStructureService implements BadgeAssignedStructureService {
 
@@ -94,7 +93,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
 
         Promise<MessageRenderRequest> promise = Promise.promise();
         String request = String.format("INSERT INTO %s (badge_assigned_id, structure_id, is_structure_assigner, " +
-                        " is_structure_receiver) VALUES %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
+                        " is_structure_receiver) VALUES %s", SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                 insertValues);
 
         sql.prepared(request, params, PromiseHelper.validResultHandler(promise, MessageRenderRequest.SUCCESS_WITHOUT_RESPONSE_BODY,
@@ -200,9 +199,9 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
     public Future<List<BadgeAssigned>> getAssignationsWithoutStructuresLinked() {
         Promise<List<BadgeAssigned>> promise = Promise.promise();
         String request = "SELECT b.id as badge_id, owner_id, ba.id as id, assignor_id" +
-                " FROM  " + BADGE_TABLE + " b " +
-                " INNER JOIN " + BADGE_ASSIGNED_TABLE + " ba ON b.id = ba.badge_id " +
-                " LEFT JOIN " + BADGE_ASSIGNED_STRUCTURE_TABLE + " bas on ba.id = bas.badge_assigned_id " +
+                " FROM  " + SqlTable.BADGE.getName() + " b " +
+                " INNER JOIN " + SqlTable.BADGE_ASSIGNED.getName() + " ba ON b.id = ba.badge_id " +
+                " LEFT JOIN " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas on ba.id = bas.badge_assigned_id " +
                 " WHERE bas.badge_assigned_id IS NULL";
 
         sql.prepared(request, new JsonArray(), SqlResult.validResultHandler(PromiseHelper.handlerJsonArrayModelled(promise,

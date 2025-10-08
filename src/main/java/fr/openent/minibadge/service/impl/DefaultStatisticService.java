@@ -2,6 +2,7 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.*;
@@ -23,8 +24,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static fr.openent.minibadge.core.constants.Database.*;
 
 public class DefaultStatisticService implements StatisticService {
 
@@ -133,9 +132,9 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s ba on ba.id = bas.badge_assigned_id " +
                         " INNER JOIN %s b on b.id = ba.badge_id " +
                         " WHERE is_structure_assigner IS TRUE AND %s",
-                        BADGE_ASSIGNED_STRUCTURE_TABLE,
-                        BADGE_ASSIGNED_VALID_TABLE,
-                        BADGE_TABLE,
+                        SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
+                        SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        SqlTable.BADGE.getName(),
                 SqlHelper.filterStructuresWithNull(structureIds, params));
 
 
@@ -163,10 +162,10 @@ public class DefaultStatisticService implements StatisticService {
                         " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
                         " GROUP BY bt.id, b.count_assigned %s " +
                         " ORDER BY count_assigned %s LIMIT %s",
-                BADGE_TYPE_TABLE,
-                BADGE_TABLE,
-                BADGE_ASSIGNED_VALID_TABLE,
-                BADGE_ASSIGNED_STRUCTURE_TABLE,
+                SqlTable.BADGE_TYPE.getName(),
+                SqlTable.BADGE.getName(),
+                SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                 SqlHelper.andFilterStructures(structureIds, params),
                 SqlHelper.filterStructuresWithNull(structureIds, params),
                 (Boolean.TRUE.equals(isDesc) ? "HAVING count_assigned > 0" : ""),
@@ -193,10 +192,10 @@ public class DefaultStatisticService implements StatisticService {
                         " WHERE is_structure_receiver IS TRUE %s " +
                         " GROUP BY b.badge_type_id) b on bt.id = b.badge_type_id WHERE %s " +
                         " GROUP BY bt.id, b.count_refused HAVING count_refused > 0 ORDER BY count_refused DESC LIMIT %s",
-                        BADGE_TYPE_TABLE,
-                        BADGE_DISABLED_TABLE,
-                        BADGE_ASSIGNED_VALID_TABLE,
-                        BADGE_ASSIGNED_STRUCTURE_TABLE,
+                        SqlTable.BADGE_TYPE.getName(),
+                        SqlTable.BADGE_DISABLED.getName(),
+                        SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                         SqlHelper.andFilterStructures(structureIds, params),
                         SqlHelper.filterStructuresWithNull(structureIds, params),
                         config.mostRefusedTypeListSize());
@@ -265,10 +264,10 @@ public class DefaultStatisticService implements StatisticService {
                         " GROUP BY %s ORDER BY count_assigned DESC " +
                         " LIMIT %s",
                 userSelector,
-                BADGE_ASSIGNED_VALID_TABLE,
-                BADGE_ASSIGNED_STRUCTURE_TABLE,
-                BADGE_TABLE,
-                BADGE_TYPE_TABLE,
+                SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
+                SqlTable.BADGE.getName(),
+                SqlTable.BADGE_TYPE.getName(),
                 (isStructureAssigner ? Field.IS_STRUCTURE_ASSIGNER : Field.IS_STRUCTURE_RECEIVER),
                 SqlHelper.andFilterStructures(structureIds, params, "bas"),
                 SqlHelper.filterStructuresWithNull(structureIds, params, "bt"),
@@ -334,9 +333,9 @@ public class DefaultStatisticService implements StatisticService {
                         " INNER JOIN %s b on ba.badge_id = b.id " +
                         " WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
                         " ORDER BY count_assigned DESC LIMIT %s",
-                BADGE_ASSIGNED_STRUCTURE_TABLE,
-                BADGE_ASSIGNED_VALID_TABLE,
-                BADGE_TABLE,
+                SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
+                SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                SqlTable.BADGE.getName(),
                 SqlHelper.andFilterStructures(structureIds, params),
                 config.mostAssigningStructureListSize());
 
