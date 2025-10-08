@@ -1,0 +1,13 @@
+.minibadge-types {
+    &-header {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 32px;
+    }
+    &-chip-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+}

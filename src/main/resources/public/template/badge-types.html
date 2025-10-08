@@ -1,6 +1,16 @@
 <div ng-controller="BadgeTypesController as vm">
-    <search-input search-query="vm.searchQuery" on-search="vm.initBadgeTypes()"
-                  placeholder="minibadge.badge.search"></search-input>
+    <div class="minibadge-types-header">
+        <search-input 
+            search-query="vm.searchQuery" 
+            on-search="vm.initBadgeTypes()"         
+            placeholder="minibadge.badge.search">
+        </search-input>
+        <div class="minibadge-types-chip-container">
+            <chip-badge-category ng-repeat="category in vm.badgeCategories" category="category"
+                                is-selected="category.id === vm.selectedCategory.id" on-click="vm.toggleCategory(category)">
+            </chip-badge-category>
+        </div>
+    </div>
     <div class="minibadge-card-list flex-row f-wrap justify-center" ng-show="!!vm.badgeTypes.length">
         <minibadge-card-type ng-repeat="badgeType in vm.badgeTypes" badge-type="badgeType"
                              on-body-click="vm.redirectBadgeType(badgeType)"
