@@ -42,6 +42,11 @@ public class TypeSetting implements Model<TypeSetting> {
         return isSelfAssignable;
     }
 
+    public TypeSetting setSelfAssignable(boolean selfAssignable) {
+        isSelfAssignable = selfAssignable;
+        return this;
+    }
+
     public String structureId() {
         return structureId;
     }
