@@ -119,6 +119,10 @@ public class BadgeType implements Model<BadgeType> {
         this.mostAssigningUsers = mostAssigningUsers;
     }
 
+    public TypeSetting getSetting() {
+        return setting;
+    }
+
     public void setSetting(TypeSetting setting) {
         this.setting = setting;
     }

@@ -12,6 +12,7 @@ import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.entity.BadgeCategory;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.BadgeTypeService;
+import fr.openent.minibadge.service.BadgeTypeSettingService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
 import io.vertx.core.CompositeFuture;
@@ -39,6 +40,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
     private final Sql sql = Sql.getInstance();
     private final EventBus eb = Minibadge.eventBus;
     private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
+    private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
 
     @Override
     public Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset, Long badgeCategoryId) {
@@ -47,14 +49,16 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
         getBadgesTypesRequest(structureIds, query, limit, offset, badgeCategoryId)
                 .onSuccess(badgeTypesArray -> {
                     List<BadgeType> badgeTypes = new BadgeType().toList(badgeTypesArray);
-                    badgeTypes.forEach(badgeType -> badgeType.setSetting(SettingHelper.getDefaultTypeSetting()));
 
                     List<Future> categoryFutures = new ArrayList<>();
 
                     for (BadgeType badgeType : badgeTypes) {
-                        Future<List<BadgeCategory>> future = badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id())
+                        Future<List<BadgeCategory>> categoryFuture = badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id())
                                 .onSuccess(badgeType::setCategories);
-                        categoryFutures.add(future);
+                        Future<Boolean> settingFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id())
+                                .onSuccess(isSelfAssignable -> badgeType.setSetting(SettingHelper.getDefaultTypeSetting().setSelfAssignable(isSelfAssignable)));
+                        categoryFutures.add(categoryFuture);
+                        categoryFutures.add(settingFuture);
                     }
 
                     CompositeFuture.all(categoryFutures)
@@ -125,11 +129,14 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                 })
                 .compose(user -> {
                     badgeType.setOwner(user);
-                    badgeType.setSetting(SettingHelper.getDefaultTypeSetting());
                     return badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id());
                 })
-                .onSuccess(badgeCategories -> {
+                .compose(badgeCategories -> {
                     badgeType.setCategories(badgeCategories);
+                    return badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id());
+                })
+                .onSuccess(isSelfAssignable -> {
+                    badgeType.setSetting(SettingHelper.getDefaultTypeSetting().setSelfAssignable(isSelfAssignable));
                     promise.complete(badgeType);
                 })
                 .onFailure(promise::fail);

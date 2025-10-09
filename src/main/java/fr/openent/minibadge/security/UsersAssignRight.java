@@ -8,6 +8,8 @@ import fr.openent.minibadge.model.Chart;
 import fr.openent.minibadge.model.ThresholdSetting;
 import fr.openent.minibadge.model.TypeSetting;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.service.BadgeTypeSettingService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Binding;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -30,11 +32,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static fr.openent.minibadge.core.constants.Field.MINIBADGECHART;
+import static fr.openent.minibadge.core.constants.Field.TYPEID;
 
 public class UsersAssignRight implements ResourcesProvider {
     private static final List<String> PERMISSIONS_FIELDS = Arrays.asList(Field.ACCEPTCHART, Field.ACCEPTASSIGN,
             Field.ACCEPTRECEIVE);
     private final Logger log = LoggerFactory.getLogger(UsersAssignRight.class);
+    private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -44,13 +48,15 @@ public class UsersAssignRight implements ResourcesProvider {
             return;
         }
 
+        long typeId = Long.parseLong(request.params().get(TYPEID));
+
         request.pause();
         RequestUtils.bodyToJson(request, body -> {
             request.resume();
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();
 
             Future<JsonObject> cachedPermissionsFuture = getUserCachedPermissions(request);
-            Future<TypeSetting> badgeSettingFuture = getTypeSetting();
+            Future<TypeSetting> badgeSettingFuture = getTypeSetting(typeId);
             Future<Boolean> areReachedThresholdsFuture = areReachedThresholds(userInfos,
                     SettingHelper.getDefaultBadgeSettings());
 
@@ -69,7 +75,7 @@ public class UsersAssignRight implements ResourcesProvider {
                                     String.format("[Minibadge@%s::authorize] User is not allowed to assign.",
                                             this.getClass().getSimpleName()));
 
-                        return this.getUsers(request, ownerIds);
+                        return this.getUsers(request, ownerIds, userInfos);
                     })
                     .onSuccess(usersArray -> {
                         List<User> receivers = new User().toList(usersArray);
@@ -97,8 +103,18 @@ public class UsersAssignRight implements ResourcesProvider {
         return promise.future();
     }
 
-    private Future<TypeSetting> getTypeSetting() {
-        return Future.succeededFuture(SettingHelper.getDefaultTypeSetting());
+    private Future<TypeSetting> getTypeSetting(Long badgeTypeId) {
+        Promise<TypeSetting> promise = Promise.promise();
+
+        TypeSetting defaultSetting = SettingHelper.getDefaultTypeSetting();
+
+        badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeTypeId)
+                .onSuccess(isSelfAssignable -> {
+                    promise.complete(defaultSetting.setSelfAssignable(isSelfAssignable));
+                })
+                .onFailure(err -> promise.complete(defaultSetting));
+
+        return promise.future();
     }
 
     private Future<Boolean> areReachedThresholds(UserInfos user, List<ThresholdSetting> thresholdSettings) {
@@ -136,7 +152,7 @@ public class UsersAssignRight implements ResourcesProvider {
                 .orElseGet(() -> getAndCachePermissionsPreferences(user, request));
     }
 
-    private Future<JsonArray> getUsers(HttpServerRequest request, List<String> ownerIds) {
+    private Future<JsonArray> getUsers(HttpServerRequest request, List<String> ownerIds, UserInfos currentUser) {
         Promise<JsonArray> promise = Promise.promise();
         JsonObject params = new JsonObject();
         String preFilter = Neo4jHelper.filterUsersFromIds(ownerIds, "m", params);
@@ -149,7 +165,9 @@ public class UsersAssignRight implements ResourcesProvider {
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 userAlias, prefAlias, MINIBADGECHART);
 
-        UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, false, true,
+        boolean isCurrentUserInOwners = ownerIds.contains(currentUser.getUserId());
+
+        UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, isCurrentUserInOwners, true,
                 String.format(" %s %s ", "AND", preFilter),
                 customReturn, params, promise::complete);
 
