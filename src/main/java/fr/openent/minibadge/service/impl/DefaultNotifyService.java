@@ -7,7 +7,9 @@ import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.NotifyService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Renders;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.notification.TimelineHelper;
@@ -23,7 +25,6 @@ public class DefaultNotifyService implements NotifyService {
         return instance;
     }
 
-    private final TimelineHelper timelineHelper = Minibadge.timelineHelper;
     private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
 
     @Override
@@ -42,6 +43,10 @@ public class DefaultNotifyService implements NotifyService {
                             .put(Field.PUSHNOTIF, new JsonObject()
                                     .put(Field.TITLE, "minibadge.new.badge.assigned.title").put(Field.BODY, ""));
 
+                    TimelineHelper timelineHelper = new TimelineHelper(
+                            Vertx.currentContext().owner(),
+                            Server.getEventBus(Vertx.currentContext().owner()),
+                            Minibadge.minibadgeConfig.toJson());
                     timelineHelper.notifyTimeline(request, String.format("%s.%s", Minibadge.MINIBADGE, Notify.NEW_BADGE_ASSIGNED),
                             assigner, ownerIds, params);
                 });
