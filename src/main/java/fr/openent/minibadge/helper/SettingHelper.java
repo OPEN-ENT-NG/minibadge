@@ -39,7 +39,7 @@ public class SettingHelper {
     }
 
     public static boolean isAuthorizedToAssign(User assignor, User receiver, TypeSetting typeSetting) {
-        // ✅ Refus si assignation à soi-même et non autorisée
+        // Refus si assignation à soi-même et non autorisée
         if (assignor.getUserId().equals(receiver.getUserId()) && !typeSetting.isSelfAssignable()) {
             return false;
         }
