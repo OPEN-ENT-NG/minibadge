@@ -1,8 +1,8 @@
-import {InfiniteScrollService, SnipletBadgeAssignService} from "./services";
-import {minibadgeBadgeAssign} from "./sniplets/badge-assign.sniplet";
-import {rights} from "./core/constants/rights.const";
-import {ChartEventsService} from "./services/chart.events.service";
-import {ContainerHeaderEventsService} from "./services/container-header.events.service";
+import { rights } from "./core/constants/rights.const";
+import { InfiniteScrollService, SnipletBadgeAssignService } from "./services";
+import { ChartEventsService } from "./services/chart.events.service";
+import { ContainerHeaderEventsService } from "./services/container-header.events.service";
+import { minibadgeBadgeAssign } from "./sniplets/badge-assign.sniplet";
 
 export const MINIBADGE_APP = "minibadge";
 

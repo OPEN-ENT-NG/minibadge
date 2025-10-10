@@ -25,4 +25,13 @@
         </div>
     </div>
     <sniplet template="badge-assign" application="minibadge" ng-if="setting.userPermissions.canAssign()"></sniplet>
+    <minibadge-assign-myself
+        ng-if="vm.isBadgeAssignMyselfModalOpen"
+        is-lightbox-opened="vm.isBadgeAssignMyselfModalOpen"
+        number-assignable="setting.assignableNumbers(0)"
+        on-assign-myself="vm.assignMyself()"
+        on-close="vm.onCloseAssignMyselfModal()"
+        badge-type="vm.badgeType"
+    >
+    </minibadge-assign-myself>
 </div>

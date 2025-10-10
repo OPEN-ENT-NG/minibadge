@@ -1,3 +1,4 @@
+export * from './badge-assign-myself/badge-assign-myself.directive';
 export * from './badge-given-array/badge-given-array';
 export * from './badge-list/badge-list.directive';
 export * from './card/card-type-stat.directive';
