@@ -16,6 +16,7 @@ import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultNotifyService implements NotifyService {
 
@@ -31,6 +32,10 @@ public class DefaultNotifyService implements NotifyService {
     public void notifyBadgeAssigned(HttpServerRequest request, UserInfos assigner, List<String> ownerIds, long typeId) {
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
+
+        List<String> ownerIdsWithoutAssigner = ownerIds.stream().filter(id -> !id.equals(assigner.getUserId())).collect(Collectors.toList());
+
+        if (ownerIdsWithoutAssigner.isEmpty()) return;
 
         badgeTypeService.getBadgeType(assigner.getStructures(), typeId, host, language)
                 .onSuccess(badgeType -> {
@@ -48,7 +53,7 @@ public class DefaultNotifyService implements NotifyService {
                             Server.getEventBus(Vertx.currentContext().owner()),
                             Minibadge.minibadgeConfig.toJson());
                     timelineHelper.notifyTimeline(request, String.format("%s.%s", Minibadge.MINIBADGE, Notify.NEW_BADGE_ASSIGNED),
-                            assigner, ownerIds, params);
+                            assigner, ownerIdsWithoutAssigner, params);
                 });
     }
 }
