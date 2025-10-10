@@ -9,8 +9,14 @@ public final class ServiceRegistry {
 
     private static final Map<Class<?>, Object> SERVICES = new ConcurrentHashMap<>();
 
-    static {
-        // Instanciation unique des singletons dans la map dans l'ordre des dépendances
+    private static boolean initialized = false;
+
+    /**
+     * Initialise tous les services dans l'ordre des dépendances.
+     */
+    public static synchronized void initServices() {
+        if (initialized) return;
+
         SERVICES.put(UserService.class, DefaultUserService.getInstance());
         SERVICES.put(SettingService.class, DefaultSettingService.getInstance());
         SERVICES.put(BadgeCategoryService.class, DefaultBadgeCategoryService.getInstance());
@@ -22,7 +28,10 @@ public final class ServiceRegistry {
         SERVICES.put(StructureService.class, DefaultStructureService.getInstance());
         SERVICES.put(StatisticService.class, DefaultStatisticService.getInstance());
         SERVICES.put(NotifyService.class, DefaultNotifyService.getInstance());
+
+        initialized = true;
     }
+
 
     // Private constructor to prevent instantiation
     private ServiceRegistry() {}

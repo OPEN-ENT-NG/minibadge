@@ -1,13 +1,11 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.model.entity.BadgeTypeSetting;
 import fr.openent.minibadge.repository.BadgeTypeSettingRepository;
 import fr.openent.minibadge.service.AbstractService;
 import fr.openent.minibadge.service.BadgeTypeSettingService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
-import java.util.Optional;
 
 public class DefaultBadgeTypeSettingService extends AbstractService implements BadgeTypeSettingService {
 

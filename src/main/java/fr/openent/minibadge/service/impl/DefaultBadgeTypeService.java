@@ -1,6 +1,5 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.LoggerHelper;
@@ -15,10 +14,11 @@ import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.BadgeTypeSettingService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.Server;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
@@ -38,7 +38,6 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
     }
 
     private final Sql sql = Sql.getInstance();
-    private final EventBus eb = Minibadge.eventBus;
     private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
     private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
 
@@ -167,7 +166,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
         if (badgeType.ownerId() != null) {
             Promise<User> promise = Promise.promise();
-            UserUtils.getUserInfos(eb, badgeType.ownerId(), user -> promise.complete((User) user));
+            UserUtils.getUserInfos(Server.getEventBus(Vertx.currentContext().owner()), badgeType.ownerId(), user -> promise.complete((User) user));
             return promise.future();
         }
 

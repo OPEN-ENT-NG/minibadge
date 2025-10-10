@@ -1,6 +1,5 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.Neo4jHelper;
@@ -9,9 +8,10 @@ import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.Server;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -35,7 +35,6 @@ public class DefaultUserService implements UserService {
         return instance;
     }
 
-    private final EventBus eb = Minibadge.eventBus;
     private final Sql sql = Sql.getInstance();
     private final Neo4j neo = Neo4j.getInstance();
 
@@ -72,7 +71,7 @@ public class DefaultUserService implements UserService {
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 MINIBADGECHART);
 
-        UserUtils.findVisibleUsers(eb, request, false, true,
+        UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, false, true,
                 String.format(" %s %s ", (query != null && !query.isEmpty()) ? "AND" : "", preFilter),
                 customReturn, params, promise::complete);
 
