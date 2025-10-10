@@ -1,5 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
+import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.repository.BadgeTypeSettingRepository;
 import fr.openent.minibadge.service.AbstractService;
 import fr.openent.minibadge.service.BadgeTypeSettingService;
@@ -31,7 +32,11 @@ public class DefaultBadgeTypeSettingService extends AbstractService implements B
                         promise.complete(false); // Default to false if no setting found
                     }
                 })
-                .onFailure(promise::fail);
+                .onFailure(err -> {
+                    String errorMessage = "Error retrieving badge type setting for badgeTypeId: " + badgeTypeId;
+                    LoggerHelper.logError(this, "isBadgeTypeSelfAssignable", errorMessage, err.getMessage());
+                    promise.fail(err);
+                });
 
         return promise.future();
     }
