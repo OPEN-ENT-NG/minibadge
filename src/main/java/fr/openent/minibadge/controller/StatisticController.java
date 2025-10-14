@@ -3,9 +3,9 @@ package fr.openent.minibadge.controller;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.security.StatisticsViewRight;
 import fr.openent.minibadge.service.BadgeAssignedStructureService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.StatisticService;
 import fr.openent.minibadge.service.UserService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
@@ -19,16 +19,9 @@ import org.entcore.common.user.UserUtils;
 
 public class StatisticController extends ControllerHelper {
 
-    private final StatisticService statisticService;
-    private final BadgeAssignedStructureService badgeAssignedStructureService;
-    private final UserService userService;
-
-    public StatisticController(ServiceFactory serviceFactory) {
-        super();
-        this.statisticService = serviceFactory.statisticServiceService();
-        this.badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
-        this.userService = serviceFactory.userService();
-    }
+    private final StatisticService statisticService = ServiceRegistry.getService(StatisticService.class);
+    private final BadgeAssignedStructureService badgeAssignedStructureService = ServiceRegistry.getService(BadgeAssignedStructureService.class);
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
 
     @Get("/statistics")
     @ApiDoc("Retrieve statistics")

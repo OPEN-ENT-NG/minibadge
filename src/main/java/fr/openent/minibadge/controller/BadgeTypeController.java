@@ -1,7 +1,6 @@
 package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
@@ -11,7 +10,7 @@ import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
 import fr.openent.minibadge.service.BadgeService;
 import fr.openent.minibadge.service.BadgeTypeService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.security.ActionType;
@@ -28,18 +27,13 @@ import org.entcore.common.user.UserUtils;
 
 import java.util.List;
 
+import static fr.openent.minibadge.core.constants.Field.*;
+
 public class BadgeTypeController extends ControllerHelper {
 
-    private final BadgeTypeService badgeTypeService;
-    private final BadgeAssignedService badgeAssignedService;
-    private final BadgeService badgeService;
-
-    public BadgeTypeController(ServiceFactory serviceFactory) {
-        super();
-        this.badgeTypeService = serviceFactory.badgeTypeService();
-        this.badgeAssignedService = serviceFactory.badgeAssignedService();
-        this.badgeService = serviceFactory.badgeService();
-    }
+    private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
+    private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
 
     @Get("/types")
     @ApiDoc("Retrieve badge type list")
@@ -50,7 +44,21 @@ public class BadgeTypeController extends ControllerHelper {
         int limit = RequestHelper.cappingLimit(request.params());
         String query = request.params().get(Request.QUERY);
 
-        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset)
+        String categoryIdParam = request.params().get(CATEGORYID);
+        Long categoryId = null;
+
+        if (categoryIdParam != null) {
+            try {
+                categoryId = Long.parseLong(categoryIdParam);
+            } catch (NumberFormatException e) {
+                renderError(request, new JsonObject().put(Request.MESSAGE, "Invalid categoryId"));
+                return;
+            }
+        }
+
+        Long finalCategoryId = categoryId;
+
+        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset, finalCategoryId)
                 .onSuccess(badgeTypes -> renderJson(request, RequestHelper.formatResponse(limit, offset, badgeTypes)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
@@ -60,7 +68,7 @@ public class BadgeTypeController extends ControllerHelper {
     @SecuredAction(value = "", type = ActionType.RESOURCE)
     @ResourceFilter(ViewRight.class)
     public void getBadgeType(HttpServerRequest request) {
-        long typeId = Long.parseLong(request.params().get(Database.TYPEID));
+        long typeId = Long.parseLong(request.params().get(TYPEID));
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
 
@@ -76,9 +84,9 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeAssigners(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
+        int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
-        long typeId = Long.parseLong(params.get(Database.TYPEID));
+        long typeId = Long.parseLong(params.get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> {
             Future<List<User>> assignersFuture = badgeAssignedService.getBadgeTypeAssigners(typeId, user, limit, offset);
@@ -103,9 +111,9 @@ public class BadgeTypeController extends ControllerHelper {
     public void getBadgeTypeReceivers(HttpServerRequest request) {
         MultiMap params = request.params();
         int page = params.contains(Request.PAGE) ? Integer.parseInt(params.get(Request.PAGE)) : 0;
-        int limit = RequestHelper.cappingLimit(params, Minibadge.modelConfig.typeListsUsersSize());
+        int limit = RequestHelper.cappingLimit(params, Minibadge.minibadgeConfig.typeListsUsersSize());
         int offset = RequestHelper.pageToOffset(page, limit);
-        long typeId = Long.parseLong(params.get(Database.TYPEID));
+        long typeId = Long.parseLong(params.get(TYPEID));
 
         Future<List<User>> receiversFuture = badgeService.getBadgeTypeReceivers(typeId, limit, offset);
         Future<Integer> countReceiversFuture = badgeService.countTotalReceivers(typeId);

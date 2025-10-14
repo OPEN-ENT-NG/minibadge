@@ -1,9 +1,8 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Rights;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.Neo4jHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
@@ -26,18 +25,19 @@ import org.entcore.common.user.UserUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static fr.openent.minibadge.core.constants.Field.*;
+
 public class DefaultUserService implements UserService {
 
-    public static final String USER_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.USER);
-    private final EventBus eb;
-    private final Sql sql;
-    private final Neo4j neo;
-
-    protected DefaultUserService(Sql sql, Neo4j neo, EventBus eb) {
-        this.sql = sql;
-        this.neo = neo;
-        this.eb = eb;
+    private static final UserService instance = new DefaultUserService();
+    private DefaultUserService() {}
+    public static UserService getInstance() {
+        return instance;
     }
+
+    private final EventBus eb = Minibadge.eventBus;
+    private final Sql sql = Sql.getInstance();
+    private final Neo4j neo = Neo4j.getInstance();
 
     @Override
     public Future<List<User>> search(HttpServerRequest request, UserInfos user, Long typeId, String query) {
@@ -61,7 +61,7 @@ public class DefaultUserService implements UserService {
         JsonObject params = new JsonObject();
 
         String preFilter = Neo4jHelper.searchQueryInColumns(query,
-                Arrays.asList(String.format("m.%s", Field.FIRSTNAME), String.format("m.%s", Field.LASTNAME)),
+                Arrays.asList(String.format("m.%s", FIRSTNAME), String.format("m.%s", LASTNAME)),
                 params);
 
         String userAlias = "visibles";
@@ -70,7 +70,7 @@ public class DefaultUserService implements UserService {
                         "visibles.firstName as firstName, uac.%s as permissions, profile.name as type  ",
                 Neo4jHelper.matchUsersWithPreferences(userAlias, prefAlias,
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
-                Database.MINIBADGECHART);
+                MINIBADGECHART);
 
         UserUtils.findVisibleUsers(eb, request, false, true,
                 String.format(" %s %s ", (query != null && !query.isEmpty()) ? "AND" : "", preFilter),
@@ -132,7 +132,7 @@ public class DefaultUserService implements UserService {
         return String.format(" SELECT DISTINCT(owner_id) as id " +
                         " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
                         " WHERE assignor_id = ? AND badge_type_id = ? AND owner_id IN %s",
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, DefaultBadgeService.BADGE_TABLE, Sql.listPrepared(receiverIds));
+                        SqlTable.BADGE_ASSIGNED_VALID.getName(), SqlTable.BADGE.getName(), Sql.listPrepared(receiverIds));
     }
 
     private String getDisabledBadgeOwnerIdsQuery(long typeId, List<String> receiverIds, JsonArray params) {
@@ -142,7 +142,7 @@ public class DefaultUserService implements UserService {
         return String.format(" SELECT DISTINCT(owner_id) as id " +
                         " FROM %s b " +
                         " WHERE badge_type_id = ? AND owner_id IN %s",
-                DefaultBadgeService.BADGE_DISABLED_TABLE, Sql.listPrepared(receiverIds));
+                        SqlTable.BADGE_DISABLED.getName(), Sql.listPrepared(receiverIds));
     }
 
     private List<User> filterUsersNotAssignedYet(List<User> allUsers, List<User> receivedUsers) {
@@ -200,7 +200,7 @@ public class DefaultUserService implements UserService {
     public Future<JsonArray> anonimyzeUser(String userId, String host, String language) {
         Promise<JsonArray> promise = Promise.promise();
         String query = String.format("UPDATE %s set display_name = ?" +
-                " WHERE id = ? ; ", USER_TABLE);
+                " WHERE id = ? ; ", SqlTable.USER.getName());
         JsonArray params = new JsonArray();
         params.add(I18n.getInstance().translate("minibadge.disable.user", host, language))
                 .add(userId);
@@ -215,7 +215,7 @@ public class DefaultUserService implements UserService {
     private JsonObject upsertStatement(User user) {
         String statement = String.format(" INSERT INTO %s (id , display_name) " +
                 " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ? " +
-                "  WHERE %s.id = EXCLUDED.id;", USER_TABLE, USER_TABLE);
+                "  WHERE %s.id = EXCLUDED.id;", SqlTable.USER.getName(), SqlTable.USER.getName());
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
                 .add(user.getUsername())
@@ -234,7 +234,7 @@ public class DefaultUserService implements UserService {
         getSessionUserStructureNSubstructureIdsRequest(user)
                 .onFailure(promise::fail)
                 .onSuccess(structureIds -> promise.complete(structureIds
-                        .getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList()));
+                        .getJsonArray(STRUCTUREIDS, new JsonArray()).getList()));
         return promise.future();
     }
 
@@ -244,10 +244,10 @@ public class DefaultUserService implements UserService {
         String query = String.format(" MATCH (struct:Structure)-[r:HAS_ATTACHMENT*1..]->(s:Structure)  " +
                         " WHERE s.id IN {%s} " +
                         " RETURN {%s} + COLLECT(DISTINCT struct.id) AS %s",
-                Field.STRUCTUREIDS, Field.STRUCTUREIDS, Field.STRUCTUREIDS);
+                STRUCTUREIDS, STRUCTUREIDS, STRUCTUREIDS);
 
         JsonObject params = new JsonObject();
-        params.put(Field.STRUCTUREIDS, user.getStructures());
+        params.put(STRUCTUREIDS, user.getStructures());
 
         neo.execute(query, params, Neo4jResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::getSessionUserStructureNSubstructureIdsRequest] Fail to get structure " +

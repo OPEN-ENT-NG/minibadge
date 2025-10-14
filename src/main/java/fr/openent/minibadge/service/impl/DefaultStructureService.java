@@ -14,11 +14,14 @@ import org.entcore.common.neo4j.Neo4jResult;
 import java.util.List;
 
 public class DefaultStructureService implements StructureService {
-    private final Neo4j neo;
 
-    protected DefaultStructureService(Neo4j neo) {
-        this.neo = neo;
+    private static final StructureService instance = new DefaultStructureService();
+    private DefaultStructureService() {}
+    public static StructureService getInstance() {
+        return instance;
     }
+
+    private final Neo4j neo = Neo4j.getInstance();
 
     @Override
     public Future<List<Structure>> getStructures(List<String> structureIds) {

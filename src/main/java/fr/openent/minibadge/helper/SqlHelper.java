@@ -1,8 +1,8 @@
 package fr.openent.minibadge.helper;
 
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.model.ThresholdSetting;
-import fr.openent.minibadge.service.impl.DefaultBadgeAssignedService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.lang3.StringUtils;
@@ -115,6 +115,6 @@ public class SqlHelper {
         params.add(user.getUserId());
         return String.format("SELECT COUNT(id) FROM %s " +
                         " WHERE to_char(now(), '%s') = to_char(created_at, '%s') AND assignor_id = ?",
-                DefaultBadgeAssignedService.BADGE_ASSIGNED_VALID_TABLE, formatDate, formatDate);
+                        SqlTable.BADGE_ASSIGNED_VALID.getName(), formatDate, formatDate);
     }
 }
