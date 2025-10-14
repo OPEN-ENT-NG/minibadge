@@ -2,7 +2,7 @@ package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.LoggerHelper;
-import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.ServiceRegistry;
