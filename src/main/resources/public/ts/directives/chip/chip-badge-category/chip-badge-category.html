@@ -1,0 +1,8 @@
+<div
+    class="chip-badge-category flex-row align-center"
+    ng-class="{ 'selected': vm.isSelected }"
+    ng-click="vm.handleClick()"
+>
+    <i ng-if="vm.category.iconCssClass" ng-class="vm.category.iconCssClass"></i>
+    <span class="chip-badge-name" ng-bind="vm.category.name"></span>
+</div>

@@ -2,6 +2,7 @@ package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.LoggerHelper;
+import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.ServiceRegistry;
@@ -15,6 +16,9 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
 import org.entcore.common.http.filter.ResourceFilter;
 
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 public class BadgeCategoryController extends ControllerHelper {
     private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
 
@@ -24,7 +28,7 @@ public class BadgeCategoryController extends ControllerHelper {
     @ResourceFilter(ViewRight.class)
     public void getAllCategories(HttpServerRequest request) {
         badgeCategoryService.getAllBadgeCategories()
-                .onSuccess(categories -> renderJson(request, new JsonArray(categories)))
+                .onSuccess(categories -> renderJson(request, new JsonArray(categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()))))
                 .onFailure(err -> {
                     String errorMessage = "Error retrieving badge categories";
                     LoggerHelper.logError(this, "getAllCategories", errorMessage, err.getMessage());

@@ -1,9 +1,9 @@
-import {model, ng} from 'entcore';
-import http, {AxiosResponse} from 'axios';
-import {BadgeType, IBadgeTypeResponse, IBadgeTypesPayload, IBadgeTypesResponses} from "../models/badge-type.model";
-import {IUsersResponses, User} from "../models/user.model";
-import {Paging} from "../models/paging.model";
-import {rights} from "../core/constants/rights.const";
+import http, { AxiosResponse } from 'axios';
+import { model, ng } from 'entcore';
+import { rights } from "../core/constants/rights.const";
+import { BadgeType, IBadgeTypeResponse, IBadgeTypesPayload, IBadgeTypesResponses } from "../models/badge-type.model";
+import { Paging } from "../models/paging.model";
+import { IUsersResponses, User } from "../models/user.model";
 
 export interface IBadgeTypeService {
     getBadgeTypes(payload: IBadgeTypesPayload): Promise<BadgeType[]>;
@@ -22,7 +22,9 @@ export const badgeTypeService: IBadgeTypeService = {
      * @param payload params to send to the backend
      */
     getBadgeTypes: async (payload: IBadgeTypesPayload): Promise<BadgeType[]> =>
-        http.get(`/minibadge/types?offset=${payload.offset}${payload.query ? `&query=${payload.query}` : ''}`)
+        http.get(`/minibadge/types?offset=${payload.offset}`
+                + (payload.query ? `&query=${encodeURIComponent(payload.query)}` : '')
+                + (payload.categoryId !== undefined ? `&categoryId=${payload.categoryId}` : ''))
             .then((res: AxiosResponse) => {
                 let badgeTypesResponses: IBadgeTypesResponses = res.data;
                 return new BadgeType().toList(badgeTypesResponses ? badgeTypesResponses.all : []);
