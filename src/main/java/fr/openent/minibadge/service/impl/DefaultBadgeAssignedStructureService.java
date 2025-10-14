@@ -1,12 +1,12 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
 import fr.openent.minibadge.core.enums.MessageRenderRequest;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.BadgeAssignedStructureService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -22,15 +22,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DefaultBadgeAssignedStructureService implements BadgeAssignedStructureService {
-    public static final String BADGE_ASSIGNED_STRUCTURE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_STRUCTURE);
-    private final Sql sql;
-    private final UserService userService;
 
-
-    protected DefaultBadgeAssignedStructureService(Sql sql, UserService userService) {
+    private static BadgeAssignedStructureService instance = new DefaultBadgeAssignedStructureService(Sql.getInstance());
+    public DefaultBadgeAssignedStructureService(Sql sql) {
         this.sql = sql;
-        this.userService = userService;
     }
+    public static BadgeAssignedStructureService getInstance() {
+        return instance;
+    }
+
+    private final Sql sql;
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
 
     @Override
     public Future<Void> createBadgeAssignedStructures(List<BadgeAssigned> badgeAssigned,
@@ -91,7 +93,7 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
 
         Promise<MessageRenderRequest> promise = Promise.promise();
         String request = String.format("INSERT INTO %s (badge_assigned_id, structure_id, is_structure_assigner, " +
-                        " is_structure_receiver) VALUES %s", BADGE_ASSIGNED_STRUCTURE_TABLE,
+                        " is_structure_receiver) VALUES %s", SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                 insertValues);
 
         sql.prepared(request, params, PromiseHelper.validResultHandler(promise, MessageRenderRequest.SUCCESS_WITHOUT_RESPONSE_BODY,
@@ -197,9 +199,9 @@ public class DefaultBadgeAssignedStructureService implements BadgeAssignedStruct
     public Future<List<BadgeAssigned>> getAssignationsWithoutStructuresLinked() {
         Promise<List<BadgeAssigned>> promise = Promise.promise();
         String request = "SELECT b.id as badge_id, owner_id, ba.id as id, assignor_id" +
-                " FROM  " + DefaultBadgeService.BADGE_TABLE + " b " +
-                " INNER JOIN " + DefaultBadgeAssignedService.BADGE_ASSIGNED_TABLE + " ba ON b.id = ba.badge_id " +
-                " LEFT JOIN " + BADGE_ASSIGNED_STRUCTURE_TABLE + " bas on ba.id = bas.badge_assigned_id " +
+                " FROM  " + SqlTable.BADGE.getName() + " b " +
+                " INNER JOIN " + SqlTable.BADGE_ASSIGNED.getName() + " ba ON b.id = ba.badge_id " +
+                " LEFT JOIN " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas on ba.id = bas.badge_assigned_id " +
                 " WHERE bas.badge_assigned_id IS NULL";
 
         sql.prepared(request, new JsonArray(), SqlResult.validResultHandler(PromiseHelper.handlerJsonArrayModelled(promise,

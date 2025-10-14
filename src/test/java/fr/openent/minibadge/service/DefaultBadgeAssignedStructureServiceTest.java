@@ -1,13 +1,13 @@
 package fr.openent.minibadge.service;
 
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.impl.*;
 import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(VertxUnitRunner.class)
-@PrepareForTest({ServiceFactory.class, DefaultUserService.class})
+@PrepareForTest({Sql.class, DefaultUserService.class})
 public class DefaultBadgeAssignedStructureServiceTest {
     private static final List<BadgeAssigned> badgeAssignedList = Arrays.asList(
             new BadgeAssigned().set(new JsonObject().put(Field.ID, 1L).put(Field.ASSIGNOR_ID, "user1")
@@ -61,22 +61,22 @@ public class DefaultBadgeAssignedStructureServiceTest {
 
     @Mock
     private DefaultUserService userService;
-    private BadgeAssignedStructureService badgeAssignedStructureService;
+    private DefaultBadgeAssignedStructureService defaultBadgeAssignedStructureService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         PowerMockito.spy(DefaultUserService.class);
-        PowerMockito.spy(ServiceFactory.class);
         PowerMockito.whenNew(DefaultUserService.class).withAnyArguments().thenReturn(userService);
-        ServiceFactory serviceFactory = new ServiceFactory(Vertx.vertx(), storage, neo4j, sql, mongoDb, new JsonObject());
-        badgeAssignedStructureService = serviceFactory.badgeAssignedStructureService();
+        PowerMockito.spy(Sql.class);
+        ServiceRegistry.registerService(UserService.class, userService);
+        defaultBadgeAssignedStructureService = new DefaultBadgeAssignedStructureService(sql);
     }
 
     @Test
     public void testCreateBadgeAssignedStructuresWithAssignor() {
         User assignor = users.get(0);
-        String queryExpected = "INSERT INTO " + DefaultBadgeAssignedStructureService.BADGE_ASSIGNED_STRUCTURE_TABLE +
+        String queryExpected = "INSERT INTO " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() +
                 " (badge_assigned_id, structure_id, is_structure_assigner, " +
                 " is_structure_receiver) VALUES (?,?,?,?), (?,?,?,?), (?,?,?,?)";
         JsonArray expectedParams = new JsonArray()
@@ -87,7 +87,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
-        badgeAssignedStructureService
+        defaultBadgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user2", "user3"), assignor);
 
         verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
@@ -95,7 +95,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
 
     @Test
     public void testCreateBadgeAssignedStructuresWithoutAssignor() {
-        String queryExpected = "INSERT INTO " + DefaultBadgeAssignedStructureService.BADGE_ASSIGNED_STRUCTURE_TABLE +
+        String queryExpected = "INSERT INTO " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() +
                 " (badge_assigned_id, structure_id, is_structure_assigner, " +
                 " is_structure_receiver) VALUES (?,?,?,?), (?,?,?,?), (?,?,?,?)";
         JsonArray expectedParams = new JsonArray()
@@ -106,7 +106,7 @@ public class DefaultBadgeAssignedStructureServiceTest {
         doReturn(Future.succeededFuture(users)).when(userService).getUsers(any());
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
 
-        badgeAssignedStructureService
+        defaultBadgeAssignedStructureService
                 .createBadgeAssignedStructures(badgeAssignedList, Arrays.asList("user1", "user2", "user3"));
 
         verify(sql).prepared(eq(queryExpected), eq(expectedParams), any(Handler.class));
@@ -116,13 +116,13 @@ public class DefaultBadgeAssignedStructureServiceTest {
     public void testGetAssignationsWithoutStructuresLinked() {
 
         String queryExpected = "SELECT b.id as badge_id, owner_id, ba.id as id, assignor_id" +
-                " FROM  " + DefaultBadgeService.BADGE_TABLE + " b " +
-                " INNER JOIN " + DefaultBadgeAssignedService.BADGE_ASSIGNED_TABLE + " ba ON b.id = ba.badge_id " +
-                " LEFT JOIN " + DefaultBadgeAssignedStructureService.BADGE_ASSIGNED_STRUCTURE_TABLE + " bas on ba.id = bas.badge_assigned_id " +
+                " FROM  " + SqlTable.BADGE.getName() + " b " +
+                " INNER JOIN " + SqlTable.BADGE_ASSIGNED.getName() + " ba ON b.id = ba.badge_id " +
+                " LEFT JOIN " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas on ba.id = bas.badge_assigned_id " +
                 " WHERE bas.badge_assigned_id IS NULL";
 
         doNothing().when(sql).prepared(any(), any(), any(Handler.class));
-        badgeAssignedStructureService.getAssignationsWithoutStructuresLinked();
+        defaultBadgeAssignedStructureService.getAssignationsWithoutStructuresLinked();
         verify(sql).prepared(eq(queryExpected), eq(new JsonArray()), any(Handler.class));
     }
 }

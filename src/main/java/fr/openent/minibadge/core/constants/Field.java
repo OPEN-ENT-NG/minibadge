@@ -15,6 +15,7 @@ public class Field {
     public static final String BADGETYPELABEL = "badgeTypeLabel";
     public static final String BADGETYPELINK = "badgeTypeLink";
     public static final String BADGE_TYPE_PICTURE_ID = "badge_type_picture_id";
+    public static final String CATEGORIES = "categories";
     public static final String PICTUREID = "pictureId";
     public static final String PICTURE_ID = "picture_id";
     public static final String LABEL = "label";
@@ -33,13 +34,22 @@ public class Field {
     public static final String LASTNAME = "lastName";
     public static final String NAME = "name";
     public static final String USERNAME = "username";
-    public static final String IDUSERS = "idUsers";
     public static final String COUNT = "count";
     public static final String Q = "q";
+    public static final String ICON_NAME = "icon_name";
+    public static final String ICONNAME = "iconName";
+    public static final String ICONCSSCLASS = "iconCssClass";
     public static final String FIELDS = "fields";
     public static final String PROFILE = "profile";
+    public static final String SLUG = "slug";
+    public static final String STRUCTUREID = "structureId";
+    public static final String STRUCTURE_ID = "structure_id";
     public static final String STRUCTUREIDS = "structureIds";
     public static final String VALUE = "value";
+    public static final String CATEGORYID = "categoryId";
+    public static final String NOW_SQL_FUNCTION = "now()";
+    public static final String NULL = "null";
+    public static final String TYPEID = "typeId";
 
 
     //BadgeAssigned
@@ -57,6 +67,7 @@ public class Field {
     public static final String BADGE_ID = "badge_id";
     public static final String BADGEID = "badgeId";
     public static final String BADGE = "badge";
+    public static final String MINIBADGECHART = "minibadgechart";
 
     //BadgeAssignedStructure
     public static final String IS_STRUCTURE_ASSIGNER = "is_structure_assigner";
@@ -135,6 +146,9 @@ public class Field {
     public static final String TOP_ASSIGNING_USER_LIST_SIZE = "top_most_assigning_user_list_size";
     public static final String TOP_RECEIVING_USER_LIST_SIZE = "top_most_receiving_user_list_size";
     public static final String TYPE_LISTS_USERS_SIZE = "type_lists_users_size";
+
+    //LOG
+    public static final String MINIBADGE = "Minibadge";
 
     private Field() {
         throw new IllegalStateException("Utility class");

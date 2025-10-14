@@ -82,7 +82,6 @@ public class Config implements Model<Config> {
     public JsonObject toJson() {
         return new JsonObject()
                 .put(Field.DEFAULT_MAX_ASSIGNABLE, defaultMaxAssignable)
-                .put(Field.DEFAULT_MAX_ASSIGNABLE, defaultMaxAssignable)
                 .put(Field.MOST_ASSIGNED_TYPE_LIST_SIZE, mostAssignedTypeListSize)
                 .put(Field.LESS_ASSIGNED_TYPE_LIST_SIZE, lessAssignedTypeListSize)
                 .put(Field.MOST_REFUSED_TYPE_LIST_SIZE, mostRefusedTypeListSize)

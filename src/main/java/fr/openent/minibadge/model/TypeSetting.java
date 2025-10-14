@@ -1,13 +1,12 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static fr.openent.minibadge.core.constants.Database.STRUCTUREID;
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class TypeSetting implements Model<TypeSetting> {
     //A changer des que la bdd sera opérationnelle
@@ -54,8 +53,8 @@ public class TypeSetting implements Model<TypeSetting> {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Field.RELATIONS, new BadgeProtagonistSettingRelation().toArray(relations))
-                .put(Field.ISSELFASSIGNABLE, isSelfAssignable)
+                .put(RELATIONS, new BadgeProtagonistSettingRelation().toArray(relations))
+                .put(ISSELFASSIGNABLE, isSelfAssignable)
                 .put(STRUCTUREID, structureId);
     }
 
@@ -73,10 +72,10 @@ public class TypeSetting implements Model<TypeSetting> {
 
     @Override
     public TypeSetting set(JsonObject model) {
-        this.isSelfAssignable = model.getBoolean(Field.ISSELFASSIGNABLE, false);
+        this.isSelfAssignable = model.getBoolean(ISSELFASSIGNABLE, false);
         this.structureId = model.getString(STRUCTUREID);
         this.relations = new BadgeProtagonistSettingRelation()
-                .toList(model.getJsonArray(Field.RELATIONS, new JsonArray()));
+                .toList(model.getJsonArray(RELATIONS, new JsonArray()));
         return this;
     }
 }

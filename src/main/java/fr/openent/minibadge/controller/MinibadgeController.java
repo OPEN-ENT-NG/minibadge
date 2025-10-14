@@ -7,7 +7,7 @@ import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.security.ReceiveRight;
 import fr.openent.minibadge.service.BadgeService;
-import fr.openent.minibadge.service.impl.ServiceFactory;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Put;
@@ -26,13 +26,8 @@ import org.entcore.common.user.UserUtils;
 
 public class MinibadgeController extends ControllerHelper {
 
-    private final EventStore eventStore;
-    private final BadgeService badgeService;
-
-    public MinibadgeController(ServiceFactory serviceFactory) {
-        this.eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
-        this.badgeService = serviceFactory.badgeService();
-    }
+    private final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
 
     @Get("")
     @ApiDoc("Render view")

@@ -1,8 +1,8 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.core.constants.Database;
-import fr.openent.minibadge.core.constants.Field;
 import io.vertx.core.json.JsonObject;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 public class ThresholdSetting implements Model<ThresholdSetting> {
 
@@ -45,10 +45,10 @@ public class ThresholdSetting implements Model<ThresholdSetting> {
     @Override
     public JsonObject toJson() {
         return new JsonObject()
-                .put(Field.MAXASSIGNABLE, maxAssignable)
-                .put(Field.PERIODASSIGNABLE, periodAssignable)
-                .put(Field.ASSIGNATIONSNUMBER, assignationsNumber)
-                .put(Database.STRUCTUREID, structureId);
+                .put(MAXASSIGNABLE, maxAssignable)
+                .put(PERIODASSIGNABLE, periodAssignable)
+                .put(ASSIGNATIONSNUMBER, assignationsNumber)
+                .put(STRUCTUREID, structureId);
     }
 
     @Override
@@ -58,10 +58,10 @@ public class ThresholdSetting implements Model<ThresholdSetting> {
 
     @Override
     public ThresholdSetting set(JsonObject model) {
-        this.maxAssignable = model.getInteger(Field.MAXASSIGNABLE);
-        this.periodAssignable = model.getString(Field.PERIODASSIGNABLE);
-        this.assignationsNumber = model.getInteger(Field.ASSIGNATIONSNUMBER);
-        this.structureId = model.getString(Database.STRUCTUREID);
+        this.maxAssignable = model.getInteger(MAXASSIGNABLE);
+        this.periodAssignable = model.getString(PERIODASSIGNABLE);
+        this.assignationsNumber = model.getInteger(ASSIGNATIONSNUMBER);
+        this.structureId = model.getString(STRUCTUREID);
         return this;
     }
 }

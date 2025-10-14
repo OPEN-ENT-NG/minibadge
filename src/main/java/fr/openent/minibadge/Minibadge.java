@@ -2,12 +2,11 @@ package fr.openent.minibadge;
 
 import fr.openent.minibadge.controller.*;
 import fr.openent.minibadge.model.Config;
-import fr.openent.minibadge.service.impl.ServiceFactory;
-import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import org.entcore.common.http.BaseServer;
-import org.entcore.common.neo4j.Neo4j;
-import org.entcore.common.sql.Sql;
+import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.storage.Storage;
 import org.entcore.common.storage.StorageFactory;
 
@@ -16,28 +15,34 @@ public class Minibadge extends BaseServer {
     public static final int PAGE_SIZE_MAX = 100;
     public static final String MINIBADGE = "minibadge";
 
-    public static String dbSchema;
-    public static Config modelConfig;
+    public static String dbSchema = MINIBADGE;
+    public static Config minibadgeConfig;
+    public static Vertx minibadgeVertx;
+    public static Storage minibadgeStorage;
+    public static EventBus eventBus;
+    public static TimelineHelper timelineHelper;
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
         super.start(startPromise);
 
-        modelConfig = new Config(config);
-        dbSchema = config.getString("db-schema");
+        dbSchema = config.getString("db-schema", MINIBADGE);
+        minibadgeConfig = new Config(config);
+        minibadgeVertx = vertx;
+        minibadgeStorage = new StorageFactory(vertx, config).getStorage();
+        eventBus = getEventBus(vertx);
+        timelineHelper = new TimelineHelper(vertx, eventBus, config);
 
-        Storage storage = new StorageFactory(vertx, config).getStorage();
-
-        ServiceFactory serviceFactory = new ServiceFactory(vertx, storage, Neo4j.getInstance(), Sql.getInstance(), MongoDb.getInstance(), config);
-
-        addController(new MinibadgeController(serviceFactory));
-        addController(new SettingController(serviceFactory));
-        addController(new BadgeController(serviceFactory));
-        addController(new BadgeTypeController(serviceFactory));
-        addController(new BadgeAssignedController(serviceFactory));
-        addController(new StatisticController(serviceFactory));
-        addController(new UserController(serviceFactory));
+        addController(new MinibadgeController());
+        addController(new SettingController());
+        addController(new BadgeController());
+        addController(new BadgeCategoryController());
+        addController(new BadgeTypeController());
+        addController(new BadgeAssignedController());
+        addController(new StatisticController());
+        addController(new UserController());
         addController(new ConfigController());
+
         startPromise.tryComplete();
     }
 

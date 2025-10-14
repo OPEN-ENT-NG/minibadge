@@ -20,9 +20,13 @@ import java.util.List;
 
 public class DefaultSettingService implements SettingService {
 
-    protected DefaultSettingService() {
-        // At this moment, this service is not other service dependant
+    private static final SettingService instance = new DefaultSettingService();
+    private DefaultSettingService() {}
+    public static SettingService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
 
     public Future<GlobalSettings> getGlobalSettings(UserInfos user) {
         Promise<GlobalSettings> promise = Promise.promise();
@@ -55,7 +59,7 @@ public class DefaultSettingService implements SettingService {
         JsonArray params = new JsonArray();
         String request = String.format(" SELECT %s", SqlHelper.getCTEThresholdsRequests(thresholdSettings, user, params));
 
-        Sql.getInstance().prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+        sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::getThresholdsByPeriodRequest] Fail to get threshold status",
                         this.getClass().getSimpleName()))));
 

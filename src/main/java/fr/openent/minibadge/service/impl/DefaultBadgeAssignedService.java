@@ -1,7 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.Minibadge;
-import fr.openent.minibadge.core.constants.Database;
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.ModelHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
@@ -24,27 +23,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static fr.openent.minibadge.core.constants.Field.*;
-import static fr.openent.minibadge.service.impl.DefaultBadgeService.BADGE_TABLE;
-import static fr.openent.minibadge.service.impl.DefaultBadgeTypeService.BADGE_TYPE_TABLE;
-import static fr.openent.minibadge.service.impl.DefaultUserService.USER_TABLE;
 
 public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
-    public static final String BADGE_ASSIGNED_VALID_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_VALID);
-    public static final String BADGE_ASSIGNED_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED);
-    public static final String BADGE_ASSIGNED_STRUCTURE_TABLE = String.format("%s.%s", Minibadge.dbSchema, Database.BADGE_ASSIGNED_STRUCTURE);
-    private final Sql sql;
-    private final BadgeService badgeService;
-    private final UserService userService;
-    private final BadgeAssignedStructureService badgeAssignedStructureService;
-
-    protected DefaultBadgeAssignedService(Sql sql, BadgeService badgeService, UserService userService,
-                                       BadgeAssignedStructureService badgeAssignedStructureService) {
-        this.sql = sql;
-        this.badgeService = badgeService;
-        this.userService = userService;
-        this.badgeAssignedStructureService = badgeAssignedStructureService;
+    private static final BadgeAssignedService instance = new DefaultBadgeAssignedService();
+    private DefaultBadgeAssignedService() {}
+    public static BadgeAssignedService getInstance() {
+        return instance;
     }
+
+    private final Sql sql = Sql.getInstance();
+    private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
+    private final UserService userService = ServiceRegistry.getService(UserService.class);
+    private final BadgeAssignedStructureService badgeAssignedStructureService = ServiceRegistry.getService(BadgeAssignedStructureService.class);
 
     @Override
     public Future<Void> assign(long typeId, List<String> ownerIds, UserInfos assignor) {
@@ -88,12 +79,12 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                 " ba.created_at as created_at , bt.picture_id , us.display_name ," +
                 " bt.label as label, badge.owner_id " +
                 ", badge.id as " + BADGE_ID + " , bt.id as  " + BADGE_TYPE_ID +
-                " FROM " + BADGE_ASSIGNED_TABLE + " as ba " +
-                " INNER JOIN " + BADGE_TABLE + " " +
+                " FROM " + SqlTable.BADGE_ASSIGNED.getName() + " as ba " +
+                " INNER JOIN " + SqlTable.BADGE.getName() + " " +
                 " on ba.badge_id = badge.id " +
-                " INNER JOIN " + BADGE_TYPE_TABLE + " as bt " +
+                " INNER JOIN " + SqlTable.BADGE_TYPE.getName() + " as bt " +
                 " on badge.badge_type_id = bt.id " +
-                " INNER JOIN " + USER_TABLE + " as us " +
+                " INNER JOIN " + SqlTable.USER.getName() + " as us " +
                 " ON us.id = badge.owner_id " +
                 " WHERE ba.assignor_id = ? " +
                 ((hasDates) ? " AND ba.created_at::date  >= to_date(?,'DD-MM-YYYY') " +
@@ -116,11 +107,11 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         Promise<List<BadgeAssigned>> promise = Promise.promise();
 
         String request = "WITH inserted_badge_assigned AS ( " +
-                " INSERT INTO " + BADGE_ASSIGNED_TABLE + " (badge_id, assignor_id) " +
-                " SELECT id as badge_id, ? as assignor_id FROM  " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE +
+                " INSERT INTO " + SqlTable.BADGE_ASSIGNED.getName() + " (badge_id, assignor_id) " +
+                " SELECT id as badge_id, ? as assignor_id FROM  " + SqlTable.BADGE_ASSIGNABLE.getName() +
                 " WHERE badge_type_id = ? AND owner_id IN " + Sql.listPrepared(ownerIds) + " RETURNING *) " +
                 " SELECT iba.*, b.badge_type_id, b.owner_id " +
-                " FROM inserted_badge_assigned iba  JOIN " + DefaultBadgeService.BADGE_ASSIGNABLE_TABLE + " b " +
+                " FROM inserted_badge_assigned iba  JOIN " + SqlTable.BADGE_ASSIGNABLE.getName() + " b " +
                 " ON iba.badge_id = b.id";
 
         JsonArray params = new JsonArray()
@@ -163,8 +154,8 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         String request = String.format(" SELECT DISTINCT(assignor_id) as id, bav.created_at " +
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
                         " WHERE owner_id = ? AND badge_type_id = ? " +
-                        " ORDER BY bav.created_at DESC %s", BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_PUBLIC_TABLE, SqlHelper.addLimitOffset(limit, offset, params));
+                        " ORDER BY bav.created_at DESC %s", SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        SqlTable.BADGE_PUBLIC.getName(), SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params,
                 SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -195,8 +186,8 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
         String request = String.format(" SELECT COUNT(DISTINCT(assignor_id)) " +
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
-                        " WHERE owner_id = ? AND badge_type_id = ?", BADGE_ASSIGNED_VALID_TABLE,
-                DefaultBadgeService.BADGE_PUBLIC_TABLE);
+                        " WHERE owner_id = ? AND badge_type_id = ?", SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        SqlTable.BADGE_PUBLIC.getName());
 
         sql.prepared(request, params,
                 SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
@@ -215,7 +206,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         params.add(badgeId)
                 .add(userId);
 
-        String request = "UPDATE " + BADGE_ASSIGNED_TABLE +
+        String request = "UPDATE " + SqlTable.BADGE_ASSIGNED.getName() +
                 " SET revoked_at = NOW ()" +
                 " WHERE id = ? and assignor_id = ? ; ";
 

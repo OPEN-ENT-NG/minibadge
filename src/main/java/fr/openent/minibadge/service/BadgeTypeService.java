@@ -13,9 +13,11 @@ public interface BadgeTypeService {
      * @param structureIds Structure identifiers
      * @param limit        max number of occurrences
      * @param offset       position from where getting occurrences
+     * @param query        search query
+     * @param badgeCategoryId filter on badge category id
      * @return return list of badge type (model)
      */
-    Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset);
+    Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset, Long badgeCategoryId);
 
     /**
      * Get badge type
