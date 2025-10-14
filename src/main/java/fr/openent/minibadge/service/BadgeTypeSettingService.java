@@ -1,9 +1,6 @@
 package fr.openent.minibadge.service;
 
-import fr.openent.minibadge.model.entity.BadgeTypeSetting;
 import io.vertx.core.Future;
-
-import java.util.Optional;
 
 public interface BadgeTypeSettingService {
     /**

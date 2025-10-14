@@ -3,7 +3,7 @@ package fr.openent.minibadge.repository.impl;
 import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.ModelHelper;
-import fr.openent.minibadge.model.entity.BadgeTypeSetting;
+import fr.openent.minibadge.model.BadgeTypeSetting;
 import fr.openent.minibadge.repository.BadgeTypeSettingRepository;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

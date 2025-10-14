@@ -1,6 +1,6 @@
 package fr.openent.minibadge.repository;
 
-import fr.openent.minibadge.model.entity.BadgeTypeSetting;
+import fr.openent.minibadge.model.BadgeTypeSetting;
 import io.vertx.core.Future;
 
 import java.util.Optional;
