@@ -1,10 +1,7 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.core.enums.SqlTable;
-import fr.openent.minibadge.helper.ModelHelper;
-import fr.openent.minibadge.helper.PromiseHelper;
-import fr.openent.minibadge.helper.SqlHelper;
-import fr.openent.minibadge.helper.UserHelper;
+import fr.openent.minibadge.helper.*;
 import fr.openent.minibadge.model.BadgeAssigned;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.service.*;
@@ -16,6 +13,7 @@ import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.user.UserUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -215,4 +213,48 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                         this.getClass().getSimpleName()))));
         return promise.future();
     }
+
+    public Future<Boolean> isSelfAssigned(UserInfos userInfos, long typeId) {
+        Promise<Boolean> promise = Promise.promise();
+
+        countTotalSelfAssignedRequest(userInfos.getUserId(), typeId)
+                .onSuccess(result -> {
+                    int count = SqlHelper.getResultCount(result);
+                    promise.complete(count > 0);
+                })
+                .onFailure(err -> {
+                    String errorMessage = String.format("Fail to check self assigned badge for user %s and badge type %d : ",
+                            userInfos.getUserId(), typeId);
+                    LoggerHelper.logError(this, "isSelfAssigned", errorMessage, err.getMessage());
+                    promise.fail(err);
+                });
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> countTotalSelfAssignedRequest(String userId, long typeId) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        JsonArray params = new JsonArray()
+                .add(typeId)
+                .add(userId)
+                .add(userId); // ajouté pour le test assignor_id = owner_id
+
+        String request =
+                "SELECT COUNT(*) " +
+                        "FROM " + SqlTable.BADGE.getName() + " b " +
+                        "JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.badge_id = b.id " +
+                        "WHERE b.badge_type_id = ? " +
+                        "AND b.owner_id = ? " +
+                        "AND ba.assignor_id = ?";
+
+        sql.prepared(request, params,
+                SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
+                        String.format("[Minibadge@%s::countTotalSelfAssignedRequest] " +
+                                        "Fail to retrieve self assigned badges",
+                                this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
 }

@@ -7,13 +7,16 @@ import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.NotifyService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.Server;
 import fr.wseduc.webutils.http.Renders;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultNotifyService implements NotifyService {
 
@@ -23,7 +26,6 @@ public class DefaultNotifyService implements NotifyService {
         return instance;
     }
 
-    private final TimelineHelper timelineHelper = Minibadge.timelineHelper;
     private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
 
     @Override
@@ -31,7 +33,11 @@ public class DefaultNotifyService implements NotifyService {
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
 
-        badgeTypeService.getBadgeType(assigner.getStructures(), typeId, host, language)
+        List<String> ownerIdsWithoutAssigner = ownerIds.stream().filter(id -> !id.equals(assigner.getUserId())).collect(Collectors.toList());
+
+        if (ownerIdsWithoutAssigner.isEmpty()) return;
+
+        badgeTypeService.getBadgeType(assigner, typeId, host, language)
                 .onSuccess(badgeType -> {
                     String uri = String.format("/minibadge#/badge-types/%s", badgeType.id());
                     JsonObject params = new JsonObject()
@@ -42,8 +48,12 @@ public class DefaultNotifyService implements NotifyService {
                             .put(Field.PUSHNOTIF, new JsonObject()
                                     .put(Field.TITLE, "minibadge.new.badge.assigned.title").put(Field.BODY, ""));
 
+                    TimelineHelper timelineHelper = new TimelineHelper(
+                            Vertx.currentContext().owner(),
+                            Server.getEventBus(Vertx.currentContext().owner()),
+                            Minibadge.minibadgeConfig.toJson());
                     timelineHelper.notifyTimeline(request, String.format("%s.%s", Minibadge.MINIBADGE, Notify.NEW_BADGE_ASSIGNED),
-                            assigner, ownerIds, params);
+                            assigner, ownerIdsWithoutAssigner, params);
                 });
     }
 }

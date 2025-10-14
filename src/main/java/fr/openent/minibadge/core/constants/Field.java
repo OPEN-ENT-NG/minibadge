@@ -68,6 +68,7 @@ public class Field {
     public static final String BADGEID = "badgeId";
     public static final String BADGE = "badge";
     public static final String MINIBADGECHART = "minibadgechart";
+    public static final String ISSELFASSIGNED = "isSelfAssigned";
 
     //BadgeAssignedStructure
     public static final String IS_STRUCTURE_ASSIGNER = "is_structure_assigner";
@@ -105,6 +106,7 @@ public class Field {
     //Protagonist
     public static final String TYPEVALUE = "typeValue";
     public static final String ISSELFASSIGNABLE = "isSelfAssignable";
+    public static final String IS_SELF_ASSIGNABLE = "is_self_assignable";
     public static final String ASSIGNORTYPE = "assignorType";
     public static final String RECEIVERTYPE = "receiverType";
     public static final String SETTINGS = "settings";
