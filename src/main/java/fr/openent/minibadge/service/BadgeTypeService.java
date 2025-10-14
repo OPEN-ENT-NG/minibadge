@@ -2,6 +2,7 @@ package fr.openent.minibadge.service;
 
 import fr.openent.minibadge.model.BadgeType;
 import io.vertx.core.Future;
+import org.entcore.common.user.UserInfos;
 
 import java.util.List;
 
@@ -22,11 +23,11 @@ public interface BadgeTypeService {
     /**
      * Get badge type
      *
-     * @param structureIds Structure identifiers
+     * @param userInfos    User information
      * @param typeId       Type identifier
      * @param host         Host
      * @param language     accepted language
      * @return return list of badge type (model)
      */
-    Future<BadgeType> getBadgeType(List<String> structureIds, long typeId, String host, String language);
+    Future<BadgeType> getBadgeType(UserInfos userInfos, long typeId, String host, String language);
 }

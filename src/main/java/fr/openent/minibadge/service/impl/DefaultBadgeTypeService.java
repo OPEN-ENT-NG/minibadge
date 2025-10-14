@@ -9,10 +9,7 @@ import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.BadgeType;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.BadgeCategory;
-import fr.openent.minibadge.service.BadgeCategoryService;
-import fr.openent.minibadge.service.BadgeTypeService;
-import fr.openent.minibadge.service.BadgeTypeSettingService;
-import fr.openent.minibadge.service.ServiceRegistry;
+import fr.openent.minibadge.service.*;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.Server;
 import io.vertx.core.CompositeFuture;
@@ -23,6 +20,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
+import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
 
 import java.util.ArrayList;
@@ -40,6 +38,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
     private final Sql sql = Sql.getInstance();
     private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
     private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
+    private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
 
     @Override
     public Future<List<BadgeType>> getBadgeTypes(List<String> structureIds, String query, int limit, Integer offset, Long badgeCategoryId) {
@@ -117,11 +116,11 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
 
 
     @Override
-    public Future<BadgeType> getBadgeType(List<String> structureIds, long typeId, String host, String language) {
+    public Future<BadgeType> getBadgeType(UserInfos userInfos, long typeId, String host, String language) {
         Promise<BadgeType> promise = Promise.promise();
         BadgeType badgeType = new BadgeType();
 
-        getBadgeTypeRequest(structureIds, typeId)
+        getBadgeTypeRequest(userInfos.getStructures(), typeId)
                 .compose(badgeTypeJson -> {
                     badgeType.set(badgeTypeJson);
                     return getOwner(badgeType, host, language);
@@ -134,8 +133,12 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                     badgeType.setCategories(badgeCategories);
                     return badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id());
                 })
-                .onSuccess(isSelfAssignable -> {
+                .compose(isSelfAssignable -> {
                     badgeType.setSetting(SettingHelper.getDefaultTypeSetting().setSelfAssignable(isSelfAssignable));
+                    return badgeAssignedService.isSelfAssigned(userInfos, badgeType.id());
+                })
+                .onSuccess(isSelfAssigned -> {
+                    badgeType.setSelfAssigned(isSelfAssigned);
                     promise.complete(badgeType);
                 })
                 .onFailure(promise::fail);

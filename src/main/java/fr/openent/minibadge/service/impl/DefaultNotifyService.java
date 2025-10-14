@@ -37,7 +37,7 @@ public class DefaultNotifyService implements NotifyService {
 
         if (ownerIdsWithoutAssigner.isEmpty()) return;
 
-        badgeTypeService.getBadgeType(assigner.getStructures(), typeId, host, language)
+        badgeTypeService.getBadgeType(assigner, typeId, host, language)
                 .onSuccess(badgeType -> {
                     String uri = String.format("/minibadge#/badge-types/%s", badgeType.id());
                     JsonObject params = new JsonObject()

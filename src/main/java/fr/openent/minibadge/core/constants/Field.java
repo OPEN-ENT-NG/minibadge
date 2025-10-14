@@ -68,6 +68,7 @@ public class Field {
     public static final String BADGEID = "badgeId";
     public static final String BADGE = "badge";
     public static final String MINIBADGECHART = "minibadgechart";
+    public static final String ISSELFASSIGNED = "isSelfAssigned";
 
     //BadgeAssignedStructure
     public static final String IS_STRUCTURE_ASSIGNER = "is_structure_assigner";

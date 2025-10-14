@@ -62,4 +62,12 @@ public interface BadgeAssignedService {
      * @return return future containing assigners count
      */
     Future<Integer> countTotalAssigners(long typeId, UserInfos badgeOwner);
+
+    /**
+     * Check if the user has assigned himself a badge of this type
+     * @param userInfos user information
+     * @param typeId    type identifier
+     * @return return future containing boolean
+     */
+    Future<Boolean> isSelfAssigned(UserInfos userInfos, long typeId);
 }

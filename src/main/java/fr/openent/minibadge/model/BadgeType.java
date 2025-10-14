@@ -26,6 +26,7 @@ public class BadgeType implements Model<BadgeType> {
     private List<User> mostAssigningUsers;
     private TypeSetting setting = new TypeSetting();
     private List<BadgeCategory> categories = new ArrayList<>();
+    private Boolean isSelfAssigned = false;
 
     public BadgeType() {
     }
@@ -130,6 +131,18 @@ public class BadgeType implements Model<BadgeType> {
         this.categories = categories;
     }
 
+    public List<BadgeCategory> categories() {
+        return categories;
+    }
+
+    public Boolean isSelfAssigned() {
+        return isSelfAssigned;
+    }
+
+    public void setSelfAssigned(Boolean selfAssigned) {
+        isSelfAssigned = selfAssigned;
+    }
+
     @Override
     public JsonObject toJson() {
         JsonObject badgeType = new JsonObject()
@@ -144,7 +157,8 @@ public class BadgeType implements Model<BadgeType> {
                 .put(COUNTASSIGNED, this.countAssigned)
                 .put(COUNTREFUSED, this.countRefused)
                 .put(SETTING, this.setting.toJson())
-                .put(CATEGORIES, this.categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()));
+                .put(CATEGORIES, this.categories.stream().map(BadgeCategory::toJson).collect(Collectors.toList()))
+                .put(ISSELFASSIGNED, this.isSelfAssigned);
         if (this.owner != null)
             badgeType.put(OWNER, this.owner.toJson());
 
