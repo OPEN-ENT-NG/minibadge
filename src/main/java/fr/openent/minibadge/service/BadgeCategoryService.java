@@ -1,6 +1,6 @@
 package fr.openent.minibadge.service;
 
-import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.model.BadgeCategory;
 import io.vertx.core.Future;
 
 import java.util.List;

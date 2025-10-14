@@ -1,9 +1,8 @@
-package fr.openent.minibadge.model.entity;
+package fr.openent.minibadge.model;
 
 import java.time.LocalDateTime;
 
 import fr.openent.minibadge.core.enums.BadgeCategoryIcon;
-import fr.openent.minibadge.model.Model;
 import io.vertx.core.json.JsonObject;
 
 import static fr.openent.minibadge.core.constants.Field.*;

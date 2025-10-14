@@ -1,6 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
-import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.repository.BadgeCategoryRepository;
 import fr.openent.minibadge.service.AbstractService;
 import fr.openent.minibadge.service.BadgeCategoryService;

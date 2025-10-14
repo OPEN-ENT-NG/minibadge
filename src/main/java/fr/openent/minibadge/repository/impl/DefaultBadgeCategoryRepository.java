@@ -2,7 +2,7 @@ package fr.openent.minibadge.repository.impl;
 
 import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.ModelHelper;
-import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.repository.BadgeCategoryRepository;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

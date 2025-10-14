@@ -1,6 +1,5 @@
 package fr.openent.minibadge.model;
 
-import fr.openent.minibadge.model.entity.BadgeCategory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

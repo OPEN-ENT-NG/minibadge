@@ -9,7 +9,7 @@ import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.BadgeType;
 import fr.openent.minibadge.model.User;
-import fr.openent.minibadge.model.entity.BadgeCategory;
+import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.service.BadgeCategoryService;
 import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.ServiceRegistry;
