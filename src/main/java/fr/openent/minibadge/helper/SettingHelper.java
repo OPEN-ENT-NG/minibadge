@@ -39,12 +39,17 @@ public class SettingHelper {
     }
 
     public static boolean isAuthorizedToAssign(User assignor, User receiver, TypeSetting typeSetting) {
+        // Refus si assignation à soi-même et non autorisée
+        if (assignor.getUserId().equals(receiver.getUserId()) && !typeSetting.isSelfAssignable()) {
+            return false;
+        }
+
         return typeSetting.relations()
                 .stream()
-                .anyMatch((setting ->
+                .anyMatch(setting ->
                         isRelationAuthorized(assignor, setting.assignor())
                                 && isRelationAuthorized(receiver, setting.receiver())
-                ));
+                );
     }
 
     public static boolean isRelationAuthorized(User user, BadgeProtagonistSetting relation) {

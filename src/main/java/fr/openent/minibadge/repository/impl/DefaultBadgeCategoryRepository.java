@@ -1,5 +1,6 @@
 package fr.openent.minibadge.repository.impl;
 
+import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.ModelHelper;
 import fr.openent.minibadge.model.BadgeCategory;
@@ -24,8 +25,8 @@ public class DefaultBadgeCategoryRepository implements BadgeCategoryRepository {
 
         String query =
             "SELECT bc.id, bc.name, bc.slug, bc.icon_name, bc.created_at, bc.updated_at " +
-            "FROM minibadge.badge_category bc " +
-            "INNER JOIN minibadge.rel_badge_category_badge_type rbcbt " +
+            "FROM " + SqlTable.BADGE_CATEGORY.getName() +"  bc " +
+            "INNER JOIN " + SqlTable.REL_BADGE_CATEGORY_BADGE_TYPE.getName() +" rbcbt " +
                 "ON bc.id = rbcbt.badge_category_id " +
             "WHERE rbcbt.badge_type_id = ?";
 
@@ -42,7 +43,7 @@ public class DefaultBadgeCategoryRepository implements BadgeCategoryRepository {
     public Future<List<BadgeCategory>> findAll() {
         Promise <List<BadgeCategory>> promise = Promise.promise();
 
-        String query = "SELECT * FROM minibadge.badge_category";
+        String query = "SELECT * FROM " + SqlTable.BADGE_CATEGORY.getName();
 
         String errorMessage = "Error while getting all badge categories";
         String completeLog = LoggerHelper.getCompleteLog(this, "findAll", errorMessage);

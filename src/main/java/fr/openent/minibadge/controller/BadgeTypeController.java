@@ -72,7 +72,7 @@ public class BadgeTypeController extends ControllerHelper {
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
 
-        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeType(user.getStructures(), typeId, host, language)
+        UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeType(user, typeId, host, language)
                 .onSuccess(badgeType -> renderJson(request, badgeType.toJson()))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
