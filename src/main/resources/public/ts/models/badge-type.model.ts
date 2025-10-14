@@ -1,10 +1,11 @@
-import {ILimitOffsetPayload, IPaginatedResponses} from "./request.model";
-import {IUserResponse, User} from "./user.model";
-import {MinibadgeModel} from "./model";
-import {ITypeSettingResponse, TypeSettings} from "./type-settings.model";
-import {idiom as lang} from "entcore";
-import {RelationSetting} from "./protagonist-setting.model";
-import {IGraphItem} from "./graph.model";
+import { idiom as lang } from "entcore";
+import { BadgeCategory, IBadgeCategoryResponse } from "./badge-category.model";
+import { IGraphItem } from "./graph.model";
+import { MinibadgeModel } from "./model";
+import { RelationSetting } from "./protagonist-setting.model";
+import { ILimitOffsetPayload, IPaginatedResponses } from "./request.model";
+import { ITypeSettingResponse, TypeSettings } from "./type-settings.model";
+import { IUserResponse, User } from "./user.model";
 
 export interface IBadgeTypeResponse {
     id?: number;
@@ -22,9 +23,11 @@ export interface IBadgeTypeResponse {
     owner?: User;
     mostAssigningUsers?: IUserResponse[];
     setting?: TypeSettings;
+    categories: IBadgeCategoryResponse[];
 }
 
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
+    categoryId?: number;
 }
 
 export interface IBadgeTypesResponses extends IPaginatedResponses<IBadgeTypeResponse> {
@@ -47,6 +50,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
     owner?: User;
     mostAssigningUsers?: User[];
     setting?: TypeSettings;
+    categories?: BadgeCategory[];
 
     constructor(data?: IBadgeTypeResponse) {
         super();
@@ -68,6 +72,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
         this.owner = new User(<IUserResponse>data.owner);
         this.mostAssigningUsers = new User().toList(data.mostAssigningUsers);
         this.setting = new TypeSettings(<ITypeSettingResponse>data.setting);
+        this.categories = new BadgeCategory().toList(data.categories);
         return this;
     }
 
