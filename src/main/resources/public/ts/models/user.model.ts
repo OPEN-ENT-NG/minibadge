@@ -1,8 +1,10 @@
-import {MinibadgeModel} from "./model";
-import {IPaginatedPayload, IPaginatedResponses, IQueryStringPayload} from "./request.model";
-import {PROTAGONIST_TYPES} from "../core/enum/protagonist-types.enum";
-import {IDisplayItem} from "./display-list.model";
-import {toLocaleString} from "../utils/number.utils";
+import { ProfileColorMap } from "../core/constants/profile-colors.const";
+import { PROTAGONIST_TYPES } from "../core/enum/protagonist-types.enum";
+import { UserProfile } from "../core/enum/user-profile.enum";
+import { toLocaleString } from "../utils/number.utils";
+import { IDisplayItem } from "./display-list.model";
+import { MinibadgeModel } from "./model";
+import { IPaginatedPayload, IPaginatedResponses, IQueryStringPayload } from "./request.model";
 
 export interface IUserResponse {
     id: string;
@@ -67,5 +69,9 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     displayItemDistinction = (): string => toLocaleString(this.countAssigned);
 
     profileToI18n = (): string => !!this.profile ? `minibadge.profile.${this.profile}` : '';
+
+    getProfileDisplayColor = (): string => {
+        return ProfileColorMap[this.profile as UserProfile] || "#000000";
+    }
 
 }

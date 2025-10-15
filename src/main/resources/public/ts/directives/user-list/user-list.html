@@ -6,7 +6,20 @@
         <i class="check-decagram"></i>&nbsp;
         [[vm.lang.translate(vm.listDistinction)]]&nbsp;&#58;
     </h4>
-    <minibadge-list items="vm.users" is-italic-distinction="true" is-end-distinction="vm.isEndDistinction">
-    </minibadge-list>
+    <ul class="minibadge-list flex-row f-column">
+        <li class="minibadge-list-item" ng-repeat="user in vm.users track by $index">
+            <div ng-if="!!user.profile" class="minibadge-user-list-item-profile">
+                <img 
+                    ng-if="!!user.displayItemImg()" 
+                    class="minibadge-list-item-img"
+                    ng-src="[[user.displayItemImg()]]" 
+                    on-error-src="/minibadge/public/img/default-avatar.svg"
+                />
+                <div class="minibadge-user-list-item-profile-color" ng-style="{'background-color': user.getProfileDisplayColor()}"></div>
+                <strong><span>[[vm.lang.translate(user.profileToI18n())]]</span></strong>
+            </div>
+            <span class="minibadge-list-item-display">[[user.displayItem()]]</span>
+        </li>
+    </ul>
     <minibadge-paging paging="vm.usersPaging" on-change="vm.pageChange()"></minibadge-paging>
 </div>
