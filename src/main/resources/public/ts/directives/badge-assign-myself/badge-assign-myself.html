@@ -1,0 +1,32 @@
+<div>
+    <lightbox show="vm.isLightboxOpened" on-close="vm.closeLightbox()" class="minibadge-assign">
+    <div class="minibadge-container minibadge-assign flex-row f-column">
+        <h2 class="minibadge-assign-title" ng-click="vm.closeLightbox()">
+            <span><i class="chevron-left"></i></span>&nbsp;<i18n>minibadge.badge.assign</i18n>&nbsp;[[vm.badgeType.label]]
+        </h2>
+        <h3>
+            <i18n>minibadge.badge.assign.myself.question</i18n>
+        </h3>
+
+        <span ng-if="vm.badgeType.isSelfAssigned" ng-class="{'minibadge-assign-footer-warning': vm.badgeType.isSelfAssigned}">
+            <i18n>minibadge.badge.assign.myself.already.assigned</i18n>
+        </span>
+
+        <div class="minibadge-assign-footer flex-row">
+            <span ng-class="{'minibadge-assign-footer-warning': vm.numberAssignable <= 0}">
+                <i18n>minibadge.threshold.remaining</i18n>&nbsp;&#58;&nbsp;
+                [[vm.numberAssignable]]
+            </span>
+            <div class="minibadge-assign-footer-buttons flex-row">
+                <button class="minibadge-delete-button"
+                        ng-click="vm.closeLightbox()">
+                    <i18n>minibadge.cancel</i18n>
+                </button>
+                <button ng-click="vm.assignMyself()" ng-disabled="vm.numberAssignable <= 0 || vm.badgeType.isSelfAssigned">
+                    <i18n>minibadge.badge.assign.myself.button</i18n>
+                </button>
+            </div>
+        </div>
+    </div>
+</lightbox>
+</div>
