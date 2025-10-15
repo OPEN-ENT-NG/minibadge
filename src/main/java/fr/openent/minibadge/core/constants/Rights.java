@@ -11,6 +11,7 @@ public class Rights {
             FakeRight.class.getSimpleName());
     public static final String VIEW = "minibadge.view";
     public static final String STATISTICS_VIEW = "minibadge.statistics.view";
+    public static final String STATISTICS_VIEW_ALL = "minibadge.statistics.view.all";
 
     private Rights() {
         throw new IllegalStateException("Utility class");
