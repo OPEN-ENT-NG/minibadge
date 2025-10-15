@@ -39,9 +39,13 @@ i {
     font-family: "minibadge-icons";
     content: "\F08C9";
   }
-  &.human-arrow::before{
+  &.human-arrow-right::before{
     font-family: "minibadge-icons";
     content: "\F0B53";
+  }
+  &.human-arrow-left::before{
+    font-family: "minibadge-icons";
+    content: "\F0B51";
   }
   &.star::before {
     font-family: 'minibadge-icons';

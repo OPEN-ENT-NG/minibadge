@@ -1,22 +1,27 @@
-import {Behaviours, idiom as lang, ng, notify} from 'entcore';
+import { Behaviours, idiom as lang, model, ng, notify } from 'entcore';
 
-import {IBadgeTypeService} from "../services";
-import {BadgeType} from "../models/badge-type.model";
-import {safeApply} from "../utils/safe-apply.utils";
-import {MINIBADGE_APP} from "../minibadgeBehaviours";
-import {IScope} from "angular";
-import {Setting} from "../models/setting.model";
-import {Subscription} from "rxjs";
-import {User} from "../models/user.model";
-import {Paging} from "../models/paging.model";
-import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
-import {ActionOption, IActionOptionResponse} from "../models/action-option.model";
-import {toLocaleString} from "../utils/number.utils";
-import {translate} from "../utils/string.utils";
+import { IScope } from "angular";
+import { AxiosError } from 'axios';
+import { Subscription } from "rxjs";
+import { MINIBADGE_APP } from "../minibadgeBehaviours";
+import { ActionOption, IActionOptionResponse } from "../models/action-option.model";
+import { BadgeType } from "../models/badge-type.model";
+import { ContainerHeader, IContainerHeaderResponse } from "../models/container-header.model";
+import { Paging } from "../models/paging.model";
+import { Setting } from "../models/setting.model";
+import { User } from "../models/user.model";
+import { IBadgeAssignedService, IBadgeTypeService } from "../services";
+import { toLocaleString } from "../utils/number.utils";
+import { safeApply } from "../utils/safe-apply.utils";
+import { translate } from "../utils/string.utils";
 
 
 interface ViewModel {
-    onOpenLightbox(): void;
+    onOpenAssignModal(): void;
+
+    onOpenAssignMyselfModal(): void;
+
+    onCloseAssignMyselfModal(): void;
 
     userAssignersTotal(): string;
 
@@ -28,6 +33,8 @@ interface ViewModel {
 
     getBadgeTypeReceivers(): Promise<void>;
 
+    assignMyself(): void;
+
     typeId: number;
     badgeType: BadgeType;
     assigners: User[];
@@ -35,6 +42,7 @@ interface ViewModel {
     assignersPayload: Paging;
     receiversPayload: Paging;
     lang: typeof lang;
+    isBadgeAssignMyselfModalOpen: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -50,12 +58,15 @@ class Controller implements ng.IController, ViewModel {
     assignersPayload: Paging;
     receiversPayload: Paging;
     lang: typeof lang;
+    isBadgeAssignMyselfModalOpen: boolean = false;
 
     subscriptions: Subscription = new Subscription();
 
     constructor(private $scope: IMinibadgeScope,
                 private $route: any,
-                private badgeTypeService: IBadgeTypeService) {
+                private badgeTypeService: IBadgeTypeService,
+                private badgeAssignedService: IBadgeAssignedService
+            ) {
         this.$scope.vm = this;
         this.typeId = this.$route.current.params.typeId;
         this.lang = lang;
@@ -76,9 +87,40 @@ class Controller implements ng.IController, ViewModel {
             });
     }
 
-    onOpenLightbox = (): void => {
+    private refreshBadgeTypeData = (): void => {
+        this.assignersPayload = new Paging({page: 0});
+        this.receiversPayload = new Paging({page: 0});
+        this.getBadgeType()
+            .then(() => {
+                Promise.all([
+                    this.getBadgeTypeAssigners(),
+                    this.getBadgeTypeReceivers(),
+                ])
+            });
+    }
+
+    onOpenAssignModal = (): void => {
         Behaviours.applicationsBehaviours[MINIBADGE_APP].snipletBadgeAssignService
             .sendBadgeType(this.badgeType);
+    }
+
+    onOpenAssignMyselfModal(): void {
+        this.isBadgeAssignMyselfModalOpen = true;
+    }
+
+    onCloseAssignMyselfModal(): void {
+        this.isBadgeAssignMyselfModalOpen = false;
+    }
+
+    assignMyself(): void {
+        this.badgeAssignedService.assign(this.badgeType.id, {ownerIds: [model.me.userId]})
+            .then(() => {
+                this.onCloseAssignMyselfModal();
+                this.refreshBadgeTypeData();
+                this.$scope.setting.incrementAssignationsNumbers(1);
+                notify.success('minibadge.success.assign')
+            })
+            .catch((err: AxiosError) => notify.error('minibadge.error.assign'));
     }
 
     userAssignersTotal = (): string => this.badgeType && this.badgeType.userAssignersTotal ?
@@ -130,14 +172,27 @@ class Controller implements ng.IController, ViewModel {
             .then((data: BadgeType) => {
                 if (data) {
                     this.badgeType = data;
+                    const buttons: ActionOption[] = [];
+                    if (data.isSelfieBadge()) {
+                        buttons.push(
+                            new ActionOption(<IActionOptionResponse>{
+                                label: 'minibadge.badge.assign.myself.button',
+                                show: () => this.$scope.setting?.userPermissions?.canAssign(),
+                                action: () => this.onOpenAssignMyselfModal(),
+                            })
+                        );
+                    }
+                    buttons.push(
+                        new ActionOption(<IActionOptionResponse>{
+                            label: 'minibadge.badge.assign',
+                            show: () => this.$scope.setting?.userPermissions?.canAssign(),
+                            action: () => this.onOpenAssignModal(),
+                        })
+                    );
                     Behaviours.applicationsBehaviours[MINIBADGE_APP].containerHeaderEventsService
                         .changeContainerHeader(new ContainerHeader(<IContainerHeaderResponse>{
                             label: `${this.lang.translate('minibadge.badge')} ${this.badgeType.label}`,
-                            buttons: [new ActionOption(<IActionOptionResponse>{
-                                label: 'minibadge.badge.assign',
-                                show: () => this.$scope.setting.userPermissions.canAssign(),
-                                action: () => this.onOpenLightbox(),
-                            })]
+                            buttons: buttons
                         }));
                 }
                 safeApply(this.$scope);
@@ -151,4 +206,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const badgeTypeController = ng.controller('BadgeTypeController',
-    ['$scope', '$route', 'BadgeTypeService', Controller]);
+    ['$scope', '$route', 'BadgeTypeService', 'BadgeAssignedService', Controller]);

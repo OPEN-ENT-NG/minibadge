@@ -1,15 +1,15 @@
-import {Behaviours, model, ng, notify, template} from 'entcore';
-import {NAVBAR_VIEWS} from "../core/enum/navbar.enum";
-import {IChartService, ISettingService} from "../services";
-import {Setting} from "../models/setting.model";
-import {ILocationService, IScope} from "angular";
-import {Chart} from "../models/chart.model";
-import {IUserResponse, User} from "../models/user.model";
-import {MINIBADGE_APP} from "../minibadgeBehaviours";
-import {ContainerHeader, IContainerHeaderResponse} from "../models/container-header.model";
-import {Subscription} from "rxjs";
-import {rights} from "../core/constants/rights.const";
-import {safeApply} from "../utils/safe-apply.utils";
+import { ILocationService, IScope } from "angular";
+import { Behaviours, model, ng, notify, template } from 'entcore';
+import { Subscription } from "rxjs";
+import { rights } from "../core/constants/rights.const";
+import { NAVBAR_VIEWS } from "../core/enum/navbar.enum";
+import { MINIBADGE_APP } from "../minibadgeBehaviours";
+import { Chart } from "../models/chart.model";
+import { ContainerHeader, IContainerHeaderResponse } from "../models/container-header.model";
+import { Setting } from "../models/setting.model";
+import { IUserResponse, User } from "../models/user.model";
+import { IChartService, ISettingService } from "../services";
+import { safeApply } from "../utils/safe-apply.utils";
 
 interface ViewModel {
     openChartLightbox(): void;

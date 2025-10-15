@@ -21,9 +21,13 @@
             <span ng-bind="vm.badgeType.displayReceivers()"></span>
         </div>
         <div>
-            <i class="human-arrow"></i>
+            <i class="human-arrow-right"></i>
             <i18n>minibadge.assignable.by</i18n>&Tab;:
             <span ng-bind=" vm.badgeType.displayAssignors()"></span>
+        </div>
+        <div ng-if="vm.badgeType.isSelfieBadge()">
+            <i class="human-arrow-left"></i>
+            <i18n>minibadge.selfi.badge</i18n>
         </div>
     </div>
 </div>

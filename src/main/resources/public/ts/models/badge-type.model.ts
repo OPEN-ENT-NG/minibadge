@@ -8,7 +8,7 @@ import { ITypeSettingResponse, TypeSettings } from "./type-settings.model";
 import { IUserResponse, User } from "./user.model";
 
 export interface IBadgeTypeResponse {
-    id?: number;
+    id: number;
     structureId?: string;
     ownerId?: string;
     pictureId?: string;
@@ -24,6 +24,7 @@ export interface IBadgeTypeResponse {
     mostAssigningUsers?: IUserResponse[];
     setting?: TypeSettings;
     categories: IBadgeCategoryResponse[];
+    isSelfAssigned?: boolean;
 }
 
 export interface IBadgeTypesPayload extends ILimitOffsetPayload {
@@ -35,7 +36,7 @@ export interface IBadgeTypesResponses extends IPaginatedResponses<IBadgeTypeResp
 
 
 export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
-    id?: number;
+    id: number;
     structureId?: string;
     ownerId?: string;
     pictureId?: string;
@@ -51,6 +52,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
     mostAssigningUsers?: User[];
     setting?: TypeSettings;
     categories?: BadgeCategory[];
+    isSelfAssigned?: boolean;
 
     constructor(data?: IBadgeTypeResponse) {
         super();
@@ -73,6 +75,7 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
         this.mostAssigningUsers = new User().toList(data.mostAssigningUsers);
         this.setting = new TypeSettings(<ITypeSettingResponse>data.setting);
         this.categories = new BadgeCategory().toList(data.categories);
+        this.isSelfAssigned = data.isSelfAssigned;
         return this;
     }
 
@@ -100,6 +103,10 @@ export class BadgeType extends MinibadgeModel<BadgeType> implements IGraphItem {
 
     graphValue(): number {
         return this.countAssigned || 0;
+    }
+
+    isSelfieBadge(): boolean {
+        return !!this.setting?.isSelfAssignable;
     }
 
 }
