@@ -1,4 +1,6 @@
+import { ProfileColorMap } from "../core/constants/profile-colors.const";
 import { PROTAGONIST_TYPES } from "../core/enum/protagonist-types.enum";
+import { UserProfile } from "../core/enum/user-profile.enum";
 import { toLocaleString } from "../utils/number.utils";
 import { IDisplayItem } from "./display-list.model";
 import { MinibadgeModel } from "./model";
@@ -69,20 +71,7 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     profileToI18n = (): string => !!this.profile ? `minibadge.profile.${this.profile}` : '';
 
     getProfileDisplayColor = (): string => {
-        switch (this.profile) {
-            case "Student":
-                return "#FF8500";
-            case "Teacher":
-                return "#6FBE2E";
-            case "Parent":
-                return "#46AFE6";
-            case "Guest":
-                return "#FF3A55";
-            case "Personnel":
-                return " #A348C0";
-            default:
-                return "#000000";
-        }
+        return ProfileColorMap[this.profile as UserProfile] || "#000000";
     }
 
 }
