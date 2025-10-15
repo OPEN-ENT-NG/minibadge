@@ -3,10 +3,12 @@ import {IDirective, ILocationService, IScope, IWindowService} from "angular";
 import {RootsConst} from "../../core/constants/roots.const";
 import {BadgeType} from "../../models/badge-type.model";
 import {DATE_FORMAT} from "../../core/enum/date.enum";
+import { translate } from "../../utils/string.utils";
 
 interface IViewModel {
     DATE_FORMAT: typeof DATE_FORMAT;
     badgeType: BadgeType;
+    translate: typeof translate;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -16,6 +18,7 @@ interface IMinibadgeScope extends IScope {
 class Controller implements ng.IController, IViewModel {
     DATE_FORMAT: typeof DATE_FORMAT;
     badgeType: BadgeType;
+    translate: typeof translate = translate;
 
     constructor(private $scope: IMinibadgeScope,
                 private $location: ILocationService,
