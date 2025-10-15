@@ -29,5 +29,17 @@
             <i class="human-arrow-left"></i>
             <i18n>minibadge.selfi.badge</i18n>
         </div>
+        <strong>
+            <i18n>
+                [[ vm.translate(
+                    vm.badgeType.receiversTotal === 0 
+                        ? 'minibadge.badges.received.on.structure.none' 
+                        : (vm.badgeType.receiversTotal === 1 
+                            ? 'minibadge.badges.received.on.structure.singular' 
+                            : 'minibadge.badges.received.on.structure.plural'),
+                    [vm.badgeType.receiversTotal]
+                ) ]]
+            </i18n>
+        </strong>
     </div>
 </div>

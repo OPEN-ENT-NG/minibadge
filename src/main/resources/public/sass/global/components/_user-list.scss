@@ -22,6 +22,20 @@
       font-style: italic;
     }
 
+    &-profile {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 100px;
+      border: 1px solid #0000001A;
+      padding: 0 8px;
+      margin-right: 8px;
+      &-color {
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+      }
+    }
   }
 
   .minibadge-paging {

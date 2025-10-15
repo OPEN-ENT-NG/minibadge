@@ -1,8 +1,8 @@
-import {MinibadgeModel} from "./model";
-import {IPaginatedPayload, IPaginatedResponses, IQueryStringPayload} from "./request.model";
-import {PROTAGONIST_TYPES} from "../core/enum/protagonist-types.enum";
-import {IDisplayItem} from "./display-list.model";
-import {toLocaleString} from "../utils/number.utils";
+import { PROTAGONIST_TYPES } from "../core/enum/protagonist-types.enum";
+import { toLocaleString } from "../utils/number.utils";
+import { IDisplayItem } from "./display-list.model";
+import { MinibadgeModel } from "./model";
+import { IPaginatedPayload, IPaginatedResponses, IQueryStringPayload } from "./request.model";
 
 export interface IUserResponse {
     id: string;
@@ -67,5 +67,22 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     displayItemDistinction = (): string => toLocaleString(this.countAssigned);
 
     profileToI18n = (): string => !!this.profile ? `minibadge.profile.${this.profile}` : '';
+
+    getProfileDisplayColor = (): string => {
+        switch (this.profile) {
+            case "Student":
+                return "#FF8500";
+            case "Teacher":
+                return "#6FBE2E";
+            case "Parent":
+                return "#46AFE6";
+            case "Guest":
+                return "#FF3A55";
+            case "Personnel":
+                return " #A348C0";
+            default:
+                return "#000000";
+        }
+    }
 
 }
