@@ -1,11 +1,12 @@
-import {moment, ng, notify} from 'entcore';
-import {IScope} from "angular";
-import {Setting} from "../models/setting.model";
-import {translate} from "../utils/string.utils";
-import {Statistics} from "../models/statistic.model";
-import {IStatisticService} from "../services";
-import {safeApply} from "../utils/safe-apply.utils";
-import {toLocaleString} from "../utils/number.utils";
+import { IScope } from "angular";
+import { model, moment, ng, notify } from 'entcore';
+import { rights } from '../core/constants/rights.const';
+import { Setting } from "../models/setting.model";
+import { Statistics } from "../models/statistic.model";
+import { IStatisticService } from "../services";
+import { toLocaleString } from "../utils/number.utils";
+import { safeApply } from "../utils/safe-apply.utils";
+import { translate } from "../utils/string.utils";
 
 interface ViewModel {
     startDate: Date;
@@ -13,6 +14,7 @@ interface ViewModel {
     translate: typeof translate;
     toLocaleString: typeof toLocaleString;
     statistics: Statistics;
+    hasStatisticsViewAllRight(): boolean;
 }
 
 
@@ -46,6 +48,8 @@ class Controller implements ng.IController, ViewModel {
 
     $onDestroy() {
     }
+
+    hasStatisticsViewAllRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsViewAll);
 }
 
 export const statisticsController = ng.controller('StatisticsController',
