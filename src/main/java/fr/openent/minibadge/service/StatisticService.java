@@ -19,9 +19,10 @@ public interface StatisticService {
      * Get global statistics
      *
      * @param structureIds List of structure From which we want to aggregate statistics
+     * @param minDate Filter statistics from this date
      * @return Future containing current global statistics
      */
-    Future<Statistics> getGlobalStatistics(List<String> structureIds);
+    Future<Statistics> getGlobalStatistics(List<String> structureIds, LocalDate minDate);
 
     /**
      * Get specific statistics

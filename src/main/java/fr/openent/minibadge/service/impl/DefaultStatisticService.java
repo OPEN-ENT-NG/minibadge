@@ -20,6 +20,7 @@ import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,15 +42,15 @@ public class DefaultStatisticService implements StatisticService {
 
     @Override
     public Future<Statistics> getGlobalStatistics() {
-        return this.getGlobalStatistics(null);
+        return this.getGlobalStatistics(null, null);
     }
 
     @Override
-    public Future<Statistics> getGlobalStatistics(List<String> structureIds) {
+    public Future<Statistics> getGlobalStatistics(List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
 
-        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
+        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds, minDate);
         Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
                 Minibadge.minibadgeConfig.mostAssignedTypeListSize());
         Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
@@ -87,7 +88,7 @@ public class DefaultStatisticService implements StatisticService {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
 
-        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
+        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds, minDate);
         Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
                 Minibadge.minibadgeConfig.mostAssignedTypeListSize());
         Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
@@ -132,19 +133,24 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonObject> countBadgeAssigned(List<String> structureIds) {
+    private Future<JsonObject> countBadgeAssigned(List<String> structureIds, LocalDate minDate) {
         Promise<JsonObject> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT COUNT(DISTINCT (ba.id)) FROM %s bas " +
                         " INNER JOIN %s ba on ba.id = bas.badge_assigned_id " +
                         " INNER JOIN %s b on b.id = ba.badge_id " +
-                        " WHERE is_structure_assigner IS TRUE AND %s",
+                        " WHERE is_structure_assigner IS TRUE AND %s ",
                         SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                         SqlTable.BADGE_ASSIGNED_VALID.getName(),
                         SqlTable.BADGE.getName(),
                 SqlHelper.filterStructuresWithNull(structureIds, params));
 
+        if (minDate != null) {
+            LocalDateTime minDateTime = minDate.atStartOfDay();
+            request += " AND bas.created_at > ?";
+            params.add(minDateTime.toString());
+        }
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::countBadgeAssigned] Fail to count badge assigned",

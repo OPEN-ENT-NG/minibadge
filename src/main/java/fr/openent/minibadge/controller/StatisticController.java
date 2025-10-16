@@ -53,7 +53,7 @@ public class StatisticController extends ControllerHelper {
                             if (structuresIds != null && user.getStructures() != null
                                     && user.getStructures().size() >= structuresIds.size())
                                 return statisticService.getSpecificStructuresStatistics(structuresIds, minDate.get());
-                            return statisticService.getGlobalStatistics(structuresIds);
+                            return statisticService.getGlobalStatistics(structuresIds, minDate.get());
                         })
                         .onSuccess(statistics -> renderJson(request, statistics.toJson()))
                         .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
