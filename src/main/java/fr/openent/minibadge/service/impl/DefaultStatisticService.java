@@ -3,6 +3,7 @@ package fr.openent.minibadge.service.impl;
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.enums.SqlTable;
+import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.*;
@@ -34,7 +35,6 @@ public class DefaultStatisticService implements StatisticService {
     }
 
     private final Sql sql = Sql.getInstance();
-    private final Config config = Minibadge.minibadgeConfig;
     private final UserService userService = ServiceRegistry.getService(UserService.class);
     private final StructureService structureService = ServiceRegistry.getService(StructureService.class);
 
@@ -50,9 +50,9 @@ public class DefaultStatisticService implements StatisticService {
 
         Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
         Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
-                config.mostAssignedTypeListSize());
+                Minibadge.minibadgeConfig.mostAssignedTypeListSize());
         Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
-                config.lessAssignedTypeListSize());
+                Minibadge.minibadgeConfig.lessAssignedTypeListSize());
         Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
 
         Future.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
@@ -67,7 +67,11 @@ public class DefaultStatisticService implements StatisticService {
                             setStructures(statistics, structureIds));
                 })
                 .onSuccess(result -> promise.complete(statistics))
-                .onFailure(promise::fail);
+                .onFailure(err -> {
+                    String errorMessage = "Fail to get global statistics";
+                    LoggerHelper.logError(this, "getGlobalStatistics", errorMessage, err.getMessage());
+                    promise.fail(err);
+                });
 
 
         return promise.future();
@@ -84,16 +88,16 @@ public class DefaultStatisticService implements StatisticService {
 
         Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
         Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
-                config.mostAssignedTypeListSize());
+                Minibadge.minibadgeConfig.mostAssignedTypeListSize());
         Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
-                config.lessAssignedTypeListSize());
+                Minibadge.minibadgeConfig.lessAssignedTypeListSize());
         Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
 
 
         Future<JsonArray> topAssigningUsersFuture = listTopUsersWithCount(structureIds, true,
-                config.topAssigningUserListSize());
+                Minibadge.minibadgeConfig.topAssigningUserListSize());
         Future<JsonArray> topReceivingUserFuture = listTopUsersWithCount(structureIds, false,
-                config.topReceivingUserListSize());
+                Minibadge.minibadgeConfig.topReceivingUserListSize());
 
         List<User> mostAssigningUsersCounts = new ArrayList<>();
 
@@ -118,8 +122,11 @@ public class DefaultStatisticService implements StatisticService {
                     mergeUsersToStatistics(statistics, users, mostAssigningUsersCounts);
                     promise.complete(statistics);
                 })
-                .onFailure(promise::fail);
-
+                .onFailure(err -> {
+                    String errorMessage = "Fail to get specific structures statistics";
+                    LoggerHelper.logError(this, "getSpecificStructuresStatistics", errorMessage, err.getMessage());
+                    promise.fail(err);
+                });
 
         return promise.future();
     }
@@ -198,7 +205,7 @@ public class DefaultStatisticService implements StatisticService {
                         SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                         SqlHelper.andFilterStructures(structureIds, params),
                         SqlHelper.filterStructuresWithNull(structureIds, params),
-                        config.mostRefusedTypeListSize());
+                        Minibadge.minibadgeConfig.mostRefusedTypeListSize());
 
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -239,7 +246,7 @@ public class DefaultStatisticService implements StatisticService {
         else {
             BadgeType mostAssignedBadgeType = statistics.mostAssignedTypes().get(0);
             listTopUsersWithCount(structureIds, mostAssignedBadgeType.id(), true,
-                    config.mostAssigningUserListSize())
+                    Minibadge.minibadgeConfig.mostAssigningUserListSize())
                     .onSuccess(users -> promise.complete(new User().toList(users)))
                     .onFailure(promise::fail);
         }
@@ -337,7 +344,7 @@ public class DefaultStatisticService implements StatisticService {
                 SqlTable.BADGE_ASSIGNED_VALID.getName(),
                 SqlTable.BADGE.getName(),
                 SqlHelper.andFilterStructures(structureIds, params),
-                config.mostAssigningStructureListSize());
+                Minibadge.minibadgeConfig.mostAssigningStructureListSize());
 
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,

@@ -10,7 +10,7 @@
                         class="minibadge-statistics-count-allowed">
                 </minibadge-statistics-card>
                 <minibadge-statistics-card class="minibadge-statistics-top-structures"
-                                           ng-if="vm.statistics.mostAssigningStructures.length"
+                                           ng-if="vm.hasStatisticsViewAllStructuresRight() && vm.statistics.mostAssigningStructures.length"
                                            label="vm.translate('minibadge.statistics.most.active.structures')">
                     <container-body class="flex-row">
                         <minibadge-card body-icon="'trophy'"
