@@ -2,6 +2,7 @@ package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.core.enums.SqlTable;
+import fr.openent.minibadge.helper.LoggerHelper;
 import fr.openent.minibadge.helper.Neo4jHelper;
 import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
@@ -231,9 +232,13 @@ public class DefaultUserService implements UserService {
     public Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user) {
         Promise<List<String>> promise = Promise.promise();
         getSessionUserStructureNSubstructureIdsRequest(user)
-                .onFailure(promise::fail)
                 .onSuccess(structureIds -> promise.complete(structureIds
-                        .getJsonArray(STRUCTUREIDS, new JsonArray()).getList()));
+                        .getJsonArray(STRUCTUREIDS, new JsonArray()).getList()))
+                .onFailure(err -> {
+                    String errorMessage = "Fail to get structure and substructure ids";
+                    LoggerHelper.logError(this, "getSessionUserStructureNSubstructureIds", errorMessage);
+                    promise.fail(errorMessage);
+                });
         return promise.future();
     }
 
