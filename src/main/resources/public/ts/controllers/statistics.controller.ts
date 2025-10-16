@@ -14,7 +14,7 @@ interface ViewModel {
     translate: typeof translate;
     toLocaleString: typeof toLocaleString;
     statistics: Statistics;
-    hasStatisticsViewAllRight(): boolean;
+    hasStatisticsViewAllStructuresRight(): boolean;
 }
 
 
