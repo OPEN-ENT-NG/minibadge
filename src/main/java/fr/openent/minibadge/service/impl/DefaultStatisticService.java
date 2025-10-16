@@ -19,6 +19,7 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,11 +79,11 @@ public class DefaultStatisticService implements StatisticService {
     }
 
     public Future<Statistics> getSpecificStructuresStatistics() {
-        return this.getSpecificStructuresStatistics(null);
+        return this.getSpecificStructuresStatistics(null, null);
     }
 
     @Override
-    public Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds) {
+    public Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
 

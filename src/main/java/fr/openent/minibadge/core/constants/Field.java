@@ -142,6 +142,8 @@ public class Field {
     public static final String TOPASSIGNINGUSERS = "topAssigningUsers";
     public static final String TOPRECEIVINGUSERS = "topReceivingUsers";
     public static final String MOST_ASSIGNING_USERS = "most_assigning_users";
+    public static final String MINDATE = "minDate";
+    public static final String MIN_DATE = "min_date";
 
     //CONFIG
     public static final String DEFAULT_MAX_ASSIGNABLE = "default_max_assignable";

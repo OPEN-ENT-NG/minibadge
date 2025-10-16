@@ -37,4 +37,10 @@ public class LoggerHelper {
         Class<?> myClass = classObject.getClass();
         getLogger(myClass).info(String.format("%s %s", getBaseLog(myClass, methodName), message));
     }
+
+    public static void logWarn(Object classObject, String methodName, String message) {
+        Class<?> myClass = classObject.getClass();
+        String completeLog = getCompleteLog(myClass, methodName, message);
+        getLogger(myClass).warn(completeLog);
+    }
 }
