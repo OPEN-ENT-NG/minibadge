@@ -34,9 +34,9 @@ public class FakeRight extends ControllerHelper {
         notImplemented(request);
     }
 
-    @Get("/rights/statistics/view/all")
-    @SecuredAction(Rights.STATISTICS_VIEW_ALL)
-    public void statisticsViewAll(HttpServerRequest request) {
+    @Get("/rights/statistics/view/all/structures")
+    @SecuredAction(Rights.STATISTICS_VIEW_ALL_STRUCTURES)
+    public void statisticsViewAllStructures(HttpServerRequest request) {
         notImplemented(request);
     }
 }

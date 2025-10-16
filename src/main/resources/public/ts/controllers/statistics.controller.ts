@@ -49,7 +49,7 @@ class Controller implements ng.IController, ViewModel {
     $onDestroy() {
     }
 
-    hasStatisticsViewAllRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsViewAll);
+    hasStatisticsViewAllStructuresRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsViewAllStructures);
 }
 
 export const statisticsController = ng.controller('StatisticsController',
