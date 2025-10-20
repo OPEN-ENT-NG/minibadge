@@ -130,6 +130,8 @@ public class Field {
     public static final String STATISTICS = "statistics";
     public static final String COUNT_ASSIGNED = "count_assigned";
     public static final String COUNTASSIGNED = "countAssigned";
+    public static final String COUNT_ACTIVE_USERS = "count_active_users";
+    public static final String COUNTACTIVEUSERS = "countActiveUsers";
     public static final String COUNT_REFUSED = "count_refused";
     public static final String COUNTREFUSED = "countRefused";
     public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
