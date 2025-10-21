@@ -5,6 +5,11 @@
             <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.label'"  class="sort-arrow-down"></i>
             <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.label'" class="sort-arrow-up"></i>
         </div>
+        <div class="given-array-cell flex-row flex-one  justify-center"    ng-click="vm.onClick('minibadge.given.sort.assignor.displayName')" >
+            <i18n>minibadge.badges.assigned.by</i18n>
+            <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.assignor.displayName'"  class="sort-arrow-down"></i>
+            <i  ng-show="!vm.isAsc  && vm.label === 'minibadge.given.sort.assignor.displayName'" class="sort-arrow-up"></i>
+        </div>
         <div class="given-array-cell flex-row flex-one  justify-center"    ng-click="vm.onClick('minibadge.given.sort.owner.displayName')" >
             <i18n>minibadge.given.array.owner</i18n>
             <i ng-show="vm.isAsc  && vm.label === 'minibadge.given.sort.owner.displayName'"  class="sort-arrow-down"></i>
@@ -25,6 +30,9 @@
             <div class="flex-row align-center given-array-label">
                 [[badge.badge.badgeType.label]]
             </div>
+        </div>
+        <div class="given-array-cell flex-row flex-one justify-center" >
+            [[badge.assignorDisplayName]]
         </div>
         <div class="given-array-cell flex-row flex-one justify-center" >
             [[badge.badge.owner.getDisplayName()]]

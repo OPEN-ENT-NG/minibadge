@@ -18,6 +18,7 @@ import org.entcore.common.user.UserUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static fr.openent.minibadge.core.constants.Field.*;
@@ -273,6 +274,8 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                                                     String sortBy, Boolean sortAsc, String query, List<String> structureIds) {
         Promise<JsonArray> promise = Promise.promise();
         List<String> acceptedSort = Arrays.asList(LABEL, CREATED_AT, REVOKED_AT, RECEIVER_DISPLAY_NAME, ASSIGNOR_DISPLAY_NAME);
+        String transformedSortBy = Objects.equals(sortBy, RECEIVER_DISPLAY_NAME) ? "receiver_us.display_name" :
+                Objects.equals(sortBy, ASSIGNOR_DISPLAY_NAME) ? "assignor_us.display_name" : sortBy;
         List<String> columns = Arrays.asList("receiver_us.display_name", "assignor_us.display_name", "bt.label");
         JsonArray params = new JsonArray();
         params.addAll(new JsonArray(structureIds));
@@ -302,7 +305,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                         " AND bav.created_at::date  <= to_date( ?, 'DD-MM-YYYY') " : "") +
                 ((query != null && !query.isEmpty()) ? " AND " + SqlHelper.searchQueryInColumns(query, columns, params) : " ") +
                 " ORDER BY " +
-                ((hasSort && acceptedSort.contains(sortBy)) ? sortBy + (sortAsc ? " ASC " : " DESC ") : " bav.id ") +
+                ((hasSort && acceptedSort.contains(sortBy)) ? transformedSortBy + (sortAsc ? " ASC " : " DESC ") : " bav.id ") +
                 " ; ";
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
