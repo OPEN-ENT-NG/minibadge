@@ -39,4 +39,10 @@ public class FakeRight extends ControllerHelper {
     public void statisticsViewAllStructures(HttpServerRequest request) {
         notImplemented(request);
     }
+
+    @Get("/rights/admin")
+    @SecuredAction(Rights.ADMIN)
+    public void admin(HttpServerRequest request) {
+        notImplemented(request);
+    }
 }

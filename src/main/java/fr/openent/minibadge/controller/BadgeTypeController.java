@@ -127,6 +127,4 @@ public class BadgeTypeController extends ControllerHelper {
                 })
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }
-
-
 }

@@ -3,6 +3,7 @@ package fr.openent.minibadge.controller;
 import fr.openent.minibadge.Minibadge;
 import fr.openent.minibadge.core.constants.*;
 import fr.openent.minibadge.helper.RequestHelper;
+import fr.openent.minibadge.security.AdminRight;
 import fr.openent.minibadge.security.UsersAssignRight;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
@@ -47,7 +48,6 @@ public class BadgeAssignedController extends ControllerHelper {
 
     }
 
-
     @Get("/assigned/given")
     @ApiDoc("get all the badge the user has given")
     @SecuredAction(value = "", type = ActionType.RESOURCE)
@@ -84,4 +84,22 @@ public class BadgeAssignedController extends ControllerHelper {
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
         });
     }
+
+    @Get("/assigned/all")
+    @ApiDoc("Get all the badge assigned")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdminRight.class)
+    public void getAll(HttpServerRequest request) {
+        String query = request.params().get(Request.QUERY);
+        String startDate = request.params().get(Request.START_DATE);
+        String endDate = request.params().get(Request.END_DATE);
+        String sortType = request.params().get(Request.SORTBY);
+        Boolean sortAsc = Boolean.parseBoolean(request.params().get(Request.SORTASC));
+        UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(userInfos -> badgeAssignedService.getAllAssignedBadges(query, startDate, endDate, sortType, sortAsc, userInfos.getStructures())                )
+                .onSuccess(badges -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), badges)))
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
+
+    }
+
 }

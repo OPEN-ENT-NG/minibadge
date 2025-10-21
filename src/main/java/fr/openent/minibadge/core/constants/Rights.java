@@ -12,6 +12,7 @@ public class Rights {
     public static final String VIEW = "minibadge.view";
     public static final String STATISTICS_VIEW = "minibadge.statistics.view";
     public static final String STATISTICS_VIEW_ALL_STRUCTURES = "minibadge.statistics.view.all.structures";
+    public static final String ADMIN = "minibadge.admin";
 
     private Rights() {
         throw new IllegalStateException("Utility class");

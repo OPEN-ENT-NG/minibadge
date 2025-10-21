@@ -257,4 +257,59 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         return promise.future();
     }
 
+    public Future<List<BadgeAssigned>> getAllAssignedBadges(String query, String startDate, String endDate, String sortType, Boolean sortAsc, List<String> structureIds) {
+        Promise<List<BadgeAssigned>> promise = Promise.promise();
+
+        getAllAssignedBadgesRequest(startDate, endDate, sortType, sortAsc, query, structureIds)
+                .onSuccess(badgesAssigned -> promise.complete(new BadgeAssigned().toList(badgesAssigned)))
+                .onFailure(err -> LoggerHelper.logError(this, "getAllAssignedBadges",
+                            "Fail to retrieve all assigned badges", err.getMessage())
+                );
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> getAllAssignedBadgesRequest(String startDate, String endDate,
+                                                    String sortBy, Boolean sortAsc, String query, List<String> structureIds) {
+        Promise<JsonArray> promise = Promise.promise();
+        List<String> acceptedSort = Arrays.asList(LABEL, CREATED_AT, REVOKED_AT, RECEIVER_DISPLAY_NAME, ASSIGNOR_DISPLAY_NAME);
+        List<String> columns = Arrays.asList(DISPLAY_NAME, ASSIGNOR_DISPLAY_NAME, LABEL);
+        JsonArray params = new JsonArray();
+        params.addAll(new JsonArray(structureIds));
+        boolean hasDates = startDate != null && endDate != null;
+        boolean hasSort = sortBy != null && sortAsc != null;
+        if (hasDates) {
+            params.add(startDate);
+            params.add(endDate);
+        }
+        String request = "SELECT bav.id, bav.badge_id, bav.assignor_id, " +
+                " bt.picture_id , receiver_us.display_name , assignor_us.display_name as " + ASSIGNOR_DISPLAY_NAME + "," +
+                " bt.label as label, badge.owner_id " +
+                ", badge.id as " + BADGE_ID + " , bt.id as  " + BADGE_TYPE_ID +
+                " FROM " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " as bav " +
+                " INNER JOIN " + SqlTable.BADGE.getName() +
+                " on bav.badge_id = badge.id " +
+                " INNER JOIN " + SqlTable.BADGE_TYPE.getName() + " as bt " +
+                " on badge.badge_type_id = bt.id " +
+                " INNER JOIN " + SqlTable.USER.getName() + " as receiver_us " +
+                " ON receiver_us.id = badge.owner_id " +
+                " INNER JOIN " + SqlTable.USER.getName() + " as assignor_us " +
+                " ON assignor_us.id = bav.assignor_id " +
+                " INNER JOIN " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " as bas " +
+                " ON bas.badge_assigned_id = bav.id " +
+                " WHERE bas.structure_id IN " + Sql.listPrepared(structureIds) +
+                ((hasDates) ? " AND bav.created_at::date  >= to_date(?,'DD-MM-YYYY') " +
+                        " AND bav.created_at::date  <= to_date( ?, 'DD-MM-YYYY') " : "") +
+                ((query != null && !query.isEmpty()) ? " AND " + SqlHelper.searchQueryInColumns(query, columns, params) : " ") +
+                " ORDER BY " +
+                ((hasSort && acceptedSort.contains(sortBy)) ? sortBy + (sortAsc ? " ASC " : " DESC ") : " bav.id ") +
+                " ; ";
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getAllAssignedBadgesRequest] Fail to retrieve all assigned badges",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
 }
