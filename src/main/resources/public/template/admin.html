@@ -1,0 +1,23 @@
+<div ng-controller="AdminController as vm">
+    <div class="flex badge-given-filter">
+        <minibadge-periode-picker
+                label="vm.labelFrom"
+                date="vm.startDate"
+                on-change="vm.initAllBadges()">
+        </minibadge-periode-picker>
+        <minibadge-periode-picker
+                label="vm.labelTo"
+                date="vm.endDate"
+                on-change="vm.initAllBadges()"
+        >
+        </minibadge-periode-picker>
+
+        <search-input search-query="vm.searchQuery" class="badge-given-search mobile-disabled" on-search="vm.initAllBadges()"
+                      placeholder="minibadge.badge.given.search"></search-input>
+    </div>
+    <minibadge-all-badges-array 
+        badges="vm.badges"
+        filter-function="vm.filterBadges(filterType, filterAsc)"
+        >
+    </minibadge-all-badges-array>
+</div>

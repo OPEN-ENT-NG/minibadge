@@ -1,3 +1,4 @@
+export * from './all-badges-array/all-badges-array.directive';
 export * from './badge-assign-myself/badge-assign-myself.directive';
 export * from './badge-given-array/badge-given-array';
 export * from './badge-list/badge-list.directive';
@@ -29,3 +30,4 @@ export * from './search/search.directive';
 export * from './selected-list/selected-list.directive';
 export * from './title/title.directive';
 export * from './user-list/user-list.directive';
+
