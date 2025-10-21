@@ -282,7 +282,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
             params.add(startDate);
             params.add(endDate);
         }
-        String request = "SELECT bav.id, bav.badge_id, bav.assignor_id, " +
+        String request = "SELECT bav.id, bav.badge_id, bav.assignor_id, bav.created_at, " +
                 " bt.picture_id , receiver_us.display_name , assignor_us.display_name as " + ASSIGNOR_DISPLAY_NAME + "," +
                 " bt.label as label, badge.owner_id " +
                 ", badge.id as " + BADGE_ID + " , bt.id as  " + BADGE_TYPE_ID +
