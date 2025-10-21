@@ -273,7 +273,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                                                     String sortBy, Boolean sortAsc, String query, List<String> structureIds) {
         Promise<JsonArray> promise = Promise.promise();
         List<String> acceptedSort = Arrays.asList(LABEL, CREATED_AT, REVOKED_AT, RECEIVER_DISPLAY_NAME, ASSIGNOR_DISPLAY_NAME);
-        List<String> columns = Arrays.asList(DISPLAY_NAME, ASSIGNOR_DISPLAY_NAME, LABEL);
+        List<String> columns = Arrays.asList("receiver_us.display_name", "assignor_us.display_name", "bt.label");
         JsonArray params = new JsonArray();
         params.addAll(new JsonArray(structureIds));
         boolean hasDates = startDate != null && endDate != null;
