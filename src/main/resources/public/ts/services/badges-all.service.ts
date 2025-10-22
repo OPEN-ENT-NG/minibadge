@@ -1,26 +1,16 @@
 import http, { AxiosResponse } from 'axios';
 import { ng } from 'entcore';
-import { BadgeAssigned, IBadgeGivenPayload } from "../models/badge-assigned.model";
+import { BadgeAssigned, IBadgeAllPayload } from "../models/badge-assigned.model";
 import { IBadgeTypesResponses } from "../models/badge-type.model";
 
-export interface IBadgesGivenService {
-    getBadgeGiven(payload: IBadgeGivenPayload): Promise<BadgeAssigned[]>;
-
-    revokeBadgeGiven(badgeGiven: BadgeAssigned): Promise<AxiosResponse>;
+export interface IBadgesAllService {
+    getAllBadges(payload: IBadgeAllPayload): Promise<BadgeAssigned[]>;
 }
 
 
-export const badgesGivenService: IBadgesGivenService = {
-    revokeBadgeGiven: async (badgeGiven: BadgeAssigned) => {
-        return http.put(`/minibadge/revoked/given/${badgeGiven.id}`);
-    },
+export const badgesAllService: IBadgesAllService = {
 
-    /**
-     * Get badge type
-     *
-     * @param typeId badge type identifier
-     */
-    getBadgeGiven: async (payload: IBadgeGivenPayload): Promise<BadgeAssigned[]> => {
+    getAllBadges: async (payload: IBadgeAllPayload): Promise<BadgeAssigned[]> => {
         let url = new URLSearchParams();
         if (payload.query) {
             url.append("query", payload.query);
@@ -34,7 +24,7 @@ export const badgesGivenService: IBadgesGivenService = {
             url.append("endDate", payload.endDate);
         }
 
-        return http.get(`/minibadge/assigned/given?${url}`)
+        return http.get(`/minibadge/assigned/all?${url}`)
             .then((res: AxiosResponse) => {
                 let badgeTypesResponses: IBadgeTypesResponses = res.data;
                 return new BadgeAssigned().toList(badgeTypesResponses ? badgeTypesResponses.all : []);
@@ -43,4 +33,4 @@ export const badgesGivenService: IBadgesGivenService = {
 
 };
 
-export const BadgesGivenService = ng.service('BadgesGivenService', (): IBadgesGivenService => badgesGivenService);
+export const BadgesAllService = ng.service('BadgesAllService', (): IBadgesAllService => badgesAllService);

@@ -1,8 +1,8 @@
-import {model, ng, routes} from 'entcore';
+import { model, ng, routes } from 'entcore';
 import * as controllers from './controllers';
+import { rights } from "./core/constants/rights.const";
 import * as directives from './directives';
 import * as services from './services';
-import {rights} from "./core/constants/rights.const";
 
 for (let controller in controllers) {
     ng.controllers.push(controllers[controller]);
@@ -39,6 +39,11 @@ routes.define(function ($routeProvider) {
     if (model.me.hasWorkflow(rights.workflow.statisticsView)) {
         $routeProvider.when('/statistics', {
             action: 'statistics'
+        });
+    }
+    if (model.me.hasWorkflow(rights.workflow.admin)) {
+        $routeProvider.when('/admin', {
+            action: 'admin'
         });
     }
 })

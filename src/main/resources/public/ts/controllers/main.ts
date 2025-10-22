@@ -74,6 +74,15 @@ class Controller implements ng.IController, ViewModel {
                 this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.badges.given"});
                 template.open('main', `badges-given`);
             },
+            admin: async () => {
+                if (!model.me.hasWorkflow(rights.workflow.admin)) this.$location.path('/');
+                else {
+                    await this.initInfos();
+                    this.navbarViewSelected = NAVBAR_VIEWS.BADGES_ADMIN;
+                    this.containerHeader = new ContainerHeader(<IContainerHeaderResponse>{label: "minibadge.admin"});
+                    template.open('main', `admin`);
+                }
+            },
             statistics: async () => {
                 if (!model.me.hasWorkflow(rights.workflow.statisticsView)) this.$location.path('/');
                 else {

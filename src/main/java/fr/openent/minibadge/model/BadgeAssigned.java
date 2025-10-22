@@ -7,6 +7,7 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
     private Long id;
     private User assignor;
     private String assignorId;
+    private String assignorDisplayName;
     private String createdAt;
     private String updatedAt;
     private String revokedAt;
@@ -54,6 +55,7 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
                 badgeAssigned.getString(Field.OWNER_ID, badgeAssigned.getString(Field.OWNERID)),
                 badgeAssigned.getString(Field.DISPLAYNAME, badgeAssigned.getString(Field.DISPLAY_NAME))
         );
+        this.assignorDisplayName = badgeAssigned.getString(Field.ASSIGNORDISPLAYNAME, badgeAssigned.getString(Field.ASSIGNOR_DISPLAY_NAME));
 
         return this;
     }
@@ -68,6 +70,14 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
 
     public void setAssignor(User assignor) {
         this.assignor = assignor;
+    }
+
+    public String getAssignorDisplayName() {
+        return assignorDisplayName;
+    }
+
+    public void setAssignorDisplayName(String assignorDisplayName) {
+        this.assignorDisplayName = assignorDisplayName;
     }
 
     public String createdAt() {
@@ -124,6 +134,7 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
         JsonObject badgeAssigned = new JsonObject()
                 .put(Field.ID, this.id)
                 .put(Field.ASSIGNORID, this.assignorId)
+                .put(Field.ASSIGNORDISPLAYNAME, this.assignorDisplayName)
                 .put(Field.CREATEDAT, this.createdAt)
                 .put(Field.UPDATEDAT, this.updatedAt)
                 .put(Field.REVOKEDAT, this.revokedAt)
