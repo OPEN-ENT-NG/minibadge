@@ -260,4 +260,23 @@ public class DefaultUserService implements UserService {
 
         return promise.future();
     }
+
+    public Future<List<User>> getVisibleUsersByAdminSearch(HttpServerRequest request, String query) {
+        Promise<List<User>> promise = Promise.promise();
+
+        searchRequest(request, query)
+                .compose(queriedUsers -> setUserState(new User().toList(queriedUsers)))
+                .onSuccess(receivedUsers -> promise.complete(filterUsersNotAssignedYet(users, receivedUsers)))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<List<User>> setUserState(List<User> users) {
+        Promise<List<User>> promise = Promise.promise();
+
+
+
+        return promise.future();
+    }
 }

@@ -63,4 +63,7 @@ public interface UserService {
      * @return return future containing list of structures and substructures Ids
      */
     Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user);
+
+
+    Future<List<User>> getVisibleUsersByAdminSearch(HttpServerRequest request, String query);
 }
