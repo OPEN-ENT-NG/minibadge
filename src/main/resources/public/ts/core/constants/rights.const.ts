@@ -4,5 +4,6 @@ export const rights = {
         receive: 'fr.openent.minibadge.controller.FakeRight|receive',
         statisticsView: 'fr.openent.minibadge.controller.FakeRight|statisticsView',
         statisticsViewAllStructures: 'fr.openent.minibadge.controller.FakeRight|statisticsViewAllStructures',
+        admin: 'fr.openent.minibadge.controller.FakeRight|admin'
     }
 };

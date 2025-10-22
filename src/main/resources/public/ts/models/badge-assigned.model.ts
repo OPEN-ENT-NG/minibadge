@@ -11,12 +11,14 @@ export interface IBadgeGivenPayload extends IQueryStringPayload {
     endDate: string,
     sortType: string,
     sortAsc: boolean
-
 }
+
+export interface IBadgeAllPayload extends IBadgeGivenPayload {}
 
 export interface IBadgeAssignedResponse {
     id: number;
     assignorId: string;
+    assignorDisplayName: string;
     badge: Badge;
     acceptedAt?: string;
     updatedAt?: string;
@@ -27,6 +29,7 @@ export interface IBadgeAssignedResponse {
 export class BadgeAssigned extends MinibadgeModel<BadgeAssigned> {
     id: number;
     assignorId: string;
+    assignorDisplayName: string;
     badge: Badge;
     acceptedAt ?: string;
     updatedAt ?: string;
@@ -41,6 +44,7 @@ export class BadgeAssigned extends MinibadgeModel<BadgeAssigned> {
     build(data: IBadgeAssignedResponse): BadgeAssigned {
         this.id = data.id;
         this.assignorId = data.assignorId;
+        this.assignorDisplayName = data.assignorDisplayName;
         this.badge = new Badge(<IBadgeResponse>data.badge)
         this.acceptedAt = data.acceptedAt;
         this.updatedAt = data.updatedAt;

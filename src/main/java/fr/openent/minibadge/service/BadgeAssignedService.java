@@ -70,4 +70,17 @@ public interface BadgeAssignedService {
      * @return return future containing boolean
      */
     Future<Boolean> isSelfAssigned(UserInfos userInfos, long typeId);
+
+    /**
+     * Get all assigned badges with filters
+     *
+     * @param query     filters
+     * @param startDate Start Date
+     * @param endDate   End Date
+     * @param sortType  column sorted
+     * @param sortAsc   sort Asc
+     * @param structureIds list of structure ids
+     * @return return future
+     */
+    Future<List<BadgeAssigned>> getAllAssignedBadges(String query, String startDate, String endDate, String sortType, Boolean sortAsc, List<String> structureIds);
 }

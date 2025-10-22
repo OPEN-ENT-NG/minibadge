@@ -1,16 +1,29 @@
 <div class="minibadge-navbar flex-row align-center">
-    <navbar-item label="vm.lang.translate('minibadge.navbar.badges.received')"
-                 view-path="'/'"
-                 is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_RECEIVED)"></navbar-item>
-    <navbar-item label="vm.lang.translate('minibadge.navbar.badges.library')"
-                 view-path="'/badge-types'"
-                 is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_LIBRARY)"></navbar-item>
-    <navbar-item label="vm.lang.translate('minibadge.navbar.badges.given')"
-                 view-path="'/badges-given'"
-                 is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_GIVEN)"></navbar-item>
+    <navbar-item 
+        label="vm.lang.translate('minibadge.navbar.badges.received')"
+        view-path="'/'"
+        is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_RECEIVED)">
+    </navbar-item>
+    <navbar-item 
+        label="vm.lang.translate('minibadge.navbar.badges.library')"
+        view-path="'/badge-types'"
+        is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_LIBRARY)">
+    </navbar-item>
+    <navbar-item 
+        label="vm.lang.translate('minibadge.navbar.badges.given')"
+        view-path="'/badges-given'"
+        is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_GIVEN)">
+    </navbar-item>
     <navbar-item class="mobile-disabled"
-                 ng-if="vm.hasStatisticsViewRight()"
-                 label="vm.lang.translate('minibadge.navbar.badges.statistics')"
-                 view-path="'/statistics'"
-                 is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_STATISTICS)"></navbar-item>
+        ng-if="vm.hasAdminViewRight()"
+        label="vm.lang.translate('minibadge.navbar.badges.admin')"
+        view-path="'/admin'"
+        is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_ADMIN)">
+    </navbar-item>
+    <navbar-item class="mobile-disabled"
+        ng-if="vm.hasStatisticsViewRight()"
+        label="vm.lang.translate('minibadge.navbar.badges.statistics')"
+        view-path="'/statistics'"
+        is-selected="vm.isSelected(vm.NAVBAR_VIEWS.BADGES_STATISTICS)">
+    </navbar-item>
 </div>

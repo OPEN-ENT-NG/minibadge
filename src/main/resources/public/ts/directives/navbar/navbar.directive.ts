@@ -39,6 +39,8 @@ class Controller implements ng.IController, IViewModel {
 
     hasStatisticsViewRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsView);
 
+    hasAdminViewRight = (): boolean => model.me.hasWorkflow(rights.workflow.admin);
+
 }
 
 function directive() {
