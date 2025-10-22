@@ -1,15 +1,15 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.core.constants.Rights;
+import fr.openent.minibadge.core.enums.MinibadgeUserState;
 import fr.openent.minibadge.core.enums.SqlTable;
-import fr.openent.minibadge.helper.LoggerHelper;
-import fr.openent.minibadge.helper.Neo4jHelper;
-import fr.openent.minibadge.helper.PromiseHelper;
-import fr.openent.minibadge.helper.SettingHelper;
+import fr.openent.minibadge.helper.*;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.model.UserMinibadge;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.Server;
+import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -265,17 +265,59 @@ public class DefaultUserService implements UserService {
         Promise<List<User>> promise = Promise.promise();
 
         searchRequest(request, query)
-                .compose(queriedUsers -> setUserState(new User().toList(queriedUsers)))
-                .onSuccess(receivedUsers -> promise.complete(filterUsersNotAssignedYet(users, receivedUsers)))
+                .compose(queriedUsers -> setUserState(new User().toList(queriedUsers), request)
+                .onSuccess(promise::complete))
                 .onFailure(promise::fail);
 
         return promise.future();
     }
 
-    private Future<List<User>> setUserState(List<User> users) {
+    private Future<List<User>> setUserState(List<User> users, HttpServerRequest request) {
         Promise<List<User>> promise = Promise.promise();
 
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        String inactiveDisplayName = I18n.getInstance().translate("minibadge.disable.user", host, language);
 
+        List<String> userIds = users.stream().map(User::getUserId).collect(Collectors.toList());
+        getUserMinibadgeByIds(userIds)
+                .onSuccess(userMinibadgeList -> {
+                    Map<String, UserMinibadge> userMinibadgeMap = userMinibadgeList.stream()
+                            .collect(Collectors.toMap(UserMinibadge::getId, um -> um));
+                    for (User user : users) {
+                        UserMinibadge userMinibadge = userMinibadgeMap.get(user.getUserId());
+                        if (userMinibadge != null) {
+                            if(userMinibadge.getRevokedAt() != null) {
+                                user.setMinibadgeUserState(MinibadgeUserState.REVOKED);
+                            }
+                            else if (Objects.equals(userMinibadge.getDisplayName(), inactiveDisplayName)) {
+                                user.setMinibadgeUserState(MinibadgeUserState.INACTIVE);
+                            }
+                            else {
+                                user.setMinibadgeUserState(MinibadgeUserState.ACTIVE);
+                            }
+                        } else {
+                            user.setMinibadgeUserState(MinibadgeUserState.INACTIVE);
+                        }
+                    }
+                    promise.complete(users);
+                })
+                .onFailure(err -> LoggerHelper.logError(this, "setUserState", "Error during set users state"));
+
+        return promise.future();
+    }
+
+    private Future<List<UserMinibadge>> getUserMinibadgeByIds(List<String> userIds) {
+        Promise<List<UserMinibadge>> promise = Promise.promise();
+
+        String query = "SELECT * from " + SqlTable.USER.getName() +
+                      " WHERE id IN " + Sql.listPrepared(userIds);
+
+        JsonArray params = new JsonArray(userIds);
+
+        String errorMessage = "Error fetching UserMinibadge by IDs";
+        String completeLog = LoggerHelper.getCompleteLog(this, "getUserMinibadgeByIds", errorMessage);
+        sql.prepared(query, params, SqlResult.validResultHandler(ModelHelper.sqlResultToModel(promise, UserMinibadge.class, completeLog)));
 
         return promise.future();
     }

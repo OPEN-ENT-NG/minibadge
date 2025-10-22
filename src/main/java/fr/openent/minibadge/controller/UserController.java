@@ -42,7 +42,7 @@ public class UserController extends ControllerHelper {
     public void adminSearchUsers(HttpServerRequest request) {
         String query = request.params().get(Request.QUERY);
 
-        UserUtils.getUserInfos(eb, request, user -> userService.adminSearch(request, user, query)
+        UserUtils.getUserInfos(eb, request, user -> userService.getVisibleUsersByAdminSearch(request, query)
                 .onSuccess(users -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), users)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

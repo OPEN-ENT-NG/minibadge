@@ -106,6 +106,7 @@ public class Field {
     public static final String BADGEASSIGNEDTOTAL = "badgeAssignedTotal";
     public static final String USERASSIGNERSTOTAL = "userAssignersTotal";
     public static final String TYPE = "type";
+    public static final String MINIBADGEUSERSTATE = "minibadgeUserState";
 
     //Protagonist
     public static final String TYPEVALUE = "typeValue";
