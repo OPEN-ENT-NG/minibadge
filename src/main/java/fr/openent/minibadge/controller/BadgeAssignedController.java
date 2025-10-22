@@ -96,7 +96,7 @@ public class BadgeAssignedController extends ControllerHelper {
         String sortType = request.params().get(Request.SORTBY);
         Boolean sortAsc = Boolean.parseBoolean(request.params().get(Request.SORTASC));
         UserUtils.getAuthenticatedUserInfos(eb, request)
-                .compose(userInfos -> badgeAssignedService.getAllAssignedBadges(query, startDate, endDate, sortType, sortAsc, userInfos.getStructures())                )
+                .compose(userInfos -> badgeAssignedService.getAllAssignedBadges(query, startDate, endDate, sortType, sortAsc, userInfos.getStructures()))
                 .onSuccess(badges -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), badges)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
 

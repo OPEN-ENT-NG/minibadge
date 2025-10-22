@@ -12,37 +12,18 @@ public class FakeRight extends ControllerHelper {
         super();
     }
 
-    private void notImplemented(HttpServerRequest request) {
-        request.response().setStatusCode(501).end();
-    }
-
-    @Get("/rights/assign")
     @SecuredAction(Rights.ASSIGN)
-    public void assign(HttpServerRequest request) {
-        notImplemented(request);
-    }
+    public void assign(HttpServerRequest request) {}
 
-    @Get("/rights/receive")
     @SecuredAction(Rights.RECEIVE)
-    public void receive(HttpServerRequest request) {
-        notImplemented(request);
-    }
+    public void receive(HttpServerRequest request) {}
 
-    @Get("/rights/statistics/view")
     @SecuredAction(Rights.STATISTICS_VIEW)
-    public void statisticsView(HttpServerRequest request) {
-        notImplemented(request);
-    }
+    public void statisticsView(HttpServerRequest request) {}
 
-    @Get("/rights/statistics/view/all/structures")
     @SecuredAction(Rights.STATISTICS_VIEW_ALL_STRUCTURES)
-    public void statisticsViewAllStructures(HttpServerRequest request) {
-        notImplemented(request);
-    }
+    public void statisticsViewAllStructures(HttpServerRequest request) {}
 
-    @Get("/rights/admin")
     @SecuredAction(Rights.ADMIN)
-    public void admin(HttpServerRequest request) {
-        notImplemented(request);
-    }
+    public void admin(HttpServerRequest request) {}
 }
