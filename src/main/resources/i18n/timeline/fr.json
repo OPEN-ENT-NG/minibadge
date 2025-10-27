@@ -4,5 +4,10 @@
   "minibadge.new.badge.assigned.from": "par",
   "minibadge.new.badge.assigned.has.been.assigned": "vient de vous être décerné",
   "minibadge.new.badge.assigned.title": "Vous avez reçu un nouveau badge",
-  "minibadge.new-badge-assigned": "Réception d'un badge"
+  "minibadge.new-badge-assigned": "Réception d'un badge",
+  "minibadge.revoke.user.an.admin.has.revoked.your.participation": "Un administrateur a révoqué votre participation. ",
+  "minibadge.revoke.user.consult.app": "Consulter l'application ",
+  "minibadge.revoke.user.to.learn.more": " pour en savoir plus.",
+  "minibadge.revoke.user.title": "Votre participation a été révoquée par un administrateur",
+  "minibadge.revoke-user": "Révocation de participation"
 }

@@ -321,4 +321,71 @@ public class DefaultUserService implements UserService {
 
         return promise.future();
     }
+
+    public Future<Void> removeMinibadgePreferencesForUsers(List<String> userIds) {
+        Promise<Void> promise = Promise.promise();
+
+        removeMinibadgePreferencesForUsersRequest(userIds)
+                .onSuccess(res -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> removeMinibadgePreferencesForUsersRequest(List<String> userIds) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        JsonObject emptyMinibadgeChart = new JsonObject()
+                .put("acceptReceive", null)
+                .put("validateChart", null)
+                .put("acceptAssign", null)
+                .put("readChart", null);
+
+        String query =
+                "MATCH (u:User)-[:PREFERS]->(uac:UserAppConf) " +
+                        "WHERE u.id IN {userIds} " +
+                        "SET uac.minibadgechart = {minibadgechart} " +
+                        "RETURN count(uac) AS updated";
+
+        JsonObject params = new JsonObject().put(USERIDS, userIds).put(MINIBADGECHART, emptyMinibadgeChart.encode());
+
+        String errorMessage = "Error removing Minibadge preferences for users";
+        String completeLog = LoggerHelper.getCompleteLog(this, "removeMinibadgePreferencesForUsersRequest", errorMessage);
+        neo.execute(query, params, Neo4jResult.validUniqueResultHandler(PromiseHelper.handler(promise, completeLog)));
+
+        return promise.future();
+    }
+
+    public Future<Void> revokeUsersMinibadgeConsent(List<String> userIds, HttpServerRequest request) {
+        Promise<Void> promise = Promise.promise();
+
+        revokeUsersMinibadgeConsentRequest(userIds, request)
+                .onSuccess(res -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> revokeUsersMinibadgeConsentRequest(List<String> userIds, HttpServerRequest request) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        String inactiveDisplayName = I18n.getInstance().translate("minibadge.disable.user", host, language);
+
+        String query = "UPDATE " + SqlTable.USER.getName() +
+                " SET revoked_at = " + NOW_SQL_FUNCTION +
+                ", display_name = ? " +
+                " WHERE id IN " + Sql.listPrepared(userIds);
+
+        JsonArray params = new JsonArray();
+        params.add(inactiveDisplayName);
+        params.addAll(new JsonArray(userIds));
+
+        String errorMessage = "Error revoking Minibadge consent for users";
+        String completeLog = LoggerHelper.getCompleteLog(this, "revokeUsersMinibadgeConsentRequest", errorMessage);
+        sql.prepared(query, params, SqlResult.validResultHandler(PromiseHelper.handler(promise, completeLog)));
+
+        return promise.future();
+    }
 }

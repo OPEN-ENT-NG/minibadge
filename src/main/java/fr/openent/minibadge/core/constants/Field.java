@@ -157,6 +157,8 @@ public class Field {
     //LOG
     public static final String MINIBADGE = "Minibadge";
 
+    public static final String MINIBADGES = "Mini-badges";
+
     private Field() {
         throw new IllegalStateException("Utility class");
     }

@@ -65,5 +65,29 @@ public interface UserService {
     Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user);
 
 
+    /**
+     * get users that are visible for admin from query
+     *
+     * @param request request from which we need to retrieve users
+     * @param query   to filter on user firstName/lastName
+     * @return return future containing list of users
+     */
     Future<List<User>> getVisibleUsersByAdminSearch(HttpServerRequest request, String query);
+
+    /**
+     * Remove minibadge preferences for a list of users
+     *
+     * @param userIds list of user identifiers
+     * @return a future completed when the operation is done
+     */
+    Future<Void> removeMinibadgePreferencesForUsers(List<String> userIds);
+
+    /**
+     * Revoke users minibadge consent
+     *
+     * @param userIds list of user identifiers
+     * @param request http server request
+     * @return a future completed when the operation is done
+     */
+    Future<Void> revokeUsersMinibadgeConsent(List<String> userIds, HttpServerRequest request);
 }

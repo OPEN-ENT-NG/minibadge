@@ -56,4 +56,25 @@ public class DefaultNotifyService implements NotifyService {
                             assigner, ownerIdsWithoutAssigner, params);
                 });
     }
+
+    @Override
+    public void notifyRevokeUsers(HttpServerRequest request, UserInfos admin, List<String> userIds) {
+        String uri = "/minibadge#/";
+
+        JsonObject params = new JsonObject()
+                .put(Field.MINIBADGE, Field.MINIBADGES)
+                .put(Field.RESOURCEURI, uri)
+                .put(Field.PUSHNOTIF,
+                        new JsonObject().put(Field.TITLE, "minibadge.revoke.user.title")
+                                        .put(Field.BODY, "")
+                );
+
+        TimelineHelper timelineHelper = new TimelineHelper(
+                Vertx.currentContext().owner(),
+                Server.getEventBus(Vertx.currentContext().owner()),
+                Minibadge.minibadgeConfig.toJson());
+
+        timelineHelper.notifyTimeline(request, String.format("%s.%s", Minibadge.MINIBADGE, Notify.REVOKE_USER_TO_MINIBADGE),
+                admin, userIds, params);
+    }
 }

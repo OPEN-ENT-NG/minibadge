@@ -16,4 +16,13 @@ public interface NotifyService {
      * @param typeId   badge type identifier concerned
      */
     void notifyBadgeAssigned(HttpServerRequest request, UserInfos assigner, List<String> ownerIds, long typeId);
+
+    /**
+     * notify when users are revoked from to minibadge
+     *
+     * @param request current request
+     * @param admin   user that revoked the current badge type
+     * @param userIds user identifiers that had the current badge type revoked
+     */
+    void notifyRevokeUsers(HttpServerRequest request, UserInfos admin, List<String> userIds);
 }
