@@ -214,7 +214,7 @@ public class DefaultUserService implements UserService {
 
     private JsonObject upsertStatement(User user) {
         String statement = String.format(" INSERT INTO %s (id , display_name) " +
-                " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ? " +
+                " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ?, revoked_at = null " +
                 "  WHERE %s.id = EXCLUDED.id;", SqlTable.USER.getName(), SqlTable.USER.getName());
         JsonArray params = new JsonArray()
                 .add(user.getUserId())
@@ -385,6 +385,25 @@ public class DefaultUserService implements UserService {
         String errorMessage = "Error revoking Minibadge consent for users";
         String completeLog = LoggerHelper.getCompleteLog(this, "revokeUsersMinibadgeConsentRequest", errorMessage);
         sql.prepared(query, params, SqlResult.validResultHandler(PromiseHelper.handler(promise, completeLog)));
+
+        return promise.future();
+    }
+
+    public Future<Optional<UserMinibadge>> getUserMinibadge(String userId) {
+        return getUserMinibadgeRequest(userId);
+    }
+
+    private Future<Optional<UserMinibadge>> getUserMinibadgeRequest(String userId) {
+        Promise<Optional<UserMinibadge>> promise = Promise.promise();
+
+        String query = "SELECT * from " + SqlTable.USER.getName() +
+                      " WHERE id = ? ";
+
+        JsonArray params = new JsonArray().add(userId);
+
+        String errorMessage = "Error fetching UserMinibadge by ID";
+        String completeLog = LoggerHelper.getCompleteLog(this, "getUserMinibadgeRequest", errorMessage);
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(ModelHelper.sqlUniqueResultToModel(promise, UserMinibadge.class, completeLog)));
 
         return promise.future();
     }

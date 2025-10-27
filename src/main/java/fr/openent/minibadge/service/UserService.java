@@ -1,12 +1,14 @@
 package fr.openent.minibadge.service;
 
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.model.UserMinibadge;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.user.UserInfos;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     /**
@@ -90,4 +92,12 @@ public interface UserService {
      * @return a future completed when the operation is done
      */
     Future<Void> revokeUsersMinibadgeConsent(List<String> userIds, HttpServerRequest request);
+
+    /**
+     * Get user by id
+     *
+     * @param userId user identifier
+     * @return a future containing user minibadge preferences
+     */
+    Future<Optional<UserMinibadge>> getUserMinibadge(String userId);
 }

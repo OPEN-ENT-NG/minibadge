@@ -64,6 +64,7 @@ public class Field {
     public static final String ASSIGNORID = "assignorId";
     public static final String REVOKEDAT = "revokedAt";
     public static final String REVOKED_AT = "revoked_at";
+    public static final String REVOKED = "revoked";
     public static final String ACCEPTEDAT = "acceptedAt";
     public static final String ACCEPTED_AT = "accepted_at";
     public static final String UPDATEDAT = "updatedAt";

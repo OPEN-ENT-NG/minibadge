@@ -7,6 +7,7 @@ import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.security.AdminRight;
 import fr.openent.minibadge.security.ReceiveRight;
+import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeService;
 import fr.openent.minibadge.service.NotifyService;
 import fr.openent.minibadge.service.ServiceRegistry;
@@ -94,5 +95,23 @@ public class MinibadgeController extends ControllerHelper {
                     })
                     .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
         });
+    }
+
+    @Get("/revoked")
+    @ApiDoc("Get connected user's revoked minibadge consent status")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(ViewRight.class)
+    public void getRevokedMinibadgeConsentStatus(HttpServerRequest request) {
+        UserUtils.getAuthenticatedUserInfos(eb, request)
+                .compose(userInfos -> userService.getUserMinibadge(userInfos.getUserId()))
+                .onSuccess(user -> {
+                    boolean revoked = user.isPresent() && user.get().getRevokedAt() != null;
+                    JsonObject response = new JsonObject().put(REVOKED, revoked);
+                    if(revoked) {
+                        response.put(REVOKED_AT, user.get().getRevokedAt());
+                    }
+                    renderJson(request, response);
+                })
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage())));
     }
 }
