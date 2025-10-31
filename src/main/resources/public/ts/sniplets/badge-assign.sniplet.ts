@@ -1,4 +1,12 @@
-import {Behaviours, idiom as lang, notify} from "entcore"
+import { IScope } from "angular";
+import { AxiosError } from "axios";
+import { Behaviours, idiom as lang, notify } from "entcore";
+import { Subscription } from "rxjs";
+import { MINIBADGE_APP } from "../minibadgeBehaviours";
+import { IBadgeAssignedPayload } from "../models/badge-assigned.model";
+import { BadgeType } from "../models/badge-type.model";
+import { Setting } from "../models/setting.model";
+import { IUserPayload, User } from "../models/user.model";
 import {
     badgeAssignedService,
     badgeTypeService,
@@ -7,15 +15,7 @@ import {
     IUserService,
     userService
 } from "../services";
-import {safeApply} from "../utils/safe-apply.utils";
-import {AxiosError} from "axios";
-import {IScope} from "angular";
-import {IUserPayload, User} from "../models/user.model";
-import {Subscription} from "rxjs";
-import {MINIBADGE_APP} from "../minibadgeBehaviours";
-import {IBadgeAssignedPayload} from "../models/badge-assigned.model";
-import {BadgeType} from "../models/badge-type.model";
-import {Setting} from "../models/setting.model";
+import { safeApply } from "../utils/safe-apply.utils";
 
 interface IViewModel {
     closeLightbox(): void;

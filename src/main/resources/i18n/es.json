@@ -103,5 +103,12 @@
   "minibadge.times": "{0} fois",
   "minibadge.title": "Mini-badges",
   "minibadge.threshold.remaining": "Quota de badge à décerner restant",
-  "minibadge.validate": "Valider"
+  "minibadge.revoke.users.modal.title": "Révoquer un utilisateur",
+  "minibadge.revoke.users.modal.info": "Cette action n’est pas définitive : la participation à Mini-badges pourra être réactivée à tout moment par l’utilisateur.",
+  "minibadge.revoke.users.modal.choose": "Choisir une ou plusieurs personnes à bannir",
+  "minibadge.revoke": "Révoquer",
+  "minibadge.confirm.revoke.users.modal.title": "Révoquer ?",
+  "minibadge.confirm.revoke.users.modal.question.singular": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de <strong>{0}</strong> ?",
+  "minibadge.confirm.revoke.users.modal.question.plurial": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de ces utilisateurs ?",
+  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer"
 }

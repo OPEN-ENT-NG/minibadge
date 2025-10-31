@@ -1,0 +1,47 @@
+<div>
+    <lightbox show="vm.isRevokeUsersModalOpen" on-close="vm.onCloseRevokeUsersModal()" class="minibadge-assign">
+        <div class="minibadge-container minibadge-assign flex-row f-column">
+            <h2 class="minibadge-assign-title" ng-click="vm.onCloseRevokeUsersModal()">
+                <i18n>minibadge.revoke.users.modal.title</i18n>
+            </h2>
+            <div>
+                <i class="icon-info"></i>
+                <i18n>minibadge.revoke.users.modal.info</i18n>
+            </div>
+            <div>
+                <i18n>minibadge.revoke.users.modal.choose</i18n>
+                <minibadge-search 
+                    class="search-user justify-start" 
+                    search-query="vm.search"
+                    on-search="vm.searchUser()"
+                    on-display-result="vm.displayUser(result)"
+                    on-select-result="vm.selectUser(result)"
+                    results="vm.results">
+                </minibadge-search>
+                <h3>
+                    <i18n>minibadge.selected.persons</i18n>&nbsp;&#58;
+                </h3>
+                <minibadge-selected-list 
+                    selected-list="vm.selectedUsers" 
+                    on-display-item="vm.displayUser"
+                    on-remove-item="vm.onRemoveUser">
+                </minibadge-selected-list>
+            </div>
+
+            <div class="minibadge-assign-footer flex-row">
+                <span>
+                    <i18n>minibadge.threshold.remaining</i18n>
+                </span>
+                <div class="minibadge-assign-footer-buttons flex-row">
+                    <button class="minibadge-delete-button"
+                            ng-click="vm.onCloseRevokeUsersModal()">
+                        <i18n>minibadge.cancel</i18n>
+                    </button>
+                    <button>
+                        <i18n>minibadge.badge.assign.myself.button</i18n>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </lightbox>
+</div>

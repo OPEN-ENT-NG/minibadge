@@ -1,4 +1,5 @@
 import { ProfileColorMap } from "../core/constants/profile-colors.const";
+import { MINIBADGE_USER_STATE } from '../core/enum/minibadge-user-state.enum';
 import { PROTAGONIST_TYPES } from "../core/enum/protagonist-types.enum";
 import { UserProfile } from "../core/enum/user-profile.enum";
 import { toLocaleString } from "../utils/number.utils";
@@ -14,6 +15,7 @@ export interface IUserResponse {
     displayName?: string;
     badgeAssignedTotal?: number;
     countAssigned?: number;
+    minibadgeUserState?: MINIBADGE_USER_STATE;
     profile?: string;
     type?: string;
 }
@@ -39,6 +41,7 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     countAssigned?: number;
     profile?: string;
     type?: string;
+    minibadgeUserState?: MINIBADGE_USER_STATE;
 
     constructor(data?: IUserResponse) {
         super();
@@ -53,6 +56,7 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
         this.badgeAssignedTotal = data.badgeAssignedTotal;
         this.countAssigned = data.countAssigned;
         this.profile = data.profile || (data.type ? PROTAGONIST_TYPES[data.type] : null);
+        this.minibadgeUserState = data.minibadgeUserState ? MINIBADGE_USER_STATE[data.minibadgeUserState] : undefined;
         return this;
     }
 
