@@ -1,14 +1,14 @@
 <div>
-    <lightbox show="vm.isRevokeUsersModalOpen" on-close="vm.onCloseRevokeUsersModal()" class="minibadge-assign">
-        <div class="minibadge-container minibadge-assign flex-row f-column">
-            <h2 class="minibadge-assign-title" ng-click="vm.onCloseRevokeUsersModal()">
+    <lightbox show="vm.isRevokeUsersModalOpen" on-close="vm.onCloseRevokeUsersModal()" class="minibadge-revoke-users">
+        <div class="minibadge-container minibadge-revoke-users flex-row f-column">
+            <h2 class="minibadge-revoke-users-title">
                 <i18n>minibadge.revoke.users.modal.title</i18n>
             </h2>
-            <div>
-                <i class="icon-info"></i>
+            <div class="minibadge-revoke-users-info">
+                <i class="icon-info-circle minibadge-revoke-users-info-icon"></i>
                 <i18n>minibadge.revoke.users.modal.info</i18n>
             </div>
-            <div>
+            <div class="minibadge-revoke-users-content">
                 <i18n>minibadge.revoke.users.modal.choose</i18n>
                 <minibadge-search 
                     class="search-user justify-start" 
@@ -18,30 +18,58 @@
                     on-select-result="vm.selectUser(result)"
                     results="vm.results">
                 </minibadge-search>
-                <h3>
-                    <i18n>minibadge.selected.persons</i18n>&nbsp;&#58;
-                </h3>
-                <minibadge-selected-list 
-                    selected-list="vm.selectedUsers" 
-                    on-display-item="vm.displayUser"
-                    on-remove-item="vm.onRemoveUser">
-                </minibadge-selected-list>
-            </div>
-
-            <div class="minibadge-assign-footer flex-row">
-                <span>
-                    <i18n>minibadge.threshold.remaining</i18n>
-                </span>
-                <div class="minibadge-assign-footer-buttons flex-row">
-                    <button class="minibadge-delete-button"
-                            ng-click="vm.onCloseRevokeUsersModal()">
-                        <i18n>minibadge.cancel</i18n>
-                    </button>
-                    <button>
-                        <i18n>minibadge.badge.assign.myself.button</i18n>
-                    </button>
+                <div>
+                    <h3>
+                        <i18n>minibadge.selected.persons</i18n>&nbsp;&#58;
+                    </h3>
+                    <minibadge-selected-list 
+                        selected-list="vm.selectedUsers" 
+                        on-display-item="vm.displayUser"
+                        on-remove-item="vm.onRemoveUser">
+                    </minibadge-selected-list>
                 </div>
             </div>
+
+            <div class="minibadge-revoke-users-footer-buttons flex-row">
+                <button class="minibadge-delete-button"
+                        ng-click="vm.onCloseRevokeUsersModal()">
+                    <i18n>minibadge.cancel</i18n>
+                </button>
+                <button ng-click="vm.onOpenConfirmRevokeUsersModal()" ng-disabled="!vm.selectedUsers.length">
+                    <i18n>minibadge.revoke</i18n>
+                </button>
+            </div>
+        </div>
+        <div>
+            <lightbox class="minibadge-revoke-users-confirm" show="vm.isConfirmRevokeUsersModalOpen" on-close="vm.onCloseConfirmRevokeUsersModal()">
+                <div class="minibadge-container minibadge-revoke-users flex-row f-column">
+                    <h2 class="minibadge-revoke-users-title">
+                        <i18n>minibadge.confirm.revoke.users.modal.title</i18n>
+                    </h2>
+                    <div class="minibadge-container minibadge-revoke-users-question">
+                        <div ng-if="vm.selectedUsers.length == 1">
+                            <i18n>minibadge.confirm.revoke.users.modal.question.singular</i18n>&nbsp;<strong>[[vm.displayUser(vm.selectedUsers[0])]]</strong>&nbsp;?
+                        </div>
+                        <div ng-if="vm.selectedUsers.length > 1">
+                            <i18n>minibadge.confirm.revoke.users.modal.question.plural</i18n>
+                            <ul><strong>
+                                <li ng-repeat="user in vm.selectedUsers">
+                                    [[vm.displayUser(user)]]
+                                </li>
+                            </strong></ul>
+                        </div>
+                    </div>
+                    <div class="minibadge-revoke-users-footer-buttons flex-row">
+                        <button class="minibadge-delete-button"
+                                ng-click="vm.onCloseConfirmRevokeUsersModal()">
+                            <i18n>minibadge.cancel</i18n>
+                        </button>
+                        <button ng-click="vm.onConfirmRevokeUsers()" class="minibadge-revoke-users-button">
+                            <i18n>minibadge.confirm.revoke.users.modal.confirm</i18n>
+                        </button>
+                    </div>
+                </div>
+            </lightbox>
         </div>
     </lightbox>
 </div>

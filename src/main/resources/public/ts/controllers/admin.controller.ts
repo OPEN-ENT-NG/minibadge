@@ -139,10 +139,10 @@ class Controller implements ng.IController, ViewModel {
             .then(() => {
                 this.onCloseConfirmRevokeUsersModal();
                 this.onCloseRevokeUsersModal();
-                notify.success('todo')
+                notify.success('minibadge.confirm.revoke.users.success')
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('todo'))
+            .catch((err: AxiosError) => notify.error('minibadge.confirm.revoke.users.error'))
     }
 
     private async initAllBadges() {

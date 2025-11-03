@@ -32,12 +32,31 @@
   }
 
   &-title {
-    &:hover {
-      color: $minibadge-blue;
-    }
+    margin-top: 0 !important;
+    
+    border-radius: 4px;
+  }
 
-    &:active {
+  &-info {
+    background-color: #D2EFFF59;
+    gap: 1rem;
+    padding: 1rem;
+    &-icon {
       color: $minibadge-blue-dark;
+    }
+  }
+
+  &-content {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &-question {
+    margin-bottom: 1rem;
+    .li {
+      margin-bottom: .5rem;
     }
   }
 
@@ -53,51 +72,46 @@
 
     &-buttons {
       margin-left: auto;
+      gap: 1rem;
 
-      button:not(:last-child) {
+      button {
         margin-right: 20px;
         min-width: 148px;
       }
     }
   }
 
-  &-content {
-    flex-direction: row-reverse;
+  &-confirm {
+    section.lightbox {
     @include mobile {
-      flex-direction: column;
-    }
-
-    &-card {
-      display: flex;
-      justify-content: end;
-      @include marginX(2em);
-      margin-bottom: 2em;
-      @include mobile {
-        flex: 1;
-        justify-content: center;
-      }
-    }
-
-    &-search {
-      @include mobile {
-        justify-content: center;
-        align-items: center;
-      }
-      margin-left: 1em;
-
-      .search-user {
-        margin-bottom: 1em;
-        width: 100%;
-      }
+      position: absolute;
     }
   }
 
-  .minibadge-card {
-    border: solid $minibadge-shadow-lighter 1px;
+  .background::after {
     @include mobile {
-      width: 100%;
-      align-self: center;
+      background: none;
     }
+  }
+
+  .background::before {
+    @include mobile {
+      box-shadow: 0 2px 5px $shadow;
+      height: 50px;
+    }
+  }
+
+  .content {
+    width: 700px;
+    margin-top: 15em;
+
+    @include mobile {
+      position: fixed;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  }
   }
 }
 

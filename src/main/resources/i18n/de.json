@@ -110,5 +110,7 @@
   "minibadge.confirm.revoke.users.modal.title": "Révoquer ?",
   "minibadge.confirm.revoke.users.modal.question.singular": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de <strong>{0}</strong> ?",
   "minibadge.confirm.revoke.users.modal.question.plurial": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de ces utilisateurs ?",
-  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer"
+  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer",
+  "minibadge.confirm.revoke.users.success": "La participation a bien été révoquée.",
+  "minibadge.confirm.revoke.users.error": "Une erreur est survenue lors de la révocation."
 }

@@ -1,4 +1,8 @@
 .badge-given{
+  &-header {
+    justify-content: space-between;
+    align-items: flex-end;
+  }
   &-filter{
     display: flex;
     align-items: end;
@@ -11,6 +15,9 @@
     .periode-picker-container {
       margin-right: 10px;
     }
+  }
+  &-revoke-button {
+    margin-bottom: 0 !important;
   }
   &-search{
     margin-top: revert;

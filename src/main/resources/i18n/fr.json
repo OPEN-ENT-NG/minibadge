@@ -113,7 +113,9 @@
   "minibadge.revoke.users.modal.choose": "Choisir une ou plusieurs personnes à bannir",
   "minibadge.revoke": "Révoquer",
   "minibadge.confirm.revoke.users.modal.title": "Révoquer ?",
-  "minibadge.confirm.revoke.users.modal.question.singular": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de <strong>{0}</strong> ?",
+  "minibadge.confirm.revoke.users.modal.question.singular": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de",
   "minibadge.confirm.revoke.users.modal.question.plural": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de ces utilisateurs ?",
-  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer"
+  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer",
+  "minibadge.confirm.revoke.users.success": "La participation a bien été révoquée.",
+  "minibadge.confirm.revoke.users.error": "Une erreur est survenue lors de la révocation."
 }
