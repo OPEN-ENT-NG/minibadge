@@ -1,23 +1,49 @@
 <div ng-controller="AdminController as vm">
-    <div class="flex badge-given-filter">
-        <minibadge-periode-picker
-                label="vm.labelFrom"
-                date="vm.startDate"
-                on-change="vm.initAllBadges()">
-        </minibadge-periode-picker>
-        <minibadge-periode-picker
-                label="vm.labelTo"
-                date="vm.endDate"
-                on-change="vm.initAllBadges()"
-        >
-        </minibadge-periode-picker>
-
-        <search-input search-query="vm.searchQuery" class="badge-given-search mobile-disabled" on-search="vm.initAllBadges()"
-                      placeholder="minibadge.badge.given.search"></search-input>
+    <div class="flex badge-given-header">
+        <div class="flex badge-given-filter">
+            <minibadge-periode-picker
+                    label="vm.labelFrom"
+                    date="vm.startDate"
+                    on-change="vm.initAllBadges()">
+            </minibadge-periode-picker>
+            <minibadge-periode-picker
+                    label="vm.labelTo"
+                    date="vm.endDate"
+                    on-change="vm.initAllBadges()">
+            </minibadge-periode-picker>
+            <search-input 
+                    search-query="vm.searchQuery" 
+                    class="badge-given-search mobile-disabled"  
+                    on-search="vm.initAllBadges()"
+                    placeholder="minibadge.badge.given.search">
+            </search-input>
+        </div>
+        <div>
+            <button class="badge-given-revoke-button" ng-click="vm.onOpenRevokeUsersModal()">
+                <i18n>minibadge.revoke.users.modal.title</i18n>
+            </button>
+        </div>
     </div>
     <minibadge-all-badges-array 
         badges="vm.badges"
         filter-function="vm.filterBadges(filterType, filterAsc)"
         >
     </minibadge-all-badges-array>
+    <minibadge-revoke-users
+        ng-if="vm.isRevokeUsersModalOpen"
+        on-open-revoke-users-modal="vm.onOpenRevokeUsersModal()"
+        on-close-revoke-users-modal="vm.onCloseRevokeUsersModal()"
+        on-open-confirm-revoke-users-modal="vm.onOpenConfirmRevokeUsersModal()"
+        on-close-confirm-revoke-users-modal="vm.onCloseConfirmRevokeUsersModal()"
+        on-confirm-revoke-users="vm.onConfirmRevokeUsers()"
+        on-select-user="vm.onSelectUser"
+        on-remove-user="vm.removeUser"
+        on-search-user="vm.onSearchUser()"
+        selected-users="vm.selectedUsers"
+        is-revoke-users-modal-open="vm.isRevokeUsersModalOpen"
+        is-confirm-revoke-users-modal-open="vm.isConfirmRevokeUsersModalOpen"
+        search="vm.searchUserToRevoke"
+        results="vm.userSearchResults"
+    ></minibadge-revoke-users>
+
 </div>

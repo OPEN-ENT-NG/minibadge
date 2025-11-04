@@ -6,6 +6,7 @@ export * from './badges-all.service';
 export * from './badges-given.service';
 export * from './chart.service';
 export * from './infinite-scroll.service';
+export * from './revoke-users.service';
 export * from './setting.service';
 export * from './sniplet-badge-assign.service';
 export * from './statistic.service';

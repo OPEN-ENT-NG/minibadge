@@ -1,9 +1,12 @@
 package fr.openent.minibadge.model;
 
 import fr.openent.minibadge.core.constants.Field;
+import fr.openent.minibadge.core.enums.MinibadgeUserState;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
+
+import static fr.openent.minibadge.core.constants.Field.*;
 
 
 public class User extends UserInfos implements Model<User> {
@@ -11,6 +14,7 @@ public class User extends UserInfos implements Model<User> {
     private Integer badgeAssignedTotal;
     private Chart permissions;
     private Integer countAssigned;
+    private MinibadgeUserState minibadgeUserState;
 
     public User() {
     }
@@ -50,16 +54,30 @@ public class User extends UserInfos implements Model<User> {
         this.countAssigned = countAssigned;
     }
 
+    public MinibadgeUserState getMinibadgeUserState() {
+        return minibadgeUserState;
+    }
+
+    public void setMinibadgeUserState(MinibadgeUserState minibadgeUserState) {
+        this.minibadgeUserState = minibadgeUserState;
+    }
+
     @Override
     public JsonObject toJson() {
-        return new JsonObject()
-                .put(Field.ID, this.getUserId())
-                .put(Field.FIRSTNAME, this.getFirstName())
-                .put(Field.LASTNAME, this.getLastName())
-                .put(Field.DISPLAYNAME, this.getUsername())
-                .put(Field.PROFILE, this.getType())
-                .put(Field.COUNTASSIGNED, this.countAssigned)
-                .put(Field.BADGEASSIGNEDTOTAL, this.badgeAssignedTotal);
+        JsonObject json = new JsonObject()
+                .put(ID, this.getUserId())
+                .put(FIRSTNAME, this.getFirstName())
+                .put(LASTNAME, this.getLastName())
+                .put(DISPLAYNAME, this.getUsername())
+                .put(PROFILE, this.getType())
+                .put(COUNTASSIGNED, this.countAssigned)
+                .put(BADGEASSIGNEDTOTAL, this.badgeAssignedTotal);
+
+        if (this.minibadgeUserState != null) {
+            json.put(MINIBADGEUSERSTATE, this.minibadgeUserState.name());
+        }
+
+        return  json;
     }
 
     @Override

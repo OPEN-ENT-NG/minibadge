@@ -64,6 +64,7 @@ public class Field {
     public static final String ASSIGNORID = "assignorId";
     public static final String REVOKEDAT = "revokedAt";
     public static final String REVOKED_AT = "revoked_at";
+    public static final String REVOKED = "revoked";
     public static final String ACCEPTEDAT = "acceptedAt";
     public static final String ACCEPTED_AT = "accepted_at";
     public static final String UPDATEDAT = "updatedAt";
@@ -106,6 +107,7 @@ public class Field {
     public static final String BADGEASSIGNEDTOTAL = "badgeAssignedTotal";
     public static final String USERASSIGNERSTOTAL = "userAssignersTotal";
     public static final String TYPE = "type";
+    public static final String MINIBADGEUSERSTATE = "minibadgeUserState";
 
     //Protagonist
     public static final String TYPEVALUE = "typeValue";
@@ -155,6 +157,8 @@ public class Field {
 
     //LOG
     public static final String MINIBADGE = "Minibadge";
+
+    public static final String MINIBADGES = "Mini-badges";
 
     private Field() {
         throw new IllegalStateException("Utility class");

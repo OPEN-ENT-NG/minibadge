@@ -1,12 +1,14 @@
 package fr.openent.minibadge.service;
 
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.model.UserMinibadge;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import org.entcore.common.user.UserInfos;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     /**
@@ -63,4 +65,39 @@ public interface UserService {
      * @return return future containing list of structures and substructures Ids
      */
     Future<List<String>> getSessionUserStructureNSubstructureIds(UserInfos user);
+
+
+    /**
+     * get users that are visible for admin from query
+     *
+     * @param request request from which we need to retrieve users
+     * @param query   to filter on user firstName/lastName
+     * @return return future containing list of users
+     */
+    Future<List<User>> getVisibleUsersByAdminSearch(HttpServerRequest request, String query);
+
+    /**
+     * Remove minibadge preferences for a list of users
+     *
+     * @param userIds list of user identifiers
+     * @return a future completed when the operation is done
+     */
+    Future<Void> removeMinibadgePreferencesForUsers(List<String> userIds);
+
+    /**
+     * Revoke users minibadge consent
+     *
+     * @param userIds list of user identifiers
+     * @param request http server request
+     * @return a future completed when the operation is done
+     */
+    Future<Void> revokeUsersMinibadgeConsent(List<String> userIds, HttpServerRequest request);
+
+    /**
+     * Get user by id
+     *
+     * @param userId user identifier
+     * @return a future containing user minibadge preferences
+     */
+    Future<Optional<UserMinibadge>> getUserMinibadge(String userId);
 }
