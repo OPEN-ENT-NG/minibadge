@@ -1,0 +1,5 @@
+export enum MINIBADGE_USER_STATE {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    REVOKED = 'REVOKED'
+}

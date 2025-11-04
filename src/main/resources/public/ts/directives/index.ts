@@ -24,6 +24,7 @@ export * from './navbar/navbar.directive';
 export * from './on-error-src/on-error-src.directive';
 export * from './paging/paging.directive';
 export * from './periode-picker/periode-picker';
+export * from './revoke-users/revoke-users.directive';
 export * from './search/search-input/search-input.directive';
 export * from './search/search-results/search-results.directive';
 export * from './search/search.directive';

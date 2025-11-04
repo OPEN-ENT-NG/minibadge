@@ -80,6 +80,8 @@
   "minibadge.publish": "Rendre public",
   "minibadge.refuse": "Refuser",
   "minibadge.revoked": "Révoqué",
+  "minibadge.active": "Actif",
+  "minibadge.inactive": "Inactif",
   "minibadge.search": "Rechercher",
   "minibadge.selected.persons": "Personnes sélectionnées",
   "minibadge.selfi.badge": "Selfie badge",
@@ -105,5 +107,15 @@
   "minibadge.times": "{0} fois",
   "minibadge.title": "Mini-badges",
   "minibadge.threshold.remaining": "Quota de badge à décerner restant",
-  "minibadge.validate": "Valider"
+  "minibadge.validate": "Valider",
+  "minibadge.revoke.users.modal.title": "Révoquer un utilisateur",
+  "minibadge.revoke.users.modal.info": "Cette action n’est pas définitive : la participation à Mini-badges pourra être réactivée à tout moment par l’utilisateur.",
+  "minibadge.revoke.users.modal.choose": "Choisir une ou plusieurs personnes à bannir",
+  "minibadge.revoke": "Révoquer",
+  "minibadge.confirm.revoke.users.modal.title": "Révoquer ?",
+  "minibadge.confirm.revoke.users.modal.question.singular": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de",
+  "minibadge.confirm.revoke.users.modal.question.plural": "Êtes-vous sûr de vouloir révoquer l’accès à Mini-badges de ces utilisateurs ?",
+  "minibadge.confirm.revoke.users.modal.confirm": "Confirmer",
+  "minibadge.confirm.revoke.users.success": "La participation a bien été révoquée.",
+  "minibadge.confirm.revoke.users.error": "Une erreur est survenue lors de la révocation."
 }

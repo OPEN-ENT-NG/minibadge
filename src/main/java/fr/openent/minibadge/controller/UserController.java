@@ -2,6 +2,7 @@ package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
+import fr.openent.minibadge.security.AdminRight;
 import fr.openent.minibadge.security.AssignRight;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
@@ -30,6 +31,18 @@ public class UserController extends ControllerHelper {
         long typeId = Long.parseLong(request.params().get(TYPEID));
 
         UserUtils.getUserInfos(eb, request, user -> userService.search(request, user, typeId, query)
+                .onSuccess(users -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), users)))
+                .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+    }
+
+    @Get("/admin/users-search")
+    @ApiDoc("Get users from query to revoke users")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdminRight.class)
+    public void adminSearchUsers(HttpServerRequest request) {
+        String query = request.params().get(Request.QUERY);
+
+        UserUtils.getUserInfos(eb, request, user -> userService.getVisibleUsersByAdminSearch(request, query)
                 .onSuccess(users -> renderJson(request, RequestHelper.addAllValue(new JsonObject(), users)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
     }

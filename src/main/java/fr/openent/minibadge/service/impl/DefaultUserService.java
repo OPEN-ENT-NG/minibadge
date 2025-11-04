@@ -1,15 +1,15 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.core.constants.Rights;
+import fr.openent.minibadge.core.enums.MinibadgeUserState;
 import fr.openent.minibadge.core.enums.SqlTable;
-import fr.openent.minibadge.helper.LoggerHelper;
-import fr.openent.minibadge.helper.Neo4jHelper;
-import fr.openent.minibadge.helper.PromiseHelper;
-import fr.openent.minibadge.helper.SettingHelper;
+import fr.openent.minibadge.helper.*;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.model.UserMinibadge;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.Server;
+import fr.wseduc.webutils.http.Renders;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -213,13 +213,20 @@ public class DefaultUserService implements UserService {
     }
 
     private JsonObject upsertStatement(User user) {
-        String statement = String.format(" INSERT INTO %s (id , display_name) " +
-                " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ? " +
-                "  WHERE %s.id = EXCLUDED.id;", SqlTable.USER.getName(), SqlTable.USER.getName());
+        String statement = String.format(
+                "INSERT INTO %s (id, display_name) " +
+                        "VALUES (?, ?) " +
+                        "ON CONFLICT (id) DO UPDATE SET display_name = ?, revoked_at = ? " +
+                        "WHERE %s.id = EXCLUDED.id;",
+                SqlTable.USER.getName(),
+                SqlTable.USER.getName()
+        );
+
         JsonArray params = new JsonArray()
-                .add(user.getUserId())
-                .add(user.getUsername())
-                .add(user.getUsername());
+                .add(user.getUserId())     // insert id
+                .add(user.getUsername())   // insert display_name
+                .add(user.getUsername())   // update display_name
+                .addNull();                // update revoked_at = null
 
         return new JsonObject()
                 .put("statement", statement)
@@ -257,6 +264,152 @@ public class DefaultUserService implements UserService {
                 String.format("[Minibadge@%s::getSessionUserStructureNSubstructureIdsRequest] Fail to get structure " +
                                 "and substructure ids",
                         this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    public Future<List<User>> getVisibleUsersByAdminSearch(HttpServerRequest request, String query) {
+        Promise<List<User>> promise = Promise.promise();
+
+        searchRequest(request, query)
+                .compose(queriedUsers -> setUserState(new User().toList(queriedUsers), request)
+                .onSuccess(promise::complete))
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<List<User>> setUserState(List<User> users, HttpServerRequest request) {
+        Promise<List<User>> promise = Promise.promise();
+
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        String inactiveDisplayName = I18n.getInstance().translate("minibadge.disable.user", host, language);
+
+        List<String> userIds = users.stream().map(User::getUserId).collect(Collectors.toList());
+        getUserMinibadgeByIds(userIds)
+                .onSuccess(userMinibadgeList -> {
+                    Map<String, UserMinibadge> userMinibadgeMap = userMinibadgeList.stream()
+                            .collect(Collectors.toMap(UserMinibadge::getId, um -> um));
+                    for (User user : users) {
+                        MinibadgeUserState state = Optional.ofNullable(userMinibadgeMap.get(user.getUserId()))
+                                .map(um -> {
+                                    if (um.getRevokedAt() != null) return MinibadgeUserState.REVOKED;
+                                    if (Objects.equals(um.getDisplayName(), inactiveDisplayName)) return MinibadgeUserState.INACTIVE;
+                                    return MinibadgeUserState.ACTIVE;
+                                })
+                                .orElse(MinibadgeUserState.INACTIVE);
+
+                        user.setMinibadgeUserState(state);
+                    }
+                    promise.complete(users);
+                })
+                .onFailure(err -> LoggerHelper.logError(this, "setUserState", "Error during set users state"));
+
+        return promise.future();
+    }
+
+    private Future<List<UserMinibadge>> getUserMinibadgeByIds(List<String> userIds) {
+        Promise<List<UserMinibadge>> promise = Promise.promise();
+
+        String query = "SELECT * from " + SqlTable.USER.getName() +
+                      " WHERE id IN " + Sql.listPrepared(userIds);
+
+        JsonArray params = new JsonArray(userIds);
+
+        String errorMessage = "Error fetching UserMinibadge by IDs";
+        String completeLog = LoggerHelper.getCompleteLog(this, "getUserMinibadgeByIds", errorMessage);
+        sql.prepared(query, params, SqlResult.validResultHandler(ModelHelper.sqlResultToModel(promise, UserMinibadge.class, completeLog)));
+
+        return promise.future();
+    }
+
+    public Future<Void> removeMinibadgePreferencesForUsers(List<String> userIds) {
+        Promise<Void> promise = Promise.promise();
+
+        removeMinibadgePreferencesForUsersRequest(userIds)
+                .onSuccess(res -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonObject> removeMinibadgePreferencesForUsersRequest(List<String> userIds) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        JsonObject emptyMinibadgeChart = new JsonObject()
+                .put("acceptReceive", null)
+                .put("validateChart", null)
+                .put("acceptAssign", null)
+                .put("readChart", null);
+
+        String query =
+                "MATCH (u:User)-[:PREFERS]->(uac:UserAppConf) " +
+                        "WHERE u.id IN {userIds} " +
+                        "SET uac.minibadgechart = {minibadgechart} " +
+                        "RETURN count(uac) AS updated";
+
+        JsonObject params = new JsonObject().put(USERIDS, userIds).put(MINIBADGECHART, emptyMinibadgeChart.encode());
+
+        String errorMessage = "Error removing Minibadge preferences for users";
+        String completeLog = LoggerHelper.getCompleteLog(this, "removeMinibadgePreferencesForUsersRequest", errorMessage);
+        neo.execute(query, params, Neo4jResult.validUniqueResultHandler(PromiseHelper.handler(promise, completeLog)));
+
+        return promise.future();
+    }
+
+    public Future<Void> revokeUsersMinibadgeConsent(List<String> userIds, HttpServerRequest request) {
+        Promise<Void> promise = Promise.promise();
+
+        revokeUsersMinibadgeConsentRequest(userIds, request)
+                .onSuccess(res -> promise.complete())
+                .onFailure(promise::fail);
+
+        return promise.future();
+    }
+
+    private Future<JsonArray> revokeUsersMinibadgeConsentRequest(List<String> userIds, HttpServerRequest request) {
+        Promise<JsonArray> promise = Promise.promise();
+
+        if (userIds == null || userIds.isEmpty()) {
+            return Future.succeededFuture(new JsonArray());
+        }
+
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        String inactiveDisplayName = I18n.getInstance().translate("minibadge.disable.user", host, language);
+
+        String query = "UPDATE " + SqlTable.USER.getName() +
+                " SET revoked_at = " + NOW_SQL_FUNCTION +
+                ", display_name = ? " +
+                " WHERE id IN " + Sql.listPrepared(userIds);
+
+        JsonArray params = new JsonArray();
+        params.add(inactiveDisplayName);
+        params.addAll(new JsonArray(userIds));
+
+        String errorMessage = "Error revoking Minibadge consent for users";
+        String completeLog = LoggerHelper.getCompleteLog(this, "revokeUsersMinibadgeConsentRequest", errorMessage);
+        sql.prepared(query, params, SqlResult.validResultHandler(PromiseHelper.handler(promise, completeLog)));
+
+        return promise.future();
+    }
+
+    public Future<Optional<UserMinibadge>> getUserMinibadge(String userId) {
+        return getUserMinibadgeRequest(userId);
+    }
+
+    private Future<Optional<UserMinibadge>> getUserMinibadgeRequest(String userId) {
+        Promise<Optional<UserMinibadge>> promise = Promise.promise();
+
+        String query = "SELECT * from " + SqlTable.USER.getName() +
+                      " WHERE id = ? ";
+
+        JsonArray params = new JsonArray().add(userId);
+
+        String errorMessage = "Error fetching UserMinibadge by ID";
+        String completeLog = LoggerHelper.getCompleteLog(this, "getUserMinibadgeRequest", errorMessage);
+        sql.prepared(query, params, SqlResult.validUniqueResultHandler(ModelHelper.sqlUniqueResultToModel(promise, UserMinibadge.class, completeLog)));
 
         return promise.future();
     }
