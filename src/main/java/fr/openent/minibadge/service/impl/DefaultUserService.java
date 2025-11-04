@@ -213,13 +213,20 @@ public class DefaultUserService implements UserService {
     }
 
     private JsonObject upsertStatement(User user) {
-        String statement = String.format(" INSERT INTO %s (id , display_name) " +
-                " VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET display_name = ?, revoked_at = null " +
-                "  WHERE %s.id = EXCLUDED.id;", SqlTable.USER.getName(), SqlTable.USER.getName());
+        String statement = String.format(
+                "INSERT INTO %s (id, display_name) " +
+                        "VALUES (?, ?) " +
+                        "ON CONFLICT (id) DO UPDATE SET display_name = ?, revoked_at = ? " +
+                        "WHERE %s.id = EXCLUDED.id;",
+                SqlTable.USER.getName(),
+                SqlTable.USER.getName()
+        );
+
         JsonArray params = new JsonArray()
-                .add(user.getUserId())
-                .add(user.getUsername())
-                .add(user.getUsername());
+                .add(user.getUserId())     // insert id
+                .add(user.getUsername())   // insert display_name
+                .add(user.getUsername())   // update display_name
+                .addNull();                // update revoked_at = null
 
         return new JsonObject()
                 .put("statement", statement)
@@ -285,20 +292,15 @@ public class DefaultUserService implements UserService {
                     Map<String, UserMinibadge> userMinibadgeMap = userMinibadgeList.stream()
                             .collect(Collectors.toMap(UserMinibadge::getId, um -> um));
                     for (User user : users) {
-                        UserMinibadge userMinibadge = userMinibadgeMap.get(user.getUserId());
-                        if (userMinibadge != null) {
-                            if(userMinibadge.getRevokedAt() != null) {
-                                user.setMinibadgeUserState(MinibadgeUserState.REVOKED);
-                            }
-                            else if (Objects.equals(userMinibadge.getDisplayName(), inactiveDisplayName)) {
-                                user.setMinibadgeUserState(MinibadgeUserState.INACTIVE);
-                            }
-                            else {
-                                user.setMinibadgeUserState(MinibadgeUserState.ACTIVE);
-                            }
-                        } else {
-                            user.setMinibadgeUserState(MinibadgeUserState.INACTIVE);
-                        }
+                        MinibadgeUserState state = Optional.ofNullable(userMinibadgeMap.get(user.getUserId()))
+                                .map(um -> {
+                                    if (um.getRevokedAt() != null) return MinibadgeUserState.REVOKED;
+                                    if (Objects.equals(um.getDisplayName(), inactiveDisplayName)) return MinibadgeUserState.INACTIVE;
+                                    return MinibadgeUserState.ACTIVE;
+                                })
+                                .orElse(MinibadgeUserState.INACTIVE);
+
+                        user.setMinibadgeUserState(state);
                     }
                     promise.complete(users);
                 })
@@ -368,6 +370,10 @@ public class DefaultUserService implements UserService {
 
     private Future<JsonArray> revokeUsersMinibadgeConsentRequest(List<String> userIds, HttpServerRequest request) {
         Promise<JsonArray> promise = Promise.promise();
+
+        if (userIds == null || userIds.isEmpty()) {
+            return Future.succeededFuture(new JsonArray());
+        }
 
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
