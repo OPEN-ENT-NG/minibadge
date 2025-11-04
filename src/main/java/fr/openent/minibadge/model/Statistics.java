@@ -11,6 +11,7 @@ import java.util.List;
 public class Statistics implements Model<Statistics> {
 
     private Integer countBadgeAssigned;
+    private Integer countActiveUsers;
     private List<BadgeType> mostAssignedTypes;
     private List<BadgeType> lessAssignedTypes;
     private List<BadgeType> mostRefusedTypes;
@@ -72,6 +73,10 @@ public class Statistics implements Model<Statistics> {
         this.topReceivingUsers = users;
     }
 
+    public void setCountActiveUsers(JsonObject requestResult) {
+        this.countActiveUsers = requestResult.getInteger(Field.COUNT);
+    }
+
     @Override
     public Statistics set(JsonObject statistics) {
         return this;
@@ -80,7 +85,8 @@ public class Statistics implements Model<Statistics> {
     @Override
     public JsonObject toJson() {
         JsonObject result = new JsonObject()
-                .put(Field.COUNTBADGEASSIGNED, countBadgeAssigned);
+                .put(Field.COUNTBADGEASSIGNED, countBadgeAssigned)
+                .put(Field.COUNTACTIVEUSERS, countActiveUsers);
 
         if (mostAssignedTypes != null) result.put(Field.MOSTASSIGNEDTYPES, new BadgeType().toArray(mostAssignedTypes));
         if (lessAssignedTypes != null) result.put(Field.LESSASSIGNEDTYPES, new BadgeType().toArray(lessAssignedTypes));

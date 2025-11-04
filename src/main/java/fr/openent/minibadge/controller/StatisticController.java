@@ -50,10 +50,7 @@ public class StatisticController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user ->
                 userService.getSessionUserStructureNSubstructureIds(user)
                         .compose(structuresIds -> {
-                            if (structuresIds != null && user.getStructures() != null
-                                    && user.getStructures().size() >= structuresIds.size())
-                                return statisticService.getSpecificStructuresStatistics(structuresIds, minDate.get());
-                            return statisticService.getGlobalStatistics(structuresIds, minDate.get());
+                            return statisticService.getSpecificStructuresStatistics(structuresIds, minDate.get());
                         })
                         .onSuccess(statistics -> renderJson(request, statistics.toJson()))
                         .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));

@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.user.UserInfos;
 
+import java.util.List;
+
 import static fr.openent.minibadge.core.constants.Field.*;
 
 
@@ -29,6 +31,8 @@ public class User extends UserInfos implements Model<User> {
         this.setLastName(user.getLastName());
         this.setUsername(user.getUsername());
         this.setType(user.getType());
+        this.setStructures(user.getStructures());
+        this.setStructureNames(user.getStructureNames());
     }
 
     @Override
@@ -40,6 +44,7 @@ public class User extends UserInfos implements Model<User> {
         this.setUsername(user.getString(Field.USERNAME));
         this.setType(user.getString(Field.TYPE));
         this.setStructures(user.getJsonArray(Field.STRUCTUREIDS, new JsonArray()).getList());
+        this.setStructureNames(user.getJsonArray(STRUCTURENAMES, new JsonArray()).getList());
         this.badgeAssignedTotal = user.getInteger(Field.BADGE_ASSIGNED_TOTAL);
         this.countAssigned = user.getInteger(Field.COUNT_ASSIGNED);
         this.permissions = new Chart(user);
@@ -71,7 +76,9 @@ public class User extends UserInfos implements Model<User> {
                 .put(DISPLAYNAME, this.getUsername())
                 .put(PROFILE, this.getType())
                 .put(COUNTASSIGNED, this.countAssigned)
-                .put(BADGEASSIGNEDTOTAL, this.badgeAssignedTotal);
+                .put(BADGEASSIGNEDTOTAL, this.badgeAssignedTotal)
+                .put(STRUCTUREIDS, this.getStructures())
+                .put(STRUCTURENAMES, this.getStructureNames());
 
         if (this.minibadgeUserState != null) {
             json.put(MINIBADGEUSERSTATE, this.minibadgeUserState.name());

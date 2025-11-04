@@ -49,6 +49,7 @@ public class Field {
     public static final String STRUCTUREID = "structureId";
     public static final String STRUCTURE_ID = "structure_id";
     public static final String STRUCTUREIDS = "structureIds";
+    public static final String STRUCTURENAMES = "structureNames";
     public static final String VALUE = "value";
     public static final String CATEGORYID = "categoryId";
     public static final String NOW_SQL_FUNCTION = "now()";
