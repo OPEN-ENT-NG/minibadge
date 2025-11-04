@@ -39,11 +39,6 @@ public class DefaultStatisticService implements StatisticService {
     private final StructureService structureService = ServiceRegistry.getService(StructureService.class);
 
     @Override
-    public Future<Statistics> getGlobalStatistics() {
-        return this.getGlobalStatistics(null, null);
-    }
-
-    @Override
     public Future<Statistics> getGlobalStatistics(List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
@@ -75,10 +70,6 @@ public class DefaultStatisticService implements StatisticService {
 
 
         return promise.future();
-    }
-
-    public Future<Statistics> getSpecificStructuresStatistics() {
-        return this.getSpecificStructuresStatistics(null, null);
     }
 
     @Override
