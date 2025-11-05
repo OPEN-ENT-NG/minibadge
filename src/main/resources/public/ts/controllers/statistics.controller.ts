@@ -2,6 +2,7 @@ import { IScope } from "angular";
 import { model, moment, ng, notify } from 'entcore';
 import { rights } from '../core/constants/rights.const';
 import { StatsPeriod } from "../core/enum/stats-period.enum";
+import { StatsType } from "../core/enum/stats-type.enum";
 import { Setting } from "../models/setting.model";
 import { Statistics } from "../models/statistic.model";
 import { IStatisticService } from "../services";
@@ -13,12 +14,12 @@ interface ViewModel {
     startDate: Date | null;
     endDate: Date;
     selectedPeriod: StatsPeriod;
+    selectedType: StatsType;
     translate: typeof translate;
     toLocaleString: typeof toLocaleString;
     statistics: Statistics;
     hasStatisticsViewAllStructuresRight(): boolean;
 }
-
 
 interface IMinibadgeScope extends IScope {
     vm: ViewModel;
@@ -32,6 +33,7 @@ class Controller implements ng.IController, ViewModel {
     toLocaleString: typeof toLocaleString = toLocaleString;
     statistics: Statistics;
     selectedPeriod: StatsPeriod;
+    selectedType: StatsType;
 
     constructor(private $scope: IMinibadgeScope, private statisticService: IStatisticService) {
         this.endDate = new Date();
@@ -39,6 +41,7 @@ class Controller implements ng.IController, ViewModel {
         this.$scope.vm = this;
         this.statistics = new Statistics();
         this.selectedPeriod = StatsPeriod.ALL;
+        this.selectedType = StatsType.BADGES;
     }
 
     onChangePeriod(): void {

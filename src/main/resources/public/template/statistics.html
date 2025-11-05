@@ -95,8 +95,22 @@
             </div> -->
         </container-body>
     </minibadge-container>
+    <minibadge-container label="'minibadge.filter.stats.per.type'">
+        <div>
+            <label>
+                <input type="radio"
+                    ng-model="vm.selectedType"
+                    value="badges">
+                <i18n>minibadge.badges.option</i18n>
+            </label>
 
-    <minibadge-container>
+            <label>
+                <input type="radio"
+                    ng-model="vm.selectedType"
+                    value="users">
+                <i18n>minibadge.users.option</i18n>
+            </label>
+        </div>
         <container-body ng-if="!!vm.statistics.mostAssignedTypes.length || !!vm.statistics.mostRefusedTypes.length"
                             label="'minibadge.statistics.badges'" class="minibadge-container-badges">
             <container-body class="flex-row f-column">

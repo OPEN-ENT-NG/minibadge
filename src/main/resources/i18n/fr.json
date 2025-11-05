@@ -119,10 +119,15 @@
   "minibadge.confirm.revoke.users.success": "La participation a bien été révoquée.",
   "minibadge.confirm.revoke.users.error": "Une erreur est survenue lors de la révocation.",
   "minibadge.filter.stats.per.period": "Filtrer les statistiques par période",
+  "minibadge.filter.stats.per.type": "Filtrer les statistiques par type",
   "minibadge.filter.stats.complete.history": "Historique complet",
   "minibadge.filter.stats.last.thirty.days": "30 derniers jours",
   "minibadge.filter.stats.last.seven.days": "7 derniers jours",
   "minibadge.active.users": "{0} participants actifs",
   "minibadge.statistics.top.assigning.users": "Les {0} utilisateurs ayant décerné le plus de badges",
-  "minibadge.statistics.top.receiving.users": "Les {0} utilisateurs ayant reçu le plus de badges"
+  "minibadge.statistics.top.receiving.users": "Les {0} utilisateurs ayant reçu le plus de badges",
+  "minibadge.badges": "Les badges",
+  "minibadge.badges.option": "Badges",
+  "minibadge.users": "Les utilisateurs",
+  "minibadge.users.option": "Utilisateurs"
 }
