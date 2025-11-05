@@ -11,6 +11,15 @@
     }
   }
 
+  &-participation {
+    gap: 8px !important;
+
+    &-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+  }
+
   &-card {
     display: flex;
 
@@ -23,25 +32,21 @@
   &-count-allowed {
     flex: 4;
     display: flex;
+    flex-direction: column;
+    justify-content: space-around;
 
-    .minibadge-container-card {
-      flex: 1;
-      justify-content: center;
-      padding: 30px;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 5px 5px rgb(214, 214, 214);
 
-      .minibadge-title {
-        font-size: 30px;
+    .minibadge-title {
+      font-size: 30px;
+      font-weight: bold;
 
-        .check-decagram {
-          color: $minibadge-orange;
-        }
-      }
-
-      .minibadge-container-card-body {
-        display: none;
+      .check-decagram, .user {
+        color: $minibadge-orange;
       }
     }
-
   }
 
   &-top-structures {

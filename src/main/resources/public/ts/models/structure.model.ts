@@ -1,17 +1,20 @@
-import {MinibadgeModel} from "./model";
-import {IDisplayItem} from "./display-list.model";
-import {toLocaleString} from "../utils/number.utils";
+import { toLocaleString } from "../utils/number.utils";
+import { translate } from "../utils/string.utils";
+import { IDisplayItem } from "./display-list.model";
+import { MinibadgeModel } from "./model";
 
 export interface IStructureResponse {
     id: string;
     name: string;
     countAssigned?: number;
+    countActiveUsers?: number;
 }
 
 export class Structure extends MinibadgeModel<Structure> implements IDisplayItem {
     id: string;
     name: string;
     countAssigned?: number;
+    countActiveUsers?: number;
 
     constructor(data?: IStructureResponse) {
         super();
@@ -22,6 +25,7 @@ export class Structure extends MinibadgeModel<Structure> implements IDisplayItem
         this.id = data.id
         this.name = data.name;
         this.countAssigned = data.countAssigned;
+        this.countActiveUsers = data.countActiveUsers;
         return this;
     }
 
@@ -31,6 +35,13 @@ export class Structure extends MinibadgeModel<Structure> implements IDisplayItem
 
     displayItem = (): string => this.name;
 
-    displayItemDistinction = (): string => toLocaleString(this.countAssigned);
+    displayItemDistinction = (): string => {
+        const optionsLabel = translate('minibadge.badges.option').toLowerCase();
+        const baseText = `${toLocaleString(this.countAssigned)} ${optionsLabel}`;
 
+        const participantsLabel = translate('minibadge.participants').toLowerCase();
+        const participantsText = `${toLocaleString(this.countActiveUsers)} ${participantsLabel}`;
+
+        return `${baseText} - ${participantsText}`;
+    };
 }
