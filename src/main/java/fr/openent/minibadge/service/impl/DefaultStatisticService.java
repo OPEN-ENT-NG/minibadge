@@ -393,23 +393,22 @@ public class DefaultStatisticService implements StatisticService {
             return Future.succeededFuture(new JsonObject().put(Field.COUNT, 0));
         }
 
-        String inClause = Sql.listPrepared(structureIds);
-
         StringBuilder query = new StringBuilder(
                 "SELECT COUNT(DISTINCT user_id) " +
                         "FROM ( " +
                         "  SELECT ba.assignor_id AS user_id " +
                         "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
                         "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
-                        "  WHERE bas.structure_id IN " + inClause +
+                        "  WHERE bas.structure_id IN " + Sql.listPrepared(structureIds) +
                         "    AND bas.is_structure_assigner = TRUE"
         );
 
-        JsonArray params = new JsonArray(structureIds); // assignor
+        JsonArray params = new JsonArray();
+        for (String id : structureIds) params.add(id);
 
         if (minDate != null) {
             query.append(" AND ba.created_at > ?");
-            params.add(minDate.toString());
+            params.add(minDate.atStartOfDay().toString()); // ISO 8601 string
         }
 
         query.append(
@@ -418,15 +417,15 @@ public class DefaultStatisticService implements StatisticService {
                         "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
                         "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
                         "  JOIN " + SqlTable.BADGE.getName() + " b ON b.id = ba.badge_id " +
-                        "  WHERE bas.structure_id IN " + inClause +
+                        "  WHERE bas.structure_id IN " + Sql.listPrepared(structureIds) +
                         "    AND bas.is_structure_receiver = TRUE"
         );
 
-        params.addAll(new JsonArray(structureIds)); // receiver
+        for (String id : structureIds) params.add(id);
 
         if (minDate != null) {
             query.append(" AND ba.created_at > ?");
-            params.add(minDate.toString());
+            params.add(minDate.atStartOfDay().toString()); // ISO 8601 string
         }
 
         query.append(" ) active_users");
@@ -441,6 +440,8 @@ public class DefaultStatisticService implements StatisticService {
 
         return promise.future();
     }
+
+
 
 
     private void mergeMostAssigningStructuresWithCounts(List<Structure> mostAssigningStructures,
