@@ -21,6 +21,11 @@ i {
     content: "\F04BC";
   }
 
+  &.user::before {
+    font-family: 'minibadge-icons';
+    content: "\F0004";
+  }
+
   &.user-circle::before {
     font-family: 'minibadge-icons';
     content: "\F0009";
