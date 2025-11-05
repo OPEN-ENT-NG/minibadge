@@ -290,7 +290,7 @@ public class DefaultStatisticService implements StatisticService {
     private Future<Statistics> setStructures(Statistics statistics, List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         List<Structure> mostAssigningStructuresCounts = new ArrayList<>();
-        listMostAssigningStructuresWithCount(structureIds)
+        listMostAssigningStructuresWithCount(structureIds, minDate)
                 .compose(structures -> {
                     mostAssigningStructuresCounts.addAll(new Structure().toList(structures));
                     return structureService.getStructures(mostAssigningStructuresCounts.stream()
@@ -316,74 +316,38 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonArray> listMostAssigningStructuresWithCount(List<String> structureIds) {
+    private Future<JsonArray> listMostAssigningStructuresWithCount(List<String> structureIds, LocalDate minDate) {
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT bas.structure_id, COUNT(DISTINCT bas.badge_assigned_id) as count_assigned " +
                         " FROM %s bas INNER JOIN %s ba on bas.badge_assigned_id = ba.id" +
                         " INNER JOIN %s b on ba.badge_id = b.id " +
-                        " WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
-                        " ORDER BY count_assigned DESC LIMIT %s",
+                        " WHERE is_structure_assigner IS TRUE %s",
                 SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                 SqlTable.BADGE_ASSIGNED_VALID.getName(),
                 SqlTable.BADGE.getName(),
-                SqlHelper.andFilterStructures(structureIds, params),
-                Minibadge.minibadgeConfig.mostAssigningStructureListSize());
+                SqlHelper.andFilterStructures(structureIds, params)
+        );
 
+        if (minDate != null) {
+            LocalDateTime minDateTime = minDate.atStartOfDay();
+            request += " AND bas.created_at > ?";
+            params.add(minDateTime.toString());
+        }
+
+        request += " GROUP BY bas.structure_id " +
+                " ORDER BY count_assigned DESC LIMIT " + Minibadge.minibadgeConfig.mostAssigningStructureListSize();
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::listMostAssigningStructuresWithCount] Fail to list refused types with " +
-                                "count refused",
+                String.format("[Minibadge@%s::listMostAssigningStructuresWithCount] Fail to list most assigning structures with count",
                         this.getClass().getSimpleName()))));
 
         return promise.future();
     }
 
     private Future<JsonObject> countActiveUsersFromStructureId(String structureId, LocalDate minDate) {
-        Promise<JsonObject> promise = Promise.promise();
-
-        JsonArray params = new JsonArray()
-                .add(structureId) // pour assignor
-                .add(structureId); // pour receiver
-
-        StringBuilder request = new StringBuilder(
-                "SELECT COUNT(DISTINCT user_id) " +
-                "FROM ( " +
-                "  SELECT ba.assignor_id AS user_id " +
-                "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
-                "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
-                "  WHERE bas.structure_id = ? " +
-                "    AND bas.is_structure_assigner = TRUE"
-        );
-
-        if (minDate != null) {
-            request.append(" AND ba.created_at > ?");
-            params.add(minDate.toString()); // Format "yyyy-MM-dd"
-        }
-
-        request.append(
-                " UNION " +
-                "  SELECT b.owner_id AS user_id " +
-                "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
-                "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
-                "  JOIN " + SqlTable.BADGE.getName() + " b ON b.id = ba.badge_id " +
-                "  WHERE bas.structure_id = ? " +
-                "    AND bas.is_structure_receiver = TRUE"
-        );
-
-        if (minDate != null) {
-            request.append(" AND ba.created_at > ?");
-            params.add(minDate.toString());
-        }
-
-        request.append(" ) active_users");
-
-        sql.prepared(request.toString(), params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::countActiveUsersFromStructureId] Fail to count active users from structure id",
-                        this.getClass().getSimpleName()))));
-
-        return promise.future();
+        return countActiveUsersFromStructureIds(Collections.singletonList(structureId), minDate);
     }
 
     private Future<JsonObject> countActiveUsersFromStructureIds(List<String> structureIds, LocalDate minDate) {
@@ -403,8 +367,7 @@ public class DefaultStatisticService implements StatisticService {
                         "    AND bas.is_structure_assigner = TRUE"
         );
 
-        JsonArray params = new JsonArray();
-        for (String id : structureIds) params.add(id);
+        JsonArray params = new JsonArray().addAll(new JsonArray(structureIds));
 
         if (minDate != null) {
             query.append(" AND ba.created_at > ?");
@@ -421,7 +384,7 @@ public class DefaultStatisticService implements StatisticService {
                         "    AND bas.is_structure_receiver = TRUE"
         );
 
-        for (String id : structureIds) params.add(id);
+        params.addAll(new JsonArray(structureIds));
 
         if (minDate != null) {
             query.append(" AND ba.created_at > ?");
