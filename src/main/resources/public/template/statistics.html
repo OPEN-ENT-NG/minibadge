@@ -57,97 +57,192 @@
     </minibadge-container>
 
     <minibadge-container ng-if="!!vm.statistics.mostAssignedTypes.length || !!vm.statistics.mostRefusedTypes.length"
-                         label="'minibadge.statistics.badges'" class="minibadge-container-badges">
-        <container-body class="flex-row f-column">
-            <div class="minibadge-statistics-badges flex-row">
+                         label="'minibadge.filter.stats.per.type'" class="minibadge-container-badges">
+        <container-body class="minibadge-statistics-participation flex-row f-column">
+            <div>
+                <label>
+                    <input type="radio"
+                        ng-model="vm.selectedType"
+                        value="badges">
+                    <i18n>minibadge.badges.option</i18n>
+                </label>
+
+                <label>
+                    <input type="radio"
+                        ng-model="vm.selectedType"
+                        value="users">
+                    <i18n>minibadge.users.option</i18n>
+                </label>
+            </div>
+            <div ng-if="vm.isBadgesSelected()" class="flex-row f-column minibadge-statistics-participation-content">
+                <div class="flex-row minibadge-statistics-participation flex-row f-column">
+                    <i18n class="minibadge-statistics-participation-title">minibadge.statistics.badges</i18n>
+                    <div class="minibadge-statistics-badges flex-row">
+                        <minibadge-statistics-card
+                                ng-if="!!vm.statistics.mostAssignedTypes.length"
+                                class="minibadge-statistics-top-most-allowed"
+                                icon="'check-circle'"
+                                label="vm.translate('minibadge.statistics.most.allowed.badges',
+                                [vm.statistics.mostAssignedTypes.slice(0, 3).length])">
+                            <container-body>
+                                <div class="minibadge-most-assigned flex-row">
+                                    <minibadge-card-type badge-type="vm.statistics.mostAssignedTypes[0]"
+                                                        class="minibadge-card-simple">
+                                    </minibadge-card-type>
+                                    <div class="minibadge-most-assigned-detail flex-row f-column">
+                                        <minibadge-title icon="'check-decagram'">
+                                        <span>[[vm.translate('minibadge.statistics.assigned.times',
+                                            [vm.toLocaleString(vm.statistics.mostAssignedTypes[0].countAssigned)])]]</span>
+                                        </minibadge-title>
+                                        <minibadge-title ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
+                                                        icon="'trophy'">
+                                        <span>[[vm.translate('minibadge.statistics.top',
+                                            [vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length])]]</span>
+                                        </minibadge-title>
+                                        <minibadge-list ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
+                                                        is-end-distinction="true"
+                                                        items="vm.statistics.mostAssignedTypes[0].mostAssigningUsers">
+                                        </minibadge-list>
+                                    </div>
+                                    <div ng-if="vm.statistics.mostAssignedTypes.length > 1"
+                                        class="minibadge-most-assigned-others flex-row f-column">
+                                        <div ng-repeat="type in vm.statistics.mostAssignedTypes.slice(1, 3)" class="flex-row">
+                                            <minibadge-card-type-statistic badge-type="type">
+                                            </minibadge-card-type-statistic>
+                                        </div>
+                                    </div>
+                                </div>
+                            </container-body>
+                        </minibadge-statistics-card>
+                        <minibadge-statistics-card
+                                ng-if="!!vm.statistics.mostRefusedTypes.length"
+                                class="minibadge-statistics-top-most-refused"
+                                icon="'close-circle'"
+                                label="vm.translate('minibadge.statistics.most.refused.badges', [vm.statistics.mostRefusedTypes.length])">
+                            <container-body>
+                                <div class="flex-row">
+                                    <div ng-repeat="type in vm.statistics.mostRefusedTypes"
+                                        class="flex-row flex-one justify-center">
+                                        <minibadge-card class="minibadge-card-simple flex-one">
+                                            <container-body class="flex-row f-column">
+                                                <div class="minibadge-card-picture flex-row justify-center">
+                                                    <img ng-src="/minibadge/public/img/[[type.pictureId]]"/>
+                                                </div>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[type.label]]
+                                                </div>
+                                            </container-body>
+                                            <container-footer>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[vm.translate('minibadge.statistics.refused.times', [type.countRefused])]]
+                                                </div>
+                                            </container-footer>
+                                        </minibadge-card>
+                                    </div>
+                                </div>
+                            </container-body>
+                        </minibadge-statistics-card>
+                    </div>
+                </div>
                 <minibadge-statistics-card
                         ng-if="!!vm.statistics.mostAssignedTypes.length"
-                        class="minibadge-statistics-top-most-allowed"
-                        icon="'check-circle'"
-                        label="vm.translate('minibadge.statistics.most.allowed.badges',
-                        [vm.statistics.mostAssignedTypes.slice(0, 3).length])">
+                        class="minibadge-statistics-most-allowed"
+                        icon="'trophy'"
+                        label="vm.translate('minibadge.statistics.most.allowed.badges', [vm.statistics.mostAssignedTypes.length])">
                     <container-body>
                         <div class="minibadge-most-assigned flex-row">
-                            <minibadge-card-type badge-type="vm.statistics.mostAssignedTypes[0]"
-                                                 class="minibadge-card-simple">
-                            </minibadge-card-type>
-                            <div class="minibadge-most-assigned-detail flex-row f-column">
-                                <minibadge-title icon="'check-decagram'">
-                                <span>[[vm.translate('minibadge.statistics.assigned.times',
-                                    [vm.toLocaleString(vm.statistics.mostAssignedTypes[0].countAssigned)])]]</span>
-                                </minibadge-title>
-                                <minibadge-title ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
-                                                 icon="'trophy'">
-                                <span>[[vm.translate('minibadge.statistics.top',
-                                    [vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length])]]</span>
-                                </minibadge-title>
-                                <minibadge-list ng-if="vm.statistics.mostAssignedTypes[0].mostAssigningUsers.length"
-                                                is-end-distinction="true"
-                                                items="vm.statistics.mostAssignedTypes[0].mostAssigningUsers">
-                                </minibadge-list>
-                            </div>
-                            <div ng-if="vm.statistics.mostAssignedTypes.length > 1"
-                                 class="minibadge-most-assigned-others flex-row f-column">
-                                <div ng-repeat="type in vm.statistics.mostAssignedTypes.slice(1, 3)" class="flex-row">
-                                    <minibadge-card-type-statistic badge-type="type">
-                                    </minibadge-card-type-statistic>
-                                </div>
-                            </div>
+                            <minibadge-column-graph items="vm.statistics.mostAssignedTypes"></minibadge-column-graph>
                         </div>
                     </container-body>
                 </minibadge-statistics-card>
                 <minibadge-statistics-card
-                        ng-if="!!vm.statistics.mostRefusedTypes.length"
-                        class="minibadge-statistics-top-most-refused"
-                        icon="'close-circle'"
-                        label="vm.translate('minibadge.statistics.most.refused.badges', [vm.statistics.mostRefusedTypes.length])">
+                        ng-if="!!vm.statistics.lessAssignedTypes.length"
+                        class="minibadge-statistics-less-allowed"
+                        icon="'icon-badge'"
+                        label="vm.translate('minibadge.statistics.less.allowed.badges', [vm.statistics.lessAssignedTypes.length])">
                     <container-body>
-                        <div class="flex-row">
-                            <div ng-repeat="type in vm.statistics.mostRefusedTypes"
-                                 class="flex-row flex-one justify-center">
-                                <minibadge-card class="minibadge-card-simple flex-one">
-                                    <container-body class="flex-row f-column">
-                                        <div class="minibadge-card-picture flex-row justify-center">
-                                            <img ng-src="/minibadge/public/img/[[type.pictureId]]"/>
-                                        </div>
-                                        <div class="flex-row justify-center align-center">
-                                            [[type.label]]
-                                        </div>
-                                    </container-body>
-                                    <container-footer>
-                                        <div class="flex-row justify-center align-center">
-                                            [[vm.translate('minibadge.statistics.refused.times', [type.countRefused])]]
-                                        </div>
-                                    </container-footer>
-                                </minibadge-card>
-                            </div>
+                        <div ng-if="vm.statistics.lessAssignedTypes.length > 1"
+                            class="minibadge-less-assigned flex-row">
+                            <minibadge-column-graph items="vm.statistics.lessAssignedTypes"></minibadge-column-graph>
                         </div>
                     </container-body>
                 </minibadge-statistics-card>
             </div>
-            <minibadge-statistics-card
-                    ng-if="!!vm.statistics.mostAssignedTypes.length"
-                    class="minibadge-statistics-most-allowed"
-                    icon="'trophy'"
-                    label="vm.translate('minibadge.statistics.most.allowed.badges', [vm.statistics.mostAssignedTypes.length])">
-                <container-body>
-                    <div class="minibadge-most-assigned flex-row">
-                        <minibadge-column-graph items="vm.statistics.mostAssignedTypes"></minibadge-column-graph>
-                    </div>
-                </container-body>
-            </minibadge-statistics-card>
-            <minibadge-statistics-card
-                    ng-if="!!vm.statistics.lessAssignedTypes.length"
-                    class="minibadge-statistics-less-allowed"
-                    icon="'icon-badge'"
-                    label="vm.translate('minibadge.statistics.less.allowed.badges', [vm.statistics.lessAssignedTypes.length])">
-                <container-body>
-                    <div ng-if="vm.statistics.lessAssignedTypes.length > 1"
-                         class="minibadge-less-assigned flex-row">
-                        <minibadge-column-graph items="vm.statistics.lessAssignedTypes"></minibadge-column-graph>
-                    </div>
-                </container-body>
-            </minibadge-statistics-card>
+            <div ng-if="vm.isUsersSelected()" class="flex-row f-column minibadge-statistics-participation">
+                <i18n class="minibadge-statistics-participation-title">minibadge.users</i18n>
+                <div class="minibadge-statistics-badges flex-row">
+                        <minibadge-statistics-card
+                                ng-if="!!vm.statistics.topAssigningUsers.length"
+                                class="minibadge-statistics-top-most-refused"
+                                icon="'hand-heart'"
+                                label="vm.translate('minibadge.statistics.top.assigning.users', [vm.statistics.topAssigningUsers.length])">
+                            <container-body>
+                                <div class="flex-row">
+                                    <div ng-repeat="user in vm.statistics.topAssigningUsers"
+                                        class="flex-row flex-one justify-center">
+                                        <minibadge-card class="minibadge-card-simple flex-one">
+                                            <container-body class="flex-row f-column">
+                                                <div class="minibadge-card-picture flex-row justify-center">
+                                                    <img 
+                                                        ng-src="[[user.displayItemImg()]]" 
+                                                        on-error-src="/minibadge/public/img/default-avatar.svg"
+                                                        class="minibadge-statistics-user-img"
+                                                    />
+                                                </div>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[($index + 1) + '. ' + user.getDisplayName()]]
+                                                </div>
+                                                <div class="minibadge-statistics-user-structure">
+                                                    [[user.getStructureName()]]
+                                                </div>
+                                            </container-body>
+                                            <container-footer>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[vm.translate('minibadge.statistics.badges.assigned', [user.countAssigned])]]
+                                                </div>
+                                            </container-footer>
+                                        </minibadge-card>
+                                    </div>
+                                </div>
+                            </container-body>
+                        </minibadge-statistics-card>
+                        <minibadge-statistics-card
+                                ng-if="!!vm.statistics.topReceivingUsers.length"
+                                class="minibadge-statistics-top-most-refused"
+                                icon="'handshake'"
+                                label="vm.translate('minibadge.statistics.top.receiving.users', [vm.statistics.topReceivingUsers.length])">
+                            <container-body>
+                                <div class="flex-row">
+                                    <div ng-repeat="user in vm.statistics.topReceivingUsers"
+                                        class="flex-row flex-one justify-center">
+                                        <minibadge-card class="minibadge-card-simple flex-one">
+                                            <container-body class="flex-row f-column">
+                                                <div class="minibadge-card-picture flex-row justify-center">
+                                                    <img 
+                                                        ng-src="[[user.displayItemImg()]]" 
+                                                        on-error-src="/minibadge/public/img/default-avatar.svg"
+                                                        class="minibadge-statistics-user-img"
+                                                    />
+                                                </div>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[($index + 1) + '. ' + user.getDisplayName()]]
+                                                </div>
+                                                <div class="minibadge-statistics-user-structure">
+                                                    [[user.getStructureName()]]
+                                                </div>
+                                            </container-body>
+                                            <container-footer>
+                                                <div class="flex-row justify-center align-center">
+                                                    [[vm.translate('minibadge.statistics.badges.received', [user.countAssigned])]]
+                                                </div>
+                                            </container-footer>
+                                        </minibadge-card>
+                                    </div>
+                                </div>
+                            </container-body>
+                        </minibadge-statistics-card>
+                </div>
+            </div>
         </container-body>
     </minibadge-container>
 </div>

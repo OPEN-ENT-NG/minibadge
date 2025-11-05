@@ -86,6 +86,10 @@ class Controller implements ng.IController, ViewModel {
     }
 
     hasStatisticsViewAllStructuresRight = (): boolean => model.me.hasWorkflow(rights.workflow.statisticsViewAllStructures);
+
+    isBadgesSelected = (): boolean => this.selectedType === StatsType.BADGES;
+
+    isUsersSelected = (): boolean => this.selectedType === StatsType.USERS;
 }
 
 export const statisticsController = ng.controller('StatisticsController',

@@ -91,6 +91,7 @@
   "minibadge.statistics.assigned.times": "Décerné {0} fois",
   "minibadge.statistics.badges": "Les badges",
   "minibadge.statistics.badges.assigned": "{0} badges décernés",
+  "minibadge.statistics.badges.received": "{0} badges reçus",
   "minibadge.statistics.less.allowed.badges": "Les badges les moins décernés",
   "minibadge.statistics.most.generous.users": "Les utilisateurs les plus généreux",
   "minibadge.statistics.most.active.structures": "Les établissements les plus actifs",
