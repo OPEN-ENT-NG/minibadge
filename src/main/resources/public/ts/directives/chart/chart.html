@@ -44,9 +44,20 @@
             </div>
         </div>
         <div>
-            <lightbox show="vm.isRevokeModalOpen" on-close="vm.closeRevokeModal()">
-                <div class="minibadge-container minibadge-chart flex-row f-column">
-                    coucou
+            <lightbox class="minibadge-revoke" show="vm.isRevokeModalOpen" on-close="vm.closeRevokeModal()">
+                <div class="minibadge-revoke-container minibadge-chart flex-row f-column">
+                    <div class="minibadge-revoke-title">
+                        <i18n>minibadge.revoke.modal.title</i18n>
+                    </div>
+                    <div class="minibadge-revoke-text flex-row f-column">
+                        <i18n>minibadge.revoke.modal.text1</i18n>
+                        <i18n>minibadge.revoke.modal.text2</i18n>
+                    </div>
+                    <div class="minibadge-revoke-footer flex-row">
+                        <button class="minibadge-revoke-footer-button" ng-click="vm.closeRevokeModal()">
+                            <i18n>minibadge.revoke.modal.button</i18n>
+                        </button>
+                    </div>
                 </div>
             </lightbox>
         </div>
