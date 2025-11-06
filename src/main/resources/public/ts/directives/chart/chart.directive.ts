@@ -47,6 +47,11 @@ class Controller implements ng.IController, IViewModel {
         safeApply(this.$scope);
     }
 
+    changeMinibadgeAcceptationStatus(): void {
+        if (!this.$scope.vm.isMinibadgeAccepted) this.$scope.vm.isChartAccepted = false;
+        safeApply(this.$scope);
+    }
+
     async validChart(): Promise<void> {
         this.$scope.vm.chartValidate()
             .then(() => this.closeLightbox());
