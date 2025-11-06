@@ -23,12 +23,15 @@
                         ng-model="vm.selectedPeriod"
                         ng-change="vm.onChangePeriod()"
                         value="7days">
-                    <i18n>minibadge.filter.stats.last.seven.days</i18n>
+                    <i18n>minibadge.filter.stats.last.seven.days</i18n>s
                 </label>
             </div>
             <i18n class="minibadge-statistics-participation-title">minibadge.statistics.participation</i18n>
             <div class="minibadge-statistics-cards flex-row">
-                <div class="minibadge-statistics-count-allowed">
+                <div 
+                    class="minibadge-statistics-count-allowed"
+                    ng-class="{'minibadge-statistics-count-allowed--alone': !(vm.hasStatisticsViewAllStructuresRight() && vm.statistics.mostAssigningStructures.length)}"
+                >
                     <minibadge-title icon="'check-decagram'">
                         [[vm.translate('minibadge.statistics.badges.assigned',
                         [vm.toLocaleString(vm.statistics.countBadgeAssigned)])]]
@@ -192,7 +195,7 @@
                                                 <div class="flex-row justify-center align-center">
                                                     [[($index + 1) + '. ' + user.getDisplayName()]]
                                                 </div>
-                                                <div class="minibadge-statistics-user-structure">
+                                                <div ng-if="vm.hasStatisticsViewAllStructuresRight()" class="minibadge-statistics-user-structure">
                                                     [[user.getStructureName()]]
                                                 </div>
                                             </container-body>
@@ -227,7 +230,7 @@
                                                 <div class="flex-row justify-center align-center">
                                                     [[($index + 1) + '. ' + user.getDisplayName()]]
                                                 </div>
-                                                <div class="minibadge-statistics-user-structure">
+                                                <div ng-if="vm.hasStatisticsViewAllStructuresRight()" class="minibadge-statistics-user-structure">
                                                     [[user.getStructureName()]]
                                                 </div>
                                             </container-body>

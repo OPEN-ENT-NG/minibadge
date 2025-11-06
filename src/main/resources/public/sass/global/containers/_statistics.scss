@@ -11,6 +11,10 @@
     }
   }
 
+  input[type="radio"]:checked {
+    accent-color: $minibadge-blue-dark;
+  }
+
   &-user {
     &-img {
       border-radius: 50%;
@@ -54,6 +58,10 @@
     padding: 30px;
     border-radius: 5px;
     box-shadow: 0 5px 5px rgb(214, 214, 214);
+
+    &--alone {
+      flex-direction: row;
+    }
 
     .minibadge-title {
       font-size: 30px;
