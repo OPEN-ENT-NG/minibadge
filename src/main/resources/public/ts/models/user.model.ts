@@ -18,6 +18,8 @@ export interface IUserResponse {
     minibadgeUserState?: MINIBADGE_USER_STATE;
     profile?: string;
     type?: string;
+    structureIds?: string[];
+    structureNames?: string[];
 }
 
 export interface IUsersResponses extends IPaginatedResponses<IUserResponse> {
@@ -42,6 +44,8 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
     profile?: string;
     type?: string;
     minibadgeUserState?: MINIBADGE_USER_STATE;
+    structureIds?: string[];
+    structureNames?: string[];
 
     constructor(data?: IUserResponse) {
         super();
@@ -57,6 +61,8 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
         this.countAssigned = data.countAssigned;
         this.profile = data.profile || (data.type ? PROTAGONIST_TYPES[data.type] : null);
         this.minibadgeUserState = data.minibadgeUserState ? MINIBADGE_USER_STATE[data.minibadgeUserState] : undefined;
+        this.structureIds = data.structureIds;
+        this.structureNames = data.structureNames;
         return this;
     }
 
@@ -68,7 +74,9 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
 
     displayItem = (): string => this.getDisplayName();
 
-    displayItemImg = (): string => null;
+    displayItemImg = (): string => `/userbook/avatar/${this.id}?thumbnail=48x48`;
+
+    getStructureName = (): string => !!this.structureNames && this.structureNames.length ? this.structureNames[0] : '';
 
     displayItemDistinction = (): string => toLocaleString(this.countAssigned);
 

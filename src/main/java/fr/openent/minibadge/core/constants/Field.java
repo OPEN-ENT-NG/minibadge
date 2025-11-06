@@ -49,6 +49,7 @@ public class Field {
     public static final String STRUCTUREID = "structureId";
     public static final String STRUCTURE_ID = "structure_id";
     public static final String STRUCTUREIDS = "structureIds";
+    public static final String STRUCTURENAMES = "structureNames";
     public static final String VALUE = "value";
     public static final String CATEGORYID = "categoryId";
     public static final String NOW_SQL_FUNCTION = "now()";
@@ -130,6 +131,8 @@ public class Field {
     public static final String STATISTICS = "statistics";
     public static final String COUNT_ASSIGNED = "count_assigned";
     public static final String COUNTASSIGNED = "countAssigned";
+    public static final String COUNT_ACTIVE_USERS = "count_active_users";
+    public static final String COUNTACTIVEUSERS = "countActiveUsers";
     public static final String COUNT_REFUSED = "count_refused";
     public static final String COUNTREFUSED = "countRefused";
     public static final String COUNT_BADGE_ASSIGNED = "count_badge_assigned";
@@ -142,6 +145,8 @@ public class Field {
     public static final String TOPASSIGNINGUSERS = "topAssigningUsers";
     public static final String TOPRECEIVINGUSERS = "topReceivingUsers";
     public static final String MOST_ASSIGNING_USERS = "most_assigning_users";
+    public static final String MINDATE = "minDate";
+    public static final String MIN_DATE = "min_date";
 
     //CONFIG
     public static final String DEFAULT_MAX_ASSIGNABLE = "default_max_assignable";

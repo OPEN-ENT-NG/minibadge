@@ -21,6 +21,11 @@ i {
     content: "\F04BC";
   }
 
+  &.user::before {
+    font-family: 'minibadge-icons';
+    content: "\F0004";
+  }
+
   &.user-circle::before {
     font-family: 'minibadge-icons';
     content: "\F0009";
@@ -140,5 +145,15 @@ i {
   &.medal::before {
     font-family: 'minibadge-icons';
     content: "\F0987";
+  }
+
+  &.hand-heart::before {
+    font-family: 'minibadge-icons';
+    content: "\F10F1";
+  }
+
+  &.handshake::before {
+    font-family: 'minibadge-icons';
+    content: "\F1218";
   }
 }

@@ -1,5 +1,6 @@
 package fr.openent.minibadge.service.impl;
 
+import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.core.enums.MinibadgeUserState;
 import fr.openent.minibadge.core.enums.SqlTable;
@@ -164,24 +165,48 @@ public class DefaultUserService implements UserService {
     private Future<JsonArray> getUsersRequest(List<String> userIds) {
         Promise<JsonArray> promise = Promise.promise();
 
-        String query = " MATCH (u:User) " +
-                " WHERE u.id IN {userIds} " +
-                " OPTIONAL MATCH (u)-[:ADMINISTRATIVE_ATTACHMENT]->(sAdminAttach:Structure) " +
-                " OPTIONAL MATCH (u)-[:IN]->(pg:ProfileGroup)-[:HAS_PROFILE]->(profile:Profile) " +
-                " OPTIONAL MATCH (pg)-[:DEPENDS]->(sProfile:Structure) " +
-                " WITH u, profile, COLLECT(distinct sProfile.id) + COLLECT(distinct sAdminAttach.id) as concatStructureIds " +
-                " UNWIND concatStructureIds as structures " +
-                " RETURN distinct u.id as id, u.login as login," +
-                " u.displayName as username, profile.name as type, COLLECT(distinct structures) as structureIds " +
-                " ORDER BY username ";
-        JsonObject params = new JsonObject();
-        params.put("userIds", userIds);
-        neo.execute(query, params, Neo4jResult.validResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::getUsersRequest] Fail to create badge assigned",
-                        this.getClass().getSimpleName()))));
+        String query =
+                "MATCH (u:User) " +
+                        "WHERE u.id IN {userIds} " +
+                        "OPTIONAL MATCH (u)-[:ADMINISTRATIVE_ATTACHMENT]->(sAdminAttach:Structure) " +
+                        "OPTIONAL MATCH (u)-[:IN]->(pg:ProfileGroup)-[:HAS_PROFILE]->(profile:Profile) " +
+                        "OPTIONAL MATCH (pg)-[:DEPENDS]->(sProfile:Structure) " +
+
+                        "WITH u, profile, COLLECT(DISTINCT sProfile) + COLLECT(DISTINCT sAdminAttach) AS allStructures " +
+
+                        "WITH u, profile, " +
+                        "     [s IN allStructures WHERE s IS NOT NULL | s.id] AS tempIds, " +
+                        "     [s IN allStructures WHERE s IS NOT NULL | s.name] AS tempNames " +
+
+                        "UNWIND tempIds AS singleId " +
+                        "UNWIND tempNames AS singleName " +
+                        "WITH u, profile, COLLECT(DISTINCT singleId) AS structureIds, COLLECT(DISTINCT singleName) AS structureNames " +
+
+                        "RETURN u.id AS id, " +
+                        "       u.login AS login, " +
+                        "       u.displayName AS username, " +
+                        "       profile.name AS type, " +
+                        "       structureIds, " +
+                        "       structureNames " +
+                        "ORDER BY username";
+
+        JsonObject params = new JsonObject().put("userIds", userIds);
+
+        String errorMsg = String.format(
+                "[Minibadge@%s::getUsersRequest] Fail to get users",
+                this.getClass().getSimpleName()
+        );
+
+        neo.execute(
+                query,
+                params,
+                Neo4jResult.validResultHandler(PromiseHelper.handler(promise, errorMsg))
+        );
 
         return promise.future();
     }
+
+
 
     @Override
     public Future<Void> upsert(List<String> usersIds) {

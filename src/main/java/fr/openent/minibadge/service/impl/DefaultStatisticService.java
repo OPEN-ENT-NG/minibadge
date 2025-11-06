@@ -11,6 +11,7 @@ import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.StatisticService;
 import fr.openent.minibadge.service.StructureService;
 import fr.openent.minibadge.service.UserService;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -19,10 +20,9 @@ import org.entcore.common.sql.Sql;
 import org.entcore.common.sql.SqlResult;
 import org.entcore.common.user.UserInfos;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,54 +39,12 @@ public class DefaultStatisticService implements StatisticService {
     private final StructureService structureService = ServiceRegistry.getService(StructureService.class);
 
     @Override
-    public Future<Statistics> getGlobalStatistics() {
-        return this.getGlobalStatistics(null);
-    }
-
-    @Override
-    public Future<Statistics> getGlobalStatistics(List<String> structureIds) {
+    public Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         Statistics statistics = new Statistics();
 
-        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
-        Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
-                Minibadge.minibadgeConfig.mostAssignedTypeListSize());
-        Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
-                Minibadge.minibadgeConfig.lessAssignedTypeListSize());
-        Future<JsonArray> mostRefusedTypesFuture = refusedBadgeTypesWithCount(structureIds);
-
-        Future.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
-                        mostRefusedTypesFuture)
-                .compose(result -> {
-                    statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
-                    statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
-                    statistics.setLessAssignedTypes(lessAssignedTypesFuture.result());
-                    statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
-
-                    return Future.all(setUsersOnFirstMostAssignedType(statistics, structureIds),
-                            setStructures(statistics, structureIds));
-                })
-                .onSuccess(result -> promise.complete(statistics))
-                .onFailure(err -> {
-                    String errorMessage = "Fail to get global statistics";
-                    LoggerHelper.logError(this, "getGlobalStatistics", errorMessage, err.getMessage());
-                    promise.fail(err);
-                });
-
-
-        return promise.future();
-    }
-
-    public Future<Statistics> getSpecificStructuresStatistics() {
-        return this.getSpecificStructuresStatistics(null);
-    }
-
-    @Override
-    public Future<Statistics> getSpecificStructuresStatistics(List<String> structureIds) {
-        Promise<Statistics> promise = Promise.promise();
-        Statistics statistics = new Statistics();
-
-        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds);
+        Future<JsonObject> countBadgeAssignedFuture = countBadgeAssigned(structureIds, minDate);
+        Future<JsonObject> countActiveUsersFuture = countActiveUsersFromStructureIds(structureIds, minDate);
         Future<JsonArray> mostAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds, true,
                 Minibadge.minibadgeConfig.mostAssignedTypeListSize());
         Future<JsonArray> lessAssignedTypesFuture = badgeTypesWithCountAssigned(structureIds,
@@ -101,10 +59,20 @@ public class DefaultStatisticService implements StatisticService {
 
         List<User> mostAssigningUsersCounts = new ArrayList<>();
 
-        Future.all(countBadgeAssignedFuture, mostAssignedTypesFuture, lessAssignedTypesFuture,
-                        mostRefusedTypesFuture, topAssigningUsersFuture, topReceivingUserFuture)
+        List<Future<?>> futures = Arrays.asList(
+                countBadgeAssignedFuture,
+                countActiveUsersFuture,
+                mostAssignedTypesFuture,
+                lessAssignedTypesFuture,
+                mostRefusedTypesFuture,
+                topAssigningUsersFuture,
+                topReceivingUserFuture
+        );
+
+        Future.all(futures)
                 .compose(result -> {
                     statistics.setCountBadgeAssigned(countBadgeAssignedFuture.result());
+                    statistics.setCountActiveUsers(countActiveUsersFuture.result());
                     statistics.setMostAssignedTypes(mostAssignedTypesFuture.result());
                     statistics.setLessAssignedTypes(lessAssignedTypesFuture.result());
                     statistics.setMostRefusedTypes(mostRefusedTypesFuture.result());
@@ -118,10 +86,11 @@ public class DefaultStatisticService implements StatisticService {
                     return getUsersFromCountsList(statistics.topAssigningUsers(), statistics.topReceivingUsers(),
                             mostAssigningUsersCounts);
                 })
-                .onSuccess(users -> {
+                .compose(users -> {
                     mergeUsersToStatistics(statistics, users, mostAssigningUsersCounts);
-                    promise.complete(statistics);
+                    return setStructures(statistics, structureIds, minDate);
                 })
+                .onSuccess(promise::complete)
                 .onFailure(err -> {
                     String errorMessage = "Fail to get specific structures statistics";
                     LoggerHelper.logError(this, "getSpecificStructuresStatistics", errorMessage, err.getMessage());
@@ -131,19 +100,24 @@ public class DefaultStatisticService implements StatisticService {
         return promise.future();
     }
 
-    private Future<JsonObject> countBadgeAssigned(List<String> structureIds) {
+    private Future<JsonObject> countBadgeAssigned(List<String> structureIds, LocalDate minDate) {
         Promise<JsonObject> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT COUNT(DISTINCT (ba.id)) FROM %s bas " +
                         " INNER JOIN %s ba on ba.id = bas.badge_assigned_id " +
                         " INNER JOIN %s b on b.id = ba.badge_id " +
-                        " WHERE is_structure_assigner IS TRUE AND %s",
+                        " WHERE is_structure_assigner IS TRUE AND %s ",
                         SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                         SqlTable.BADGE_ASSIGNED_VALID.getName(),
                         SqlTable.BADGE.getName(),
                 SqlHelper.filterStructuresWithNull(structureIds, params));
 
+        if (minDate != null) {
+            LocalDateTime minDateTime = minDate.atStartOfDay();
+            request += " AND bas.created_at > ?";
+            params.add(minDateTime.toString());
+        }
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::countBadgeAssigned] Fail to count badge assigned",
@@ -313,47 +287,125 @@ public class DefaultStatisticService implements StatisticService {
                 .collect(Collectors.toList());
     }
 
-    private Future<Statistics> setStructures(Statistics statistics, List<String> structureIds) {
+    private Future<Statistics> setStructures(Statistics statistics, List<String> structureIds, LocalDate minDate) {
         Promise<Statistics> promise = Promise.promise();
         List<Structure> mostAssigningStructuresCounts = new ArrayList<>();
-        listMostAssigningStructuresWithCount(structureIds)
+        listMostAssigningStructuresWithCount(structureIds, minDate)
                 .compose(structures -> {
                     mostAssigningStructuresCounts.addAll(new Structure().toList(structures));
                     return structureService.getStructures(mostAssigningStructuresCounts.stream()
                             .map(Structure::id).collect(Collectors.toList()));
                 })
-                .onSuccess(mostAssigningStructures -> {
+                .compose(mostAssigningStructures -> {
                     mergeMostAssigningStructuresWithCounts(mostAssigningStructures, mostAssigningStructuresCounts);
+
                     statistics.setMostAssigningStructures(mostAssigningStructures);
-                    promise.complete(statistics);
+
+                    List<Future> activeUsersFutures = mostAssigningStructures.stream()
+                            .map(structure -> countActiveUsersFromStructureId(structure.id(), minDate)
+                                    .onSuccess(result -> {
+                                        Integer count = SqlHelper.getResultCount(result);
+                                        structure.setCountActiveUsers(count);
+                                    })
+                            ).collect(Collectors.toList());
+
+                    return CompositeFuture.all(activeUsersFutures);
                 })
+                .onSuccess(ok -> promise.complete(statistics))
                 .onFailure(promise::fail);
         return promise.future();
     }
 
-    private Future<JsonArray> listMostAssigningStructuresWithCount(List<String> structureIds) {
+    private Future<JsonArray> listMostAssigningStructuresWithCount(List<String> structureIds, LocalDate minDate) {
         Promise<JsonArray> promise = Promise.promise();
 
         JsonArray params = new JsonArray();
         String request = String.format("SELECT bas.structure_id, COUNT(DISTINCT bas.badge_assigned_id) as count_assigned " +
                         " FROM %s bas INNER JOIN %s ba on bas.badge_assigned_id = ba.id" +
                         " INNER JOIN %s b on ba.badge_id = b.id " +
-                        " WHERE is_structure_assigner IS TRUE %s GROUP BY structure_id " +
-                        " ORDER BY count_assigned DESC LIMIT %s",
+                        " WHERE is_structure_assigner IS TRUE %s",
                 SqlTable.BADGE_ASSIGNED_STRUCTURE.getName(),
                 SqlTable.BADGE_ASSIGNED_VALID.getName(),
                 SqlTable.BADGE.getName(),
-                SqlHelper.andFilterStructures(structureIds, params),
-                Minibadge.minibadgeConfig.mostAssigningStructureListSize());
+                SqlHelper.andFilterStructures(structureIds, params)
+        );
 
+        if (minDate != null) {
+            LocalDateTime minDateTime = minDate.atStartOfDay();
+            request += " AND bas.created_at > ?";
+            params.add(minDateTime.toString());
+        }
+
+        request += " GROUP BY bas.structure_id " +
+                " ORDER BY count_assigned DESC LIMIT " + Minibadge.minibadgeConfig.mostAssigningStructureListSize();
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
-                String.format("[Minibadge@%s::listMostAssigningStructuresWithCount] Fail to list refused types with " +
-                                "count refused",
+                String.format("[Minibadge@%s::listMostAssigningStructuresWithCount] Fail to list most assigning structures with count",
                         this.getClass().getSimpleName()))));
 
         return promise.future();
     }
+
+    private Future<JsonObject> countActiveUsersFromStructureId(String structureId, LocalDate minDate) {
+        return countActiveUsersFromStructureIds(Collections.singletonList(structureId), minDate);
+    }
+
+    private Future<JsonObject> countActiveUsersFromStructureIds(List<String> structureIds, LocalDate minDate) {
+        Promise<JsonObject> promise = Promise.promise();
+
+        if (structureIds == null || structureIds.isEmpty()) {
+            return Future.succeededFuture(new JsonObject().put(Field.COUNT, 0));
+        }
+
+        StringBuilder query = new StringBuilder(
+                "SELECT COUNT(DISTINCT user_id) " +
+                        "FROM ( " +
+                        "  SELECT ba.assignor_id AS user_id " +
+                        "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
+                        "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
+                        "  WHERE bas.structure_id IN " + Sql.listPrepared(structureIds) +
+                        "    AND bas.is_structure_assigner = TRUE"
+        );
+
+        JsonArray params = new JsonArray().addAll(new JsonArray(structureIds));
+
+        if (minDate != null) {
+            query.append(" AND ba.created_at > ?");
+            params.add(minDate.atStartOfDay().toString()); // ISO 8601 string
+        }
+
+        query.append(
+                " UNION " +
+                        "  SELECT b.owner_id AS user_id " +
+                        "  FROM " + SqlTable.BADGE_ASSIGNED_STRUCTURE.getName() + " bas " +
+                        "  JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.id = bas.badge_assigned_id " +
+                        "  JOIN " + SqlTable.BADGE.getName() + " b ON b.id = ba.badge_id " +
+                        "  WHERE bas.structure_id IN " + Sql.listPrepared(structureIds) +
+                        "    AND bas.is_structure_receiver = TRUE"
+        );
+
+        params.addAll(new JsonArray(structureIds));
+
+        if (minDate != null) {
+            query.append(" AND ba.created_at > ?");
+            params.add(minDate.atStartOfDay().toString()); // ISO 8601 string
+        }
+
+        query.append(" ) active_users");
+
+        String errorLog = String.format(
+                "[Minibadge@%s::countActiveUsersFromStructureIds] Fail to count active users from structure ids",
+                this.getClass().getSimpleName()
+        );
+
+        sql.prepared(query.toString(), params,
+                SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise, errorLog)));
+
+        return promise.future();
+    }
+
+
+
 
     private void mergeMostAssigningStructuresWithCounts(List<Structure> mostAssigningStructures,
                                                         List<Structure> mostAssigningStructuresCounts) {
@@ -362,6 +414,8 @@ public class DefaultStatisticService implements StatisticService {
                         .filter(structure -> structure.id().equals(assigningStructure.id()))
                         .findFirst()
                         .ifPresent(user -> assigningStructure.setCountAssigned(user.countAssigned())));
+
+        mostAssigningStructures.sort(Comparator.comparing(Structure::countAssigned, Comparator.nullsFirst(Comparator.reverseOrder())));
     }
 
     private Future<List<User>> getUsersFromCountsList(List<User> topAssigningUsers, List<User> topReceivingUsers,

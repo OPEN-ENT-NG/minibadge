@@ -18,6 +18,7 @@ public class Config implements Model<Config> {
     private Integer typeListsUsersSize;
 
     public Config() {
+        this.set(new JsonObject());
     }
 
     public Config(JsonObject config) {
@@ -26,56 +27,56 @@ public class Config implements Model<Config> {
 
     @Override
     public Config set(JsonObject config) {
-        this.defaultMaxAssignable = config.getInteger(Field.DEFAULT_MAX_ASSIGNABLE);
-        this.defaultPeriodAssignable = config.getString(Field.DEFAULT_PERIOD_ASSIGNABLE);
-        this.mostAssignedTypeListSize = config.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE);
-        this.lessAssignedTypeListSize = config.getInteger(Field.LESS_ASSIGNED_TYPE_LIST_SIZE);
-        this.mostRefusedTypeListSize = config.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE);
-        this.mostAssigningUserListSize = config.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE);
-        this.mostAssigningStructureListSize = config.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE);
-        this.topAssigningUserListSize = config.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE);
-        this.topReceivingUserListSize = config.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE);
-        this.typeListsUsersSize = config.getInteger(Field.TYPE_LISTS_USERS_SIZE);
+        this.defaultMaxAssignable = config.getInteger(Field.DEFAULT_MAX_ASSIGNABLE, 3);
+        this.defaultPeriodAssignable = config.getString(Field.DEFAULT_PERIOD_ASSIGNABLE, DateConst.DAY);
+        this.mostAssignedTypeListSize = config.getInteger(Field.MOST_ASSIGNED_TYPE_LIST_SIZE, 15);
+        this.lessAssignedTypeListSize = config.getInteger(Field.LESS_ASSIGNED_TYPE_LIST_SIZE, 15);
+        this.mostRefusedTypeListSize = config.getInteger(Field.MOST_REFUSED_TYPE_LIST_SIZE, 3);
+        this.mostAssigningUserListSize = config.getInteger(Field.MOST_ASSIGNING_USER_LIST_SIZE, 3);
+        this.mostAssigningStructureListSize = config.getInteger(Field.MOST_ASSIGNING_STRUCTURE_LIST_SIZE, 5);
+        this.topAssigningUserListSize = config.getInteger(Field.TOP_ASSIGNING_USER_LIST_SIZE, 3);
+        this.topReceivingUserListSize = config.getInteger(Field.TOP_RECEIVING_USER_LIST_SIZE, 3);
+        this.typeListsUsersSize = config.getInteger(Field.TYPE_LISTS_USERS_SIZE, 10);
         return this;
     }
 
     public Integer defaultMaxAssignable() {
-        return this.defaultMaxAssignable != null ? this.defaultMaxAssignable : 3;
+        return this.defaultMaxAssignable;
     }
 
     public String defaultPeriodAssignable() {
-        return this.defaultPeriodAssignable != null ? this.defaultPeriodAssignable : DateConst.DAY;
+        return this.defaultPeriodAssignable;
     }
 
     public Integer mostAssignedTypeListSize() {
-        return this.mostAssignedTypeListSize != null ? this.mostAssignedTypeListSize : 15;
+        return this.mostAssignedTypeListSize;
     }
     public Integer lessAssignedTypeListSize() {
-        return this.lessAssignedTypeListSize != null ? this.lessAssignedTypeListSize : 15;
+        return this.lessAssignedTypeListSize;
     }
 
     public Integer mostRefusedTypeListSize() {
-        return this.mostRefusedTypeListSize != null ? this.mostRefusedTypeListSize : 3;
+        return this.mostRefusedTypeListSize;
     }
 
     public Integer mostAssigningUserListSize() {
-        return this.mostAssigningUserListSize != null ? this.mostAssigningUserListSize : 3;
+        return this.mostAssigningUserListSize;
     }
 
     public Integer mostAssigningStructureListSize() {
-        return this.mostAssigningStructureListSize != null ? this.mostAssigningStructureListSize : 5;
+        return this.mostAssigningStructureListSize;
     }
 
     public Integer topAssigningUserListSize() {
-        return this.topAssigningUserListSize != null ? this.topAssigningUserListSize : 5;
+        return this.topAssigningUserListSize;
     }
 
     public Integer topReceivingUserListSize() {
-        return this.topReceivingUserListSize != null ? this.topReceivingUserListSize : 5;
+        return this.topReceivingUserListSize;
     }
 
     public Integer typeListsUsersSize() {
-        return this.typeListsUsersSize != null ? this.typeListsUsersSize : 10;
+        return this.typeListsUsersSize;
     }
 
     @Override
