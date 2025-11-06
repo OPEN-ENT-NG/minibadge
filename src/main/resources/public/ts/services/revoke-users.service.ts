@@ -3,13 +3,13 @@ import { ng } from 'entcore';
 import { IIsCurrentUserRevokedResponse, IRevokeUsersPayload } from "../models/revoke-users.model";
 
 export interface IRevokeUsersService {
-    isCurrentUserRevoked(): Promise<Boolean>;
+    isCurrentUserRevoked(): Promise<boolean>;
     revokeUsers(payload: IRevokeUsersPayload): Promise<AxiosPromise>;
 }
 
 export const revokeUsersService: IRevokeUsersService = {
     
-    isCurrentUserRevoked: async (): Promise<Boolean> => {
+    isCurrentUserRevoked: async (): Promise<boolean> => {
         return http.get("/minibadge/revoked")
         .then((res: AxiosResponse) => {
             let revokedResponse: IIsCurrentUserRevokedResponse = res.data;

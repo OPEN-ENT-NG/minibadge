@@ -8,7 +8,7 @@ import { Chart } from "../models/chart.model";
 import { ContainerHeader, IContainerHeaderResponse } from "../models/container-header.model";
 import { Setting } from "../models/setting.model";
 import { IUserResponse, User } from "../models/user.model";
-import { IChartService, ISettingService } from "../services";
+import { IChartService, IRevokeUsersService, ISettingService } from "../services";
 import { safeApply } from "../utils/safe-apply.utils";
 
 interface ViewModel {
@@ -24,6 +24,7 @@ interface ViewModel {
     isChartAccepted: boolean;
     isMinibadgeAccepted: boolean;
     isAllowedToUseMinibadge: boolean;
+    isRevokeModalOpen: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -45,6 +46,7 @@ class Controller implements ng.IController, ViewModel {
     isChartAccepted: boolean;
     isMinibadgeAccepted: boolean;
     isAllowedToUseMinibadge: boolean;
+    isRevokeModalOpen: boolean;
 
     subscriptions: Subscription = new Subscription();
 
@@ -52,7 +54,9 @@ class Controller implements ng.IController, ViewModel {
                 private $route: any,
                 private $location: ILocationService,
                 private settingService: ISettingService,
-                private chartService: IChartService) {
+                private chartService: IChartService,
+                private revokeUsersService: IRevokeUsersService
+            ) {
         this.$scope.vm = this;
 
         this.$route({
@@ -135,14 +139,19 @@ class Controller implements ng.IController, ViewModel {
 
     private async initInfos() {
         this.$scope.me = new User(<IUserResponse>model.me);
-        await Promise.all([this.getSettings(), this.chartService.getUserChart(),
-            model.me.hasWorkflow(rights.workflow.assign), model.me.hasWorkflow(rights.workflow.receive)])
-            .then((data: [Setting, Chart, boolean, boolean]) => {
+        await Promise.all(
+            [this.getSettings(), 
+            this.chartService.getUserChart(),
+            model.me.hasWorkflow(rights.workflow.assign), 
+            model.me.hasWorkflow(rights.workflow.receive),
+            this.revokeUsersService.isCurrentUserRevoked(),
+        ])
+            .then((data: [Setting, Chart, boolean, boolean, boolean]) => {
                 let setting: Setting = data[0];
                 setting.userPermissions = data[1];
                 this.$scope.setting = setting;
                 this.isAllowedToUseMinibadge = data[2] || data[3];
-
+                this.isRevokeModalOpen = data[4];
                 this.isChartLightboxOpened = this.isAllowedToUseMinibadge &&
                     !this.$scope.setting.userPermissions.readChart &&
                     !this.$scope.setting.userPermissions.acceptChart;
@@ -163,4 +172,4 @@ class Controller implements ng.IController, ViewModel {
 }
 
 export const mainController = ng.controller('MainController',
-    ['$scope', 'route', '$location', 'SettingService', 'ChartService', Controller]);
+    ['$scope', 'route', '$location', 'SettingService', 'ChartService', 'RevokeUsersService', Controller]);
