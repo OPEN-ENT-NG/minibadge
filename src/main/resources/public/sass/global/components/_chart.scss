@@ -11,5 +11,43 @@
     margin-top: 10px;
   }
 
+  &-buttons {
+    gap: 1rem;
+  }
+
 }
 
+.minibadge-revoke {
+
+  .content {
+    width: 650px;
+    margin-top: 15em;
+
+    @include mobile {
+      position: fixed;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  &-container {
+    gap: 1rem;
+  }
+
+  &-title {
+    font-size: 20px;
+  }
+
+  &-text {
+    gap: 1rem;
+  }
+
+  &-footer {
+    justify-content: flex-end;
+
+    &-button {
+      width: fit-content;
+    }
+  }
+}

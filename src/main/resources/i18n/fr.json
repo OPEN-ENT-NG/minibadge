@@ -131,5 +131,9 @@
   "minibadge.badges.option": "Badges",
   "minibadge.users": "Les utilisateurs",
   "minibadge.users.option": "Utilisateurs",
-  "minibadge.participants": "participants"
+  "minibadge.participants": "participants",
+  "minibadge.revoke.modal.title": "Votre participation à Mini-badges a été révoquée",
+  "minibadge.revoke.modal.text1": "Votre participation à Mini-badges a été révoquée par un responsable de votre établissement. Vous ne pouvez plus envoyer ni recevoir de badges pour le moment.",
+  "minibadge.revoke.modal.text2": "Si vous souhaitez participer à nouveau, veuillez relire et prendre en compte les conditions générales d'utilisation des badges disponibles sur l’ENT.",
+  "minibadge.revoke.modal.button": "Fermer"
 }

@@ -7,14 +7,6 @@
             <p>
                 <i18n>minibadge.chart.consent.needing</i18n>&nbsp;&#58;
             </p>
-            <p class="flex-row align-center">
-                <span><i18n>minibadge.chart.receive.accept</i18n></span>&nbsp;
-                <span>
-                    <switch ng-model="vm.isMinibadgeAccepted">
-                        <label class="switch"> </label>
-                    </switch>
-                </span>
-            </p>
             <div>
                 <h2>
                     <i18n>minibadge.chart.title</i18n>
@@ -33,16 +25,41 @@
                 </p>
             </div>
 
-            <label class="checkbox flex-row">
-                <input type="checkbox" ng-change="vm.changeChartAcceptationStatus()" ng-model="vm.isChartAccepted"/>
-                <span><i18n>minibadge.chart.accept</i18n></span>
-            </label>
+            <div class="flex-row minibadge-chart-buttons f-column">
+                <label class="checkbox flex-row">
+                    <input type="checkbox" ng-change="vm.changeChartAcceptationStatus()" ng-model="vm.isChartAccepted"/>
+                    <span><i18n>minibadge.chart.accept</i18n></span>
+                </label>
+
+                <label class="checkbox flex-row">
+                    <input type="checkbox" ng-change="vm.changeMinibadgeAcceptationStatus()" ng-model="vm.isMinibadgeAccepted"/>
+                    <span><i18n>minibadge.chart.receive.accept</i18n></span>
+                </label>
+            </div>
 
             <div class="minibadge-chart-footer flex-row justify-end">
                 <button ng-click="vm.validChart()" ng-disabled="vm.isMinibadgeAccepted && !vm.isChartAccepted">
                     <i18n>minibadge.validate</i18n>
                 </button>
             </div>
+        </div>
+        <div>
+            <lightbox class="minibadge-revoke" show="vm.isRevokeModalOpen" on-close="vm.closeRevokeModal()">
+                <div class="minibadge-revoke-container minibadge-chart flex-row f-column">
+                    <div class="minibadge-revoke-title">
+                        <i18n>minibadge.revoke.modal.title</i18n>
+                    </div>
+                    <div class="minibadge-revoke-text flex-row f-column">
+                        <i18n>minibadge.revoke.modal.text1</i18n>
+                        <i18n>minibadge.revoke.modal.text2</i18n>
+                    </div>
+                    <div class="minibadge-revoke-footer flex-row">
+                        <button class="minibadge-revoke-footer-button" ng-click="vm.closeRevokeModal()">
+                            <i18n>minibadge.revoke.modal.button</i18n>
+                        </button>
+                    </div>
+                </div>
+            </lightbox>
         </div>
     </lightbox>
 </div>

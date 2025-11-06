@@ -1,7 +1,7 @@
-import {ng} from "entcore";
-import {IDirective, IScope, isFunction} from "angular";
-import {RootsConst} from "../../core/constants/roots.const";
-import {safeApply} from "../../utils/safe-apply.utils";
+import { IDirective, IScope, isFunction } from "angular";
+import { ng } from "entcore";
+import { RootsConst } from "../../core/constants/roots.const";
+import { safeApply } from "../../utils/safe-apply.utils";
 
 interface IViewModel {
     closeLightbox(): void;
@@ -20,6 +20,7 @@ interface IDirectiveProperties {
     isLightboxOpened: boolean;
     isMinibadgeAccepted: boolean;
     isChartAccepted: boolean;
+    isRevokeModalOpen: boolean;
 }
 
 interface IMinibadgeScope extends IScope {
@@ -42,8 +43,18 @@ class Controller implements ng.IController, IViewModel {
         safeApply(this.$scope);
     }
 
+    closeRevokeModal(): void {
+        this.$scope.vm.isRevokeModalOpen = false;
+        safeApply(this.$scope);
+    }
+
     changeChartAcceptationStatus(): void {
         if (!this.$scope.vm.isChartAccepted) this.$scope.vm.isMinibadgeAccepted = false;
+        safeApply(this.$scope);
+    }
+
+    changeMinibadgeAcceptationStatus(): void {
+        if (!this.$scope.vm.isMinibadgeAccepted) this.$scope.vm.isChartAccepted = false;
         safeApply(this.$scope);
     }
 
@@ -66,6 +77,7 @@ function directive(): IDirective {
             isLightboxOpened: '=',
             isChartAccepted: '=',
             isMinibadgeAccepted: '=',
+            isRevokeModalOpen: '=',
             chartValidate: '&',
             onClose: '&?',
         },
