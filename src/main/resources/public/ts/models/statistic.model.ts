@@ -1,10 +1,11 @@
-import {MinibadgeModel} from "./model";
-import {BadgeType, IBadgeTypeResponse} from "./badge-type.model";
-import {IStructureResponse, Structure} from "./structure.model";
-import {IUserResponse, User} from "./user.model";
+import { BadgeType, IBadgeTypeResponse } from "./badge-type.model";
+import { MinibadgeModel } from "./model";
+import { IStructureResponse, Structure } from "./structure.model";
+import { IUserResponse, User } from "./user.model";
 
 export interface IStatisticsResponse {
     countBadgeAssigned?: number;
+    countActiveUsers?:number;
     mostAssignedTypes?: IBadgeTypeResponse[];
     lessAssignedTypes?: IBadgeTypeResponse[];
     mostRefusedTypes?: IBadgeTypeResponse[];
@@ -16,6 +17,7 @@ export interface IStatisticsResponse {
 
 export class Statistics extends MinibadgeModel<Statistics> {
     countBadgeAssigned: number;
+    countActiveUsers: number;
     mostAssignedTypes: BadgeType[];
     lessAssignedTypes: BadgeType[];
     mostRefusedTypes: BadgeType[];
@@ -26,6 +28,7 @@ export class Statistics extends MinibadgeModel<Statistics> {
     constructor(data?: IStatisticsResponse) {
         super();
         this.countBadgeAssigned = 0;
+        this.countActiveUsers = 0;
         this.mostAssignedTypes = [];
         this.mostRefusedTypes = [];
         this.mostAssigningStructures = [];
@@ -36,6 +39,7 @@ export class Statistics extends MinibadgeModel<Statistics> {
 
     build(data: IStatisticsResponse): Statistics {
         this.countBadgeAssigned = data.countBadgeAssigned || 0;
+        this.countActiveUsers = data.countActiveUsers || 0;
         this.mostAssignedTypes = new BadgeType().toList(data.mostAssignedTypes) || [];
         this.lessAssignedTypes = new BadgeType().toList(data.lessAssignedTypes) || [];
         this.mostRefusedTypes = new BadgeType().toList(data.mostRefusedTypes) || [];
