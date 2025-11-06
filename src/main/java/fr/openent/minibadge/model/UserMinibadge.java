@@ -3,6 +3,7 @@ package fr.openent.minibadge.model;
 import io.vertx.core.json.JsonObject;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static fr.openent.minibadge.core.constants.Field.*;
 
@@ -28,7 +29,10 @@ public class UserMinibadge implements Model<UserMinibadge>  {
         this.displayName = userMinibadgeJson.getString(DISPLAY_NAME, "");
         this.createdAt = LocalDateTime.parse(userMinibadgeJson.getString(CREATED_AT));
         this.updatedAt = LocalDateTime.parse(userMinibadgeJson.getString(UPDATED_AT));
-        this.revokedAt = userMinibadgeJson.containsKey(REVOKED_AT) ? LocalDateTime.parse(userMinibadgeJson.getString(REVOKED_AT)) : null;
+        this.revokedAt = Optional.ofNullable(userMinibadgeJson.getString(REVOKED_AT, null))
+                .filter(s -> !s.isEmpty())
+                .map(LocalDateTime::parse)
+                .orElse(null);
         return this;
     }
 
