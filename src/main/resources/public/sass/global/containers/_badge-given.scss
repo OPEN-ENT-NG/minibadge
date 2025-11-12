@@ -7,6 +7,7 @@
     display: flex;
     align-items: end;
     margin-top: 10px;
+    flex: 1;
 
     @include mobile{
       margin-left: 8px;

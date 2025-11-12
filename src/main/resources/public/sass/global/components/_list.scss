@@ -9,6 +9,7 @@
     display: flex;
     align-items: center;
     overflow: hidden;
+    flex-wrap: wrap;
 
     &-number {
       align-self: baseline;

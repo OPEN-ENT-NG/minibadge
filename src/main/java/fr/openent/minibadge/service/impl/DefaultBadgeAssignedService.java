@@ -305,7 +305,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
                         " AND bav.created_at::date  <= to_date( ?, 'DD-MM-YYYY') " : "") +
                 ((query != null && !query.isEmpty()) ? " AND " + SqlHelper.searchQueryInColumns(query, columns, params) : " ") +
                 " ORDER BY " +
-                ((hasSort && acceptedSort.contains(sortBy)) ? transformedSortBy + (sortAsc ? " ASC " : " DESC ") : " bav.id ") +
+                ((hasSort && acceptedSort.contains(sortBy)) ? transformedSortBy + (sortAsc ? " ASC " : " DESC ") : " bav.id DESC") +
                 " ; ";
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,

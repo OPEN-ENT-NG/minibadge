@@ -27,12 +27,22 @@ public class UserMinibadge implements Model<UserMinibadge>  {
     public UserMinibadge set(JsonObject userMinibadgeJson) {
         this.id = userMinibadgeJson.getString(ID, "");
         this.displayName = userMinibadgeJson.getString(DISPLAY_NAME, "");
-        this.createdAt = LocalDateTime.parse(userMinibadgeJson.getString(CREATED_AT));
-        this.updatedAt = LocalDateTime.parse(userMinibadgeJson.getString(UPDATED_AT));
+
+        this.createdAt = Optional.ofNullable(userMinibadgeJson.getString(CREATED_AT, null))
+                .filter(s -> !s.isEmpty())
+                .map(LocalDateTime::parse)
+                .orElse(null);
+
+        this.updatedAt = Optional.ofNullable(userMinibadgeJson.getString(UPDATED_AT, null))
+                .filter(s -> !s.isEmpty())
+                .map(LocalDateTime::parse)
+                .orElse(null);
+
         this.revokedAt = Optional.ofNullable(userMinibadgeJson.getString(REVOKED_AT, null))
                 .filter(s -> !s.isEmpty())
                 .map(LocalDateTime::parse)
                 .orElse(null);
+
         return this;
     }
 

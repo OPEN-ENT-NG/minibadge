@@ -75,14 +75,20 @@ public class UsersAssignRight implements ResourcesProvider {
                                     String.format("[Minibadge@%s::authorize] User is not allowed to assign.",
                                             this.getClass().getSimpleName()));
 
-                        return this.getUsers(request, ownerIds, userInfos);
+                        return this.getUsers(request, ownerIds);
                     })
                     .onSuccess(usersArray -> {
+                        boolean isCurrentUserInOwners = ownerIds.contains(userInfos.getUserId());
                         List<User> receivers = new User().toList(usersArray);
+                        if (isCurrentUserInOwners) {
+                            receivers.add(new User(userInfos));
+                        }
+
                         boolean isAuthorizedToAssign = SettingHelper
                                 .isAuthorizedToAssign(new User(userInfos), receivers, typeSetting);
                         boolean canUsersReceive = receivers.stream()
                                 .allMatch(user ->
+                                        user.getUserId().equals(userInfos.getUserId()) ||
                                         user.permissions().validateChart() == null
                                                 || user.permissions().acceptReceive() != null);
                         handler.handle(ownerIds.size() == receivers.size() && isAuthorizedToAssign && canUsersReceive);
@@ -152,7 +158,7 @@ public class UsersAssignRight implements ResourcesProvider {
                 .orElseGet(() -> getAndCachePermissionsPreferences(user, request));
     }
 
-    private Future<JsonArray> getUsers(HttpServerRequest request, List<String> ownerIds, UserInfos currentUser) {
+    private Future<JsonArray> getUsers(HttpServerRequest request, List<String> ownerIds) {
         Promise<JsonArray> promise = Promise.promise();
         JsonObject params = new JsonObject();
         String preFilter = Neo4jHelper.filterUsersFromIds(ownerIds, "m", params);
@@ -165,9 +171,7 @@ public class UsersAssignRight implements ResourcesProvider {
                         Neo4jHelper.usersNodeHasRight(Rights.FULLNAME_RECEIVE, params)),
                 userAlias, prefAlias, MINIBADGECHART);
 
-        boolean isCurrentUserInOwners = ownerIds.contains(currentUser.getUserId());
-
-        UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, isCurrentUserInOwners, true,
+        UserUtils.findVisibleUsers(Server.getEventBus(Vertx.currentContext().owner()), request, false, true,
                 String.format(" %s %s ", "AND", preFilter),
                 customReturn, params, promise::complete);
 

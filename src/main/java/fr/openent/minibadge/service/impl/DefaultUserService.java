@@ -307,6 +307,11 @@ public class DefaultUserService implements UserService {
     private Future<List<User>> setUserState(List<User> users, HttpServerRequest request) {
         Promise<List<User>> promise = Promise.promise();
 
+        if (users == null || users.isEmpty()) {
+            promise.complete(new ArrayList<>());
+            return promise.future();
+        }
+
         String host = Renders.getHost(request);
         String language = I18n.acceptLanguage(request);
         String inactiveDisplayName = I18n.getInstance().translate("minibadge.disable.user", host, language);

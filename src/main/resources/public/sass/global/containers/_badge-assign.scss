@@ -19,6 +19,12 @@
     }
   }
 
+  &-myself {
+    .content {
+      width: 720px !important;
+    }
+  }
+
   .content {
     width: 900px;
     margin-top: 10em;
@@ -100,4 +106,3 @@
     }
   }
 }
-

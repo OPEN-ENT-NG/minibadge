@@ -74,7 +74,7 @@ export class User extends MinibadgeModel<User> implements IDisplayItem {
 
     displayItem = (): string => this.getDisplayName();
 
-    displayItemImg = (): string => `/userbook/avatar/${this.id}?thumbnail=48x48`;
+    displayItemImg = (): string => `/userbook/avatar/${this.id}?thumbnail=96x96`;
 
     getStructureName = (): string => !!this.structureNames && this.structureNames.length ? this.structureNames[0] : '';
 
