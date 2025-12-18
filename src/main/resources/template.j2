@@ -1,0 +1,20 @@
+{
+  "name": "fr.openent~minibadge",
+  "config": {
+    "main" : "fr.openent.minibadge.Minibadge",
+    "port" : 8131,
+    "app-name" : "MiniBadge",
+    "app-address" : "/minibadge",
+    "app-icon" : "https://{{ host }}/minibadge/public/img/uni-minibadge.svg",
+    "host": "https://{{ host }}",
+    "ssl" : true,
+    "sql": true,
+    "db-schema": "minibadge",
+    "auto-redeploy": false,
+    "userbook-host": "https://{{ host }}",
+    "integration-mode": "{{ integration_mode|default('HTTP') }}",
+    "app-registry.port" : 8012,
+    "mode" : "prod",
+    "entcore.port" : 8009
+  }
+}
