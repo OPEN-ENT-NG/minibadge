@@ -6,14 +6,12 @@
   border-radius: 5px;
   text-align: right;
   font-size: 18px;
+  width: 100%;
+  min-width: 370px;
 
   &:focus-within {
     color: $minibadge-blue;
     border-color: $minibadge-blue;
-  }
-
-  @include desktop {
-    max-width: 510px;
   }
 
   @include mobile {
@@ -37,4 +35,3 @@
     }
   }
 }
-
