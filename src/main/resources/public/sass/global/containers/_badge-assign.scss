@@ -1,5 +1,4 @@
 .minibadge-assign {
-
   section.lightbox {
     @include mobile {
       position: absolute;
@@ -16,12 +15,6 @@
     @include mobile {
       box-shadow: 0 2px 5px $shadow;
       height: 50px;
-    }
-  }
-
-  &-myself {
-    .content {
-      width: 720px !important;
     }
   }
 
@@ -49,6 +42,9 @@
 
   &-footer {
     margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+
     @include mobile {
       justify-content: center;
     }
