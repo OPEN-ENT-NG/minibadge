@@ -44,13 +44,6 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.entcore</groupId>
-      <artifactId>common</artifactId>
-      <version>${entCoreVersion}</version>
-      <classifier>fat</classifier>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-unit</artifactId>
       <version>${vertxVersion}</version>
@@ -107,7 +100,7 @@
     <dependency>
       <groupId>io.gatling.highcharts</groupId>
       <artifactId>gatling-charts-highcharts</artifactId>
-      <version>2.2-separation-SNAPSHOT</version>
+      <version>${gatlingHighchartsVersion}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
