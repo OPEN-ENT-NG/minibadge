@@ -1,6 +1,6 @@
 {
   "name": "Minibadge",
-  "version": "2.2.5-dev.0",
+  "version": "2.2.5-dev.1",
   "description": "Minibadge",
   "main": "gulpfile.js",
   "scripts": {
