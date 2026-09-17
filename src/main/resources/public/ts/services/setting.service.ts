@@ -1,5 +1,5 @@
 import {ng} from 'entcore';
-import http, {AxiosResponse} from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import {ISettingResult, Setting} from "../models/setting.model";
 
 export interface ISettingService {
@@ -12,7 +12,7 @@ export const settingService: ISettingService = {
      */
     getGlobalSettings: async (): Promise<Setting> =>
         http.get(`/minibadge/global-settings`)
-            .then((res: AxiosResponse) => new Setting(<ISettingResult>res.data))
+            .then((res: HttpResponse) => new Setting(<ISettingResult>res.data))
 };
 
 export const SettingService = ng.service('SettingService', (): ISettingService => settingService);

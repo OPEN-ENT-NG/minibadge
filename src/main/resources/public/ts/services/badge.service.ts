@@ -1,15 +1,15 @@
 import {ng} from 'entcore';
-import http, {AxiosPromise, AxiosResponse} from 'axios';
+import { http, HttpPromise, HttpResponse } from 'entcore-toolkit';
 import {Badge, IBadgePayload, IBadgesResponses} from "../models/badge.model";
 
 export interface IBadgeService {
     getBadges(payload: IBadgePayload): Promise<Badge[]>;
 
-    privatizeBadgeType(typeId: number): Promise<AxiosPromise>;
+    privatizeBadgeType(typeId: number): Promise<HttpPromise>;
 
-    refuseBadgeType(typeId: number): Promise<AxiosPromise>;
+    refuseBadgeType(typeId: number): Promise<HttpPromise>;
 
-    publishBadgeType(typeId: number): Promise<AxiosPromise>;
+    publishBadgeType(typeId: number): Promise<HttpPromise>;
 }
 
 export const badgeService: IBadgeService = {
@@ -20,7 +20,7 @@ export const badgeService: IBadgeService = {
      */
     getBadges: async (payload: IBadgePayload): Promise<Badge[]> =>
         http.get(`/minibadge/badges${payload.query ? `?query=${payload.query}` : ''}`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 let badgesResponses: IBadgesResponses = res.data;
                 return new Badge().toList(badgesResponses ? badgesResponses.all : []);
             }),
@@ -30,7 +30,7 @@ export const badgeService: IBadgeService = {
      *
      * @param typeId badge type identifier
      */
-    privatizeBadgeType: async (typeId: number): Promise<AxiosPromise> =>
+    privatizeBadgeType: async (typeId: number): Promise<HttpPromise> =>
         http.put(`/minibadge/types/${typeId}/badge/privatize`),
 
     /**
@@ -38,7 +38,7 @@ export const badgeService: IBadgeService = {
      *
      * @param typeId badge type identifier
      */
-    refuseBadgeType: async (typeId: number): Promise<AxiosPromise> =>
+    refuseBadgeType: async (typeId: number): Promise<HttpPromise> =>
         http.put(`/minibadge/types/${typeId}/badge/refuse`),
 
     /**
@@ -46,7 +46,7 @@ export const badgeService: IBadgeService = {
      *
      * @param typeId badge type identifier
      */
-    publishBadgeType: async (typeId: number): Promise<AxiosPromise> =>
+    publishBadgeType: async (typeId: number): Promise<HttpPromise> =>
         http.put(`/minibadge/types/${typeId}/badge/publish`)
 };
 

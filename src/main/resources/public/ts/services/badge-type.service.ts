@@ -1,4 +1,4 @@
-import http, { AxiosResponse } from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import { model, ng } from 'entcore';
 import { rights } from "../core/constants/rights.const";
 import { BadgeType, IBadgeTypeResponse, IBadgeTypesPayload, IBadgeTypesResponses } from "../models/badge-type.model";
@@ -25,7 +25,7 @@ export const badgeTypeService: IBadgeTypeService = {
         http.get(`/minibadge/types?offset=${payload.offset}`
                 + (payload.query ? `&query=${encodeURIComponent(payload.query)}` : '')
                 + (payload.categoryId !== undefined ? `&categoryId=${payload.categoryId}` : ''))
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 let badgeTypesResponses: IBadgeTypesResponses = res.data;
                 return new BadgeType().toList(badgeTypesResponses ? badgeTypesResponses.all : []);
             }),
@@ -37,7 +37,7 @@ export const badgeTypeService: IBadgeTypeService = {
      */
     getBadgeType: async (typeId: number): Promise<BadgeType> =>
         http.get(`/minibadge/types/${typeId}`)
-            .then((res: AxiosResponse) => new BadgeType(<IBadgeTypeResponse>res.data)),
+            .then((res: HttpResponse) => new BadgeType(<IBadgeTypeResponse>res.data)),
 
     /**
      * Get users that gave me this (:typeId) badge typed
@@ -48,7 +48,7 @@ export const badgeTypeService: IBadgeTypeService = {
     getBadgeTypeAssigners: async (badgeType: BadgeType, payload: Paging): Promise<User[]> => {
         if (model.me.hasWorkflow(rights.workflow.receive))
             return http.get(`/minibadge/types/${badgeType.id}/assigners?page=${payload.page}`)
-                .then((res: AxiosResponse) => {
+                .then((res: HttpResponse) => {
                     let usersResponses: IUsersResponses = res.data;
                     if (usersResponses) {
                         badgeType.userAssignersTotal = usersResponses.userAssignersTotal
@@ -67,7 +67,7 @@ export const badgeTypeService: IBadgeTypeService = {
      */
     getBadgeReceivers: async (badgeType: BadgeType, payload: Paging): Promise<User[]> =>
         http.get(`/minibadge/types/${badgeType.id}/receivers?page=${payload.page}`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 let usersResponses: IUsersResponses = res.data;
                 if (usersResponses) {
                     badgeType.receiversTotal = usersResponses.receiversTotal

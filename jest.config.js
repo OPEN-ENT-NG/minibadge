@@ -20,7 +20,4 @@ module.exports = {
         "text",
         "cobertura"
     ],
-    moduleNameMapper: {
-        '^axios$': require.resolve('axios'),
-    },
 };

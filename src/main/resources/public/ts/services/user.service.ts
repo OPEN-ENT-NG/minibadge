@@ -1,4 +1,4 @@
-import http, { AxiosResponse } from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import { ng } from 'entcore';
 import { IUserPayload, IUsersResponses, User } from "../models/user.model";
 
@@ -16,7 +16,7 @@ export const userService: IUserService = {
      */
     searchUsers: async (typeId: number, payload: IUserPayload): Promise<User[]> =>
         http.get(`/minibadge/type/${typeId}/users-search${payload.query ? `?query=${payload.query}` : ''}`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 let usersResponses: IUsersResponses = res.data;
                 return new User().toList(usersResponses ? usersResponses.all : []);
             }),
@@ -28,7 +28,7 @@ export const userService: IUserService = {
      */
     searchUsersToRevoke: async(payload: IUserPayload): Promise<User[]> => 
         http.get(`/minibadge/admin/users-search${payload.query ? `?query=${payload.query}` : ''}`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 return new User().toList(res.data ? res.data.all : []);
             })
 };

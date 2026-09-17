@@ -1,7 +1,7 @@
 import { Behaviours, idiom as lang, model, ng, notify } from 'entcore';
 
 import { IScope } from "angular";
-import { AxiosError } from 'axios';
+import { HttpError } from 'entcore-toolkit';
 import { Subscription } from "rxjs";
 import { MINIBADGE_APP } from "../minibadgeBehaviours";
 import { ActionOption, IActionOptionResponse } from "../models/action-option.model";
@@ -120,7 +120,7 @@ class Controller implements ng.IController, ViewModel {
                 this.$scope.setting.incrementAssignationsNumbers(1);
                 notify.success('minibadge.success.assign')
             })
-            .catch((err: AxiosError) => notify.error('minibadge.error.assign'));
+            .catch((err: HttpError) => notify.error('minibadge.error.assign'));
     }
 
     userAssignersTotal = (): string => this.badgeType && this.badgeType.userAssignersTotal ?

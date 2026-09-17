@@ -1,7 +1,7 @@
 import { idiom as lang, moment, ng, notify } from 'entcore';
 
 import { ILocationService, IScope } from "angular";
-import { AxiosError } from 'axios';
+import { HttpError } from 'entcore-toolkit';
 import { DATE_FORMAT } from "../core/enum/date.enum";
 import { BadgeAssigned, IBadgeAllPayload } from "../models/badge-assigned.model";
 import { Setting } from "../models/setting.model";
@@ -89,7 +89,7 @@ class Controller implements ng.IController, ViewModel {
                     if(data) this.userSearchResults = data.filter((user: User) => !this.isUserSelected(user));
                     safeApply(this.$scope);
                 })
-                .catch((err: AxiosError) => notify.error('minibadge.error.search.users'))
+                .catch((err: HttpError) => notify.error('minibadge.error.search.users'))
         }
         else {
             this.userSearchResults = null;
@@ -142,7 +142,7 @@ class Controller implements ng.IController, ViewModel {
                 notify.success('minibadge.confirm.revoke.users.success')
                 safeApply(this.$scope);
             })
-            .catch((err: AxiosError) => notify.error('minibadge.confirm.revoke.users.error'))
+            .catch((err: HttpError) => notify.error('minibadge.confirm.revoke.users.error'))
     }
 
     private async initAllBadges() {

@@ -1,5 +1,5 @@
 import { IScope } from "angular";
-import { AxiosError } from "axios";
+import { HttpError } from 'entcore-toolkit';
 import { Behaviours, idiom as lang, notify } from "entcore";
 import { Subscription } from "rxjs";
 import { MINIBADGE_APP } from "../minibadgeBehaviours";
@@ -93,7 +93,7 @@ class ViewModel implements IViewModel {
                         }
                         safeApply(this.$scope);
                     })
-                    .catch((err: AxiosError) => notify.error('minibadge.error.get.badge.type'));
+                    .catch((err: HttpError) => notify.error('minibadge.error.get.badge.type'));
             }));
 
         this.$scope.$parent.$on("$destroy", () => {
@@ -122,7 +122,7 @@ class ViewModel implements IViewModel {
                         .filter((user: User) => !this.isUserSelected(user));
                     safeApply(this.$scope);
                 })
-                .catch((err: AxiosError) => notify.error('minibadge.error.search.users'))
+                .catch((err: HttpError) => notify.error('minibadge.error.search.users'))
         else {
             this.userSearchResults = null;
             safeApply(this.$scope);
@@ -155,7 +155,7 @@ class ViewModel implements IViewModel {
                     this.closeLightbox();
                     safeApply(this.$scope);
                 })
-                .catch((err: AxiosError) => notify.error('minibadge.error.assign'))
+                .catch((err: HttpError) => notify.error('minibadge.error.assign'))
         }
     }
 

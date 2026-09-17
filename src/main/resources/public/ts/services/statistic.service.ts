@@ -1,4 +1,4 @@
-import http, { AxiosResponse } from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import { ng } from 'entcore';
 import { IStatisticsResponse, Statistics } from '../models/statistic.model';
 
@@ -17,7 +17,7 @@ export const statisticService: IStatisticService = {
 
         return http
             .get(`/minibadge/statistics`, { params })
-            .then((res: AxiosResponse) => new Statistics(<IStatisticsResponse>res.data));
+            .then((res: HttpResponse) => new Statistics(<IStatisticsResponse>res.data));
     },
 };
 

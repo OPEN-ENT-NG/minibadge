@@ -1,4 +1,4 @@
-import http, { AxiosResponse } from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import { ng } from 'entcore';
 import { BadgeAssigned, IBadgeGivenPayload } from "../models/badge-assigned.model";
 import { IBadgeTypesResponses } from "../models/badge-type.model";
@@ -6,7 +6,7 @@ import { IBadgeTypesResponses } from "../models/badge-type.model";
 export interface IBadgesGivenService {
     getBadgeGiven(payload: IBadgeGivenPayload): Promise<BadgeAssigned[]>;
 
-    revokeBadgeGiven(badgeGiven: BadgeAssigned): Promise<AxiosResponse>;
+    revokeBadgeGiven(badgeGiven: BadgeAssigned): Promise<HttpResponse>;
 }
 
 
@@ -35,7 +35,7 @@ export const badgesGivenService: IBadgesGivenService = {
         }
 
         return http.get(`/minibadge/assigned/given?${url}`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 let badgeTypesResponses: IBadgeTypesResponses = res.data;
                 return new BadgeAssigned().toList(badgeTypesResponses ? badgeTypesResponses.all : []);
             })

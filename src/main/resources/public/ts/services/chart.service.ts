@@ -1,11 +1,11 @@
 import {Me, model, ng} from 'entcore';
-import http, {AxiosPromise, AxiosResponse} from 'axios';
+import { http, HttpPromise, HttpResponse } from 'entcore-toolkit';
 import {PREFERENCES} from "../core/enum/preferences.enum";
 import {Chart, IChartResponse} from "../models/chart.model";
 import {rights} from "../core/constants/rights.const";
 
 export interface IChartService {
-    saveChart(isChartAccepted: boolean, isMinibadgeAccepted: boolean): Promise<[void, AxiosResponse]>;
+    saveChart(isChartAccepted: boolean, isMinibadgeAccepted: boolean): Promise<[void, HttpResponse]>;
 
     viewChart(): Promise<void>;
 
@@ -22,7 +22,7 @@ export const chartService: IChartService = {
      * @param isChartAccepted true if chart is accepted
      * @param isMinibadgeAccepted true if actions relative to current user (assign/receive badge) are accepted
      */
-    saveChart: async (isChartAccepted: boolean, isMinibadgeAccepted: boolean): Promise<[void, AxiosResponse]> => {
+    saveChart: async (isChartAccepted: boolean, isMinibadgeAccepted: boolean): Promise<[void, HttpResponse]> => {
         if (!Me.preferences[PREFERENCES.CHART]) {
             await Me.savePreference(PREFERENCES.CHART);
             await Me.preference(PREFERENCES.CHART)
@@ -60,12 +60,12 @@ export const chartService: IChartService = {
             validateChart: new Date().toISOString()
         };
 
-        let chartRequest: AxiosPromise;
+        let chartRequest: HttpPromise;
         if (isNewlyAccepted && isReceiveWorkflow) chartRequest = http.put(`/minibadge/accept`);
         else if (isReceivedNewlyRefused) chartRequest = http.put(`/minibadge/refuse`);
 
         return Promise.all([Me.savePreference(PREFERENCES.CHART), chartRequest])
-            .then((values: [void, AxiosResponse]) => values);
+            .then((values: [void, HttpResponse]) => values);
     },
 
     viewChart: async (): Promise<void> => {
@@ -79,7 +79,7 @@ export const chartService: IChartService = {
     },
 
     getChart: async (): Promise<Chart> => Me.preference(PREFERENCES.CHART)
-        .then((res: AxiosResponse) => new Chart(<IChartResponse>res)),
+        .then((res: HttpResponse) => new Chart(<IChartResponse>res)),
 
     getUserChart: async (): Promise<Chart> => chartService.getChart()
         .catch(() => new Chart(<IChartResponse>{

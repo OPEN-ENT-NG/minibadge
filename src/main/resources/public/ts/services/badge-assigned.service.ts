@@ -1,9 +1,9 @@
 import {ng} from 'entcore';
-import http, {AxiosPromise} from 'axios';
+import { http, HttpPromise } from 'entcore-toolkit';
 import {IBadgeAssignedPayload} from "../models/badge-assigned.model";
 
 export interface IBadgeAssignedService {
-    assign(typeId: number, params: IBadgeAssignedPayload): Promise<AxiosPromise>;
+    assign(typeId: number, params: IBadgeAssignedPayload): Promise<HttpPromise>;
 }
 
 export const badgeAssignedService: IBadgeAssignedService = {
@@ -13,7 +13,7 @@ export const badgeAssignedService: IBadgeAssignedService = {
      * @param typeId type identifier
      * @param params to assign badge
      */
-    assign: async (typeId: number, params: IBadgeAssignedPayload): Promise<AxiosPromise> =>
+    assign: async (typeId: number, params: IBadgeAssignedPayload): Promise<HttpPromise> =>
         http.post(`/minibadge/types/${typeId}/assign`, params)
 };
 

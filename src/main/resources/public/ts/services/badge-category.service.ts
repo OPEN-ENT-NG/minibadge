@@ -1,4 +1,4 @@
-import http, { AxiosResponse } from 'axios';
+import { http, HttpResponse } from 'entcore-toolkit';
 import { ng } from 'entcore';
 import { BadgeCategory } from '../models/badge-category.model';
 
@@ -12,7 +12,7 @@ export const badgeCategoryService: IBadgeCategoryService = {
      */
     getBadgeCategories: async (): Promise<BadgeCategory[]> =>
         http.get(`/minibadge/categories`)
-            .then((res: AxiosResponse) => {
+            .then((res: HttpResponse) => {
                 return new BadgeCategory().toList(res.data ?? []);
             }),
 };
