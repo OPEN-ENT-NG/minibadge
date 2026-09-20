@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, LoadingScreen, Modal } from '@edifice.io/react';
+import { Alert, Button, Checkbox, Flex, LoadingScreen, Modal } from '@edifice.io/react';
 import { ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -169,33 +169,47 @@ export const CharterGate = ({
   return (
     <>
       <Modal id="minibadge-chart-lightbox" isOpen={isLightboxVisible} onModalClose={handleLightboxModalClose} size="lg" scrollable>
-        <Modal.Header onModalClose={handleLightboxModalClose}>{t('minibadge.chart.welcome')}</Modal.Header>
+        {/* Title changed to `minibadge.chart.title` (the actual official
+            name of what this modal is — "Conditions générales d'utilisation
+            des badges sur l'ENT") instead of the generic `chart.welcome`
+            greeting, which is now the body's own lead-in line below (still
+            shown, just no longer doubling as the modal's title while a
+            near-identical `<h2>` repeated it again inside the body). */}
+        <Modal.Header onModalClose={handleLightboxModalClose}>{t('minibadge.chart.title')}</Modal.Header>
         <Modal.Body>
-          <p>{t('minibadge.chart.consent.needing')}</p>
-          <h2>{t('minibadge.chart.title')}</h2>
-          <p>{t('minibadge.chart.text.1')}</p>
-          <p>{t('minibadge.chart.text.2')}</p>
+          <p className="lead mb-16">{t('minibadge.chart.welcome')}</p>
+          <p className="mb-16">{t('minibadge.chart.consent.needing')}</p>
+          <p className="mb-8">{t('minibadge.chart.text.1')}</p>
+          <p className="mb-16">{t('minibadge.chart.text.2')}</p>
           {/* Only translated key with markup (an inline <ul>): the app's own
-              i18n bundle, not user input. */}
-          <div dangerouslySetInnerHTML={{ __html: t('minibadge.chart.text.3') }} />
-          <p>{t('minibadge.chart.text.4')}</p>
-          <Checkbox
-            label={t('minibadge.chart.accept')}
-            checked={isChartAccepted}
-            onChange={(event) => handleChartAcceptedChange(event.target.checked)}
+              i18n bundle, not user input. Boxed (gray background, padded,
+              rounded) so the actual commitments stand out from the
+              surrounding prose instead of blending into one long block of
+              text. */}
+          <div
+            className="bg-gray-200 rounded-4 p-16 mb-16"
+            dangerouslySetInnerHTML={{ __html: t('minibadge.chart.text.3') }}
           />
-          <Checkbox
-            label={t('minibadge.chart.receive.accept')}
-            checked={isMinibadgeAccepted}
-            onChange={(event) => handleMinibadgeAcceptedChange(event.target.checked)}
-          />
+          <p className="mb-16">{t('minibadge.chart.text.4')}</p>
+          <Flex direction="column" gap="8">
+            <Checkbox
+              label={t('minibadge.chart.accept')}
+              checked={isChartAccepted}
+              onChange={(event) => handleChartAcceptedChange(event.target.checked)}
+            />
+            <Checkbox
+              label={t('minibadge.chart.receive.accept')}
+              checked={isMinibadgeAccepted}
+              onChange={(event) => handleMinibadgeAcceptedChange(event.target.checked)}
+            />
+          </Flex>
           {/* REVIEW FIX (react-reviewer, HIGH): `useValidateCharter` failing
               used to produce zero visible feedback — the button just
               re-enabled with no explanation. Mirrors `main.ts:117-119`'s
               `notify.error('minibadge.error.chart.validate')`; that key is
               already shipped in `i18n/fr.json`. */}
           {isValidateError ? (
-            <Alert type="danger">{t('minibadge.error.chart.validate')}</Alert>
+            <Alert type="danger" className="mt-16">{t('minibadge.error.chart.validate')}</Alert>
           ) : null}
         </Modal.Body>
         <Modal.Footer>

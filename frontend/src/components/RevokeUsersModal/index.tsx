@@ -1,8 +1,8 @@
-import { Alert, Button, IconButton, Modal, useToast } from '@edifice.io/react';
-import { IconDelete } from '@edifice.io/react/icons';
+import { Alert, Button, Modal, useToast } from '@edifice.io/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SelectedUsersList, UserSearchResultsList } from '~/components/UserPickerLists';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { MinibadgeUser } from '~/models/user';
 import { useRevokeCharter } from '~/services/queries/charter';
@@ -145,8 +145,8 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
     <Modal id="minibadge-revoke-users" isOpen={isOpen} onModalClose={handleModalClose} size="lg" scrollable>
         <Modal.Header onModalClose={handleModalClose}>{t('minibadge.revoke.users.modal.title')}</Modal.Header>
         <Modal.Body>
-          <p>{t('minibadge.revoke.users.modal.info')}</p>
-          <p>{t('minibadge.revoke.users.modal.choose')}</p>
+          <p className="lead mb-16">{t('minibadge.revoke.users.modal.info')}</p>
+          <h3 className="h6 mb-8">{t('minibadge.revoke.users.modal.choose')}</h3>
           <UserSearchBar
             key={searchBarResetToken}
             ariaLabel={t('minibadge.revoke.users.modal.choose')}
@@ -155,36 +155,26 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
           {searchUsersQuery.isError ? <Alert type="danger">{t('minibadge.error.search.users')}</Alert> : null}
           <div aria-live="polite">
             {trimmedQuery && results.length > 0 ? (
-              <ul aria-label={t('minibadge.revoke.users.modal.choose')}>
-                {results.map((candidate) => (
-                  <li key={candidate.id}>
-                    <button type="button" onClick={() => handleSelect(candidate)}>
-                      {displayUserLabel(candidate)}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <UserSearchResultsList
+                users={results}
+                ariaLabel={t('minibadge.revoke.users.modal.choose')}
+                getLabel={displayUserLabel}
+                onSelect={handleSelect}
+              />
             ) : null}
             {trimmedQuery && results.length === 0 && !searchUsersQuery.isFetching ? (
-              <p>{t('minibadge.no.result')}</p>
+              <p className="small text-gray-700 mb-0">{t('minibadge.no.result')}</p>
             ) : null}
           </div>
 
-          <h3>{t('minibadge.selected.persons')}&nbsp;:</h3>
-          <ul aria-label={t('minibadge.selected.persons')}>
-            {selectedUsers.map((selected) => (
-              <li key={selected.id}>
-                <span>{displayUserLabel(selected)}</span>
-                <IconButton
-                  icon={<IconDelete />}
-                  aria-label={`Retirer ${displayUserLabel(selected)}`}
-                  color="danger"
-                  variant="ghost"
-                  onClick={() => handleRemove(selected.id)}
-                />
-              </li>
-            ))}
-          </ul>
+          <h3 className="h6 mb-8 mt-16">{t('minibadge.selected.persons')}&nbsp;:</h3>
+          <SelectedUsersList
+            users={selectedUsers}
+            ariaLabel={t('minibadge.selected.persons')}
+            getLabel={displayUserLabel}
+            getRemoveLabel={(user) => `Retirer ${displayUserLabel(user)}`}
+            onRemove={handleRemove}
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button color="tertiary" variant="ghost" onClick={handleClose}>

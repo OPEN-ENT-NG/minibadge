@@ -42,18 +42,37 @@ import { ReactNode } from 'react';
  * (`level`/`children`/`className`, no unrelated constraints) for the label,
  * plain semantic HTML for the rest — same approach `BadgeSection` (Phase 2)
  * already uses for its own titled-container case.
+ *
+ * Visual chrome (`bg-white rounded-4 shadow-sm p-16`): this component had
+ * NONE at all despite its name — a bare `<section>`, indistinguishable from
+ * plain text on the page. `h-100` matches `BadgeCard`'s own convention: the
+ * Statistics grid (`Grid`, CSS Grid with default `align-items: stretch`)
+ * already stretches every `Grid.Col` in a row to the tallest one; without
+ * `h-100` the card itself wouldn't fill that already-equal-height cell.
  */
 export interface StatisticsCardProps {
   icon?: ReactNode;
   label: string;
   children: ReactNode;
   className?: string;
+  /**
+   * KPI-tile style: stacks the icon above the label, both centered, label
+   * rendered smaller (`headingStyle="h5"` — a Bootstrap size override,
+   * `Heading`'s semantic `level` stays `h3`, so the page's heading hierarchy
+   * is unaffected). Defaults to `false` — the icon sitting inline next to
+   * the label at full `h3` size, unchanged for every other card on the page.
+   */
+  centered?: boolean;
 }
 
-export const StatisticsCard = ({ icon, label, children, className }: StatisticsCardProps) => {
+export const StatisticsCard = ({ icon, label, children, className, centered }: StatisticsCardProps) => {
   return (
-    <section className={className}>
-      <Heading level="h3">
+    <section className={`bg-white rounded-4 shadow-sm p-16 h-100${className ? ` ${className}` : ''}`}>
+      <Heading
+        level="h3"
+        headingStyle={centered ? 'h5' : undefined}
+        className={centered ? 'd-flex flex-column align-items-center gap-8' : undefined}
+      >
         {icon}
         <span>{label}</span>
       </Heading>

@@ -1,6 +1,6 @@
 import { odeServices } from '@edifice.io/client';
-import { MockedProvider } from '@edifice.io/react';
-import { QueryClient } from '@tanstack/react-query';
+import { EdificeClientProvider, EdificeThemeContext } from '@edifice.io/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -22,12 +22,17 @@ import { router } from '~/routes';
 beforeEach(() => odeServices.cache().clearCache());
 
 /**
- * Smoke test for the app shell (no features yet): mounts the real router
- * inside `@edifice.io/react`'s `MockedProvider` (which substitutes a fake
- * theme context for `EdificeThemeProvider` — the real one manipulates a
- * `<link id="favicon">` element that doesn't exist in the jsdom test
- * document), and checks that the root route and the 404 route both
- * render.
+ * Smoke test for the app shell: mounts the real router inside the real
+ * `EdificeClientProvider` (so `useUser()`'s `authorizedActions` come from
+ * this app's own MSW handlers, e.g. `~/mocks/handlers`), with a fake theme
+ * context standing in for `EdificeThemeProvider` — the real one manipulates
+ * a `<link id="favicon">` element that doesn't exist in the jsdom test
+ * document. `@edifice.io/react`'s own `MockedProvider` can't be used here:
+ * since `@edifice.io/react@2.6`, it injects a static mock user with empty
+ * `authorizedActions` instead of exercising `EdificeClientProvider`, which
+ * would make every workflow-rights check in this app resolve to `false`
+ * regardless of the MSW fixtures (mirrors the pattern already used by
+ * `routes/root/CharterGate/index.test.tsx`).
  */
 function renderApp(initialPath: string) {
   window.history.pushState({}, '', initialPath);
@@ -37,9 +42,13 @@ function renderApp(initialPath: string) {
   });
 
   return render(
-    <MockedProvider>
-      <RouterProvider router={router(queryClient)} />
-    </MockedProvider>,
+    <QueryClientProvider client={queryClient}>
+      <EdificeClientProvider params={{ app: 'minibadge' }}>
+        <EdificeThemeContext.Provider value={{ theme: undefined }}>
+          <RouterProvider router={router(queryClient)} />
+        </EdificeThemeContext.Provider>
+      </EdificeClientProvider>
+    </QueryClientProvider>,
   );
 }
 

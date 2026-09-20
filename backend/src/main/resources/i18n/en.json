@@ -1,5 +1,6 @@
 {
   "minibadge.admin": "Admin",
+  "minibadge.back": "Back",
   "minibadge.badge": "Badge",
   "minibadge.badge.assign": "Award badge",
   "minibadge.badge.assign.myself.button": "Award badge to myself",
@@ -63,6 +64,7 @@
   "minibadge.selected.persons": "Selected people",
   "minibadge.selfi.badge": "Selfi badge",
   "minibadge.settings": "Settings",
+  "minibadge.terms.of.use": "Terms of use",
   "minibadge.success.assign": "Badge assignment successful",
   "minibadge.statistics": "Statistics",
   "minibadge.statistics.assigned.times": "Assigned {0} times",
@@ -95,6 +97,7 @@
   "minibadge.confirm.revoke.users.modal.confirm": "Confirmer",
   "minibadge.confirm.revoke.users.success": "La participation a bien été révoquée.",
   "minibadge.confirm.revoke.users.error": "Une erreur est survenue lors de la révocation.",
+  "minibadge.filter.by.category": "Filter by category",
   "minibadge.filter.stats.per.period": "Filtrer les statistiques par période",
   "minibadge.filter.stats.complete.history": "Historique complet",
   "minibadge.filter.stats.last.thirty.days": "30 derniers jours",

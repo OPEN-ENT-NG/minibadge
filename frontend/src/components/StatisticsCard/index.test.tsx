@@ -35,4 +35,29 @@ describe('StatisticsCard', () => {
 
     expect(screen.getByText('child content')).toBeInTheDocument();
   });
+
+  it('does not shrink or center the heading by default (centered=false)', () => {
+    render(<StatisticsCard label="Les badges">content</StatisticsCard>);
+
+    const heading = screen.getByRole('heading', { name: 'Les badges' });
+    expect(heading).not.toHaveClass('h5');
+    expect(heading).not.toHaveClass('align-items-center');
+  });
+
+  it('stacks the icon above a smaller, centered label when centered is true (KPI-tile style)', () => {
+    render(
+      <StatisticsCard centered label="42 badges décernés" icon={<span data-testid="fake-icon" />}>
+        content
+      </StatisticsCard>,
+    );
+
+    const heading = screen.getByRole('heading', { name: '42 badges décernés' });
+    // `headingStyle="h5"` only changes the visual size class, not the real
+    // (semantic) heading level, which stays h3 — the page's heading
+    // hierarchy is unaffected by this purely visual option.
+    expect(heading.tagName).toBe('H3');
+    expect(heading).toHaveClass('h5');
+    expect(heading).toHaveClass('flex-column');
+    expect(heading).toHaveClass('align-items-center');
+  });
 });

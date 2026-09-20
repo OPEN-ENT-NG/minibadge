@@ -82,6 +82,18 @@ const defaultHandlers = [
     });
   }),
 
+  // `AppHeader`'s unread-messages badge (added by @edifice.io/react since
+  // this app's original 2.2.4 pin) polls this endpoint unconditionally.
+  http.get('/conversation/api/count/inbox', () => {
+    return HttpResponse.json({ count: 0 });
+  }),
+
+  // Per-app public conf (added by @edifice.io/client since this app's
+  // original 2.2.4 pin), fetched unconditionally by `EdificeClientProvider`.
+  http.get('/minibadge/conf/public', () => {
+    return HttpResponse.json({});
+  }),
+
   http.get('/directory/userbook/a1b2c3d4', () => {
     return HttpResponse.json({
       userid: 'a1b2c3d4',
@@ -94,7 +106,20 @@ const defaultHandlers = [
   }),
 
   http.get('/applications-list', () => {
-    return HttpResponse.json({ apps: [] });
+    return HttpResponse.json({
+      apps: [
+        {
+          address: '/minibadge',
+          display: true,
+          displayName: 'Minibadge',
+          icon: 'minibadge',
+          isExternal: false,
+          name: 'Minibadge',
+          prefix: '/minibadge',
+          scope: [],
+        },
+      ],
+    });
   }),
 
   http.get('/assets/theme-conf.js', () => {

@@ -7,11 +7,34 @@ import { fakeBadge, fakeBadgeType } from '~/mocks/handlers';
 import { BadgeCard } from '.';
 
 describe('BadgeCard', () => {
-  it('renders the badge type label and short description', () => {
+  it('renders the badge type label and full short description', () => {
     render(<BadgeCard badge={fakeBadge} />);
 
     expect(screen.getByText(fakeBadge.badgeType.label)).toBeInTheDocument();
     expect(screen.getByText(fakeBadge.badgeType.descriptionShort!)).toBeInTheDocument();
+  });
+
+  it('does not truncate the description to a single line (not rendered via Card.Text)', () => {
+    const longDescription = 'Une description volontairement longue pour vérifier qu’elle ne soit pas coupée après une seule ligne.';
+    render(
+      <BadgeCard badge={{ ...fakeBadge, badgeType: { ...fakeBadge.badgeType, descriptionShort: longDescription } }} />,
+    );
+
+    const description = screen.getByText(longDescription);
+    expect(description).not.toHaveClass('text-truncate');
+    expect(description).not.toHaveClass('text-truncate-1');
+  });
+
+  it('renders the badge type categories as (colored) chips', () => {
+    render(<BadgeCard badge={fakeBadge} />);
+
+    expect(screen.getByText(fakeBadge.badgeType.categories[0].name)).toBeInTheDocument();
+  });
+
+  it('renders no category chips when the badge type has none', () => {
+    render(<BadgeCard badge={{ ...fakeBadge, badgeType: { ...fakeBadge.badgeType, categories: [] } }} />);
+
+    expect(screen.queryByText(fakeBadge.badgeType.categories[0].name)).not.toBeInTheDocument();
   });
 
   it('does not render a clickable overlay when no onClick is given', () => {
@@ -79,59 +102,28 @@ describe('BadgeCard', () => {
       expect(screen.getByText(fakeBadgeType.descriptionShort!)).toBeInTheDocument();
     });
 
-    it('renders no footer button when footerAction is absent', () => {
+    it('strips HTML markup from the description instead of showing the literal tags', () => {
+      render(
+        <BadgeCard badgeType={{ ...fakeBadgeType, descriptionShort: '<p>Acte</p><p>d’entraide</p>' }} />,
+      );
+
+      expect(screen.getByText('Acte d’entraide')).toBeInTheDocument();
+      expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
+    });
+
+    it('renders no footer at all in catalogue mode (no more "Décerner" shortcut on the card)', () => {
       render(<BadgeCard badgeType={fakeBadgeType} />);
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });
 
-    it('renders the single footer button and calls its onClick', async () => {
-      const user = userEvent.setup();
-      const onFooterAction = vi.fn();
-      render(
-        <BadgeCard
-          badgeType={fakeBadgeType}
-          footerAction={{ label: 'Décerner', onClick: onFooterAction }}
-        />,
-      );
+    it('renders the badge type picture as a cover image', () => {
+      // Decorative (`alt=""`, matching `routes/statistics`/`routes/badge-type-detail`'s
+      // same badge pictures) — excluded from the accessibility tree's "img"
+      // role by design, so queried by tag instead of by role.
+      const { container } = render(<BadgeCard badgeType={fakeBadgeType} />);
 
-      const footerButton = screen.getByRole('button', { name: 'Décerner' });
-      expect(footerButton).toBeInTheDocument();
-
-      await user.click(footerButton);
-
-      expect(onFooterAction).toHaveBeenCalledTimes(1);
-    });
-
-    /**
-     * PHASE 4 (Task 2 fix): proves `onClick` (body → navigate) and
-     * `footerAction` (footer → "Décerner") coexist on the SAME card without
-     * either handler stealing the other's click — this is the exact
-     * combination the badge-types library screen needs for every card a user
-     * `canAssign()` on. jsdom/Testing Library dispatch events directly to the
-     * target node rather than doing real coordinate-based hit-testing, so
-     * this cannot exercise the CSS stacking fix itself (see the component's
-     * doc comment for that), but it does prove both handlers are wired to
-     * their own, distinct elements and fire independently.
-     */
-    it('calls the right handler when both onClick and footerAction are set on the same card', async () => {
-      const user = userEvent.setup();
-      const onBodyClick = vi.fn();
-      const onFooterAction = vi.fn();
-      render(
-        <BadgeCard
-          badgeType={fakeBadgeType}
-          onClick={onBodyClick}
-          footerAction={{ label: 'Décerner', onClick: onFooterAction }}
-        />,
-      );
-
-      await user.click(screen.getByRole('button', { name: 'Décerner' }));
-      expect(onFooterAction).toHaveBeenCalledTimes(1);
-      expect(onBodyClick).not.toHaveBeenCalled();
-
-      await user.click(screen.getByRole('button', { name: 'card.open.resource' }));
-      expect(onBodyClick).toHaveBeenCalledTimes(1);
-      expect(onFooterAction).toHaveBeenCalledTimes(1);
+      const image = container.querySelector('img');
+      expect(image).toHaveAttribute('src', expect.stringContaining(`/minibadge/public/img/${fakeBadgeType.pictureId}`));
     });
   });
 });

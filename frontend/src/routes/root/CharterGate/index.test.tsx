@@ -80,7 +80,7 @@ describe('CharterGate', () => {
 
     renderGate();
 
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(await screen.findByRole('dialog', { name: 'minibadge.chart.title' })).toBeInTheDocument();
     expect(screen.getByText('minibadge.chart.welcome')).toBeInTheDocument();
     expect(screen.queryByText('Contenu protégé')).not.toBeInTheDocument();
   });

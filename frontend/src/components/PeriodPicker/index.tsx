@@ -1,4 +1,4 @@
-import { FormControl } from '@edifice.io/react';
+import { Flex, FormControl } from '@edifice.io/react';
 import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -52,7 +52,10 @@ export const PeriodPicker = ({
     onChange({ startDate: value.startDate, endDate: event.target.value || undefined });
 
   return (
-    <div className={className}>
+    // `FormControl` renders as a block-level element (label above input), so
+    // without an explicit row wrapper the "Du"/"Au" pair stacked vertically
+    // instead of sitting side by side.
+    <Flex wrap="wrap" align="end" gap="8" className={className}>
       <FormControl id={`${id}-start`}>
         <FormControl.Label>{t('minibadge.periode.date.from')}</FormControl.Label>
         <FormControl.Input
@@ -71,6 +74,6 @@ export const PeriodPicker = ({
           onChange={handleEndDateChange}
         />
       </FormControl>
-    </div>
+    </Flex>
   );
 };

@@ -1,15 +1,20 @@
-import { EmptyScreen, emptyScreenMapping } from '@edifice.io/react';
+import { EmptyScreen } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
+
+import illuSearch from '~/assets/illu-search.svg';
 
 /**
  * Props verified against the installed `@edifice.io/react` type declarations
  * (`node_modules/@edifice.io/react/dist/components/EmptyScreen/EmptyScreen.d.ts`):
  * `imageSrc` (required), `title`, `text`, `className`.
  *
- * `imageSrc` defaults to the design system's generic "empty" illustration
- * (`emptyScreenMapping.one.empty`) — `'minibadge'` is not one of the fixed
- * `AppKeys` the mapping supports, so a minibadge-specific illustration isn't
- * available; callers may override with their own `imageSrc`.
+ * `imageSrc` defaults to `illu-search.svg`, copied into this project's own
+ * `src/assets/` (not resolved through `@edifice.io/bootstrap`'s bundled
+ * images or `emptyScreenMapping`, neither of which ship this specific
+ * illustration) — `'minibadge'` isn't one of the fixed `AppKeys`
+ * `emptyScreenMapping` supports either way, so there's no design-system
+ * asset specific to this app; callers may override with their own
+ * `imageSrc`.
  *
  * `text` defaults to the existing `minibadge.badge.empty.statement` key
  * ("Aucun badge ne correspond à votre recherche", already shipped in
@@ -27,7 +32,7 @@ export const EmptyBadgeList = ({ title, text, imageSrc, className }: EmptyBadgeL
 
   return (
     <EmptyScreen
-      imageSrc={imageSrc ?? emptyScreenMapping.one.empty}
+      imageSrc={imageSrc ?? illuSearch}
       title={title}
       text={text ?? t('minibadge.badge.empty.statement')}
       className={className}

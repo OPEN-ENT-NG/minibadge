@@ -19,9 +19,9 @@
     "test:watch": "vitest --watch"
   },
   "dependencies": {
-    "@edifice.io/bootstrap": "2.2.4",
-    "@edifice.io/client": "2.2.4",
-    "@edifice.io/react": "2.2.4",
+    "@edifice.io/bootstrap": "develop",
+    "@edifice.io/client": "develop",
+    "@edifice.io/react": "develop",
     "@react-spring/web": "9.7.5",
     "@tanstack/react-query": "5.62.7",
     "apexcharts": "4.7.0",

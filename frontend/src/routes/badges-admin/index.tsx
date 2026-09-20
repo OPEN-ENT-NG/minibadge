@@ -1,4 +1,4 @@
-import { Alert, Button, LoadingScreen, Table } from '@edifice.io/react';
+import { Alert, Button, Flex, LoadingScreen, Table } from '@edifice.io/react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
@@ -112,21 +112,32 @@ export const BadgesAdmin = () => {
     <div>
       {badgesAssignedAllQuery.isError ? <Alert type="danger">{t('minibadge.error.get.badges')}</Alert> : null}
 
-      <PeriodPicker value={period} onChange={setPeriod} />
-      <UserSearchBar
-        ariaLabel={t('minibadge.badge.given.search')}
-        placeholder={t('minibadge.badge.given.search')}
-        onSearch={setSearchQuery}
-      />
-      <Button color="danger" variant="filled" onClick={() => setIsRevokeUsersModalOpen(true)}>
-        {t('minibadge.revoke.users.modal.title')}
-      </Button>
+      {/* Padded gray box matches communities' `SearchBarCommunities`. Kept
+          on a single row (`nowrap`): the search bar grows to fill the
+          remaining space (`flex-fill`) between the two fixed-width controls
+          on either side of it. */}
+      {/* `align="end"`, not `"center"`: `PeriodPicker`'s label sits above
+          its inputs, making it taller than the label-less search bar —
+          centering by overall height would misalign the actual input
+          fields. Aligning to the end (bottom) levels the two input rows. */}
+      <Flex wrap="nowrap" align="end" gap="16" className="p-24 bg-gray-200 mb-16">
+        <PeriodPicker value={period} onChange={setPeriod} />
+        <UserSearchBar
+          ariaLabel={t('minibadge.badge.given.search')}
+          placeholder={t('minibadge.badge.given.search')}
+          onSearch={setSearchQuery}
+          className="flex-fill"
+        />
+        <Button color="danger" variant="filled" onClick={() => setIsRevokeUsersModalOpen(true)}>
+          {t('minibadge.revoke.users.modal.title')}
+        </Button>
+      </Flex>
 
       <div aria-live="polite">
         {badgesAssignedAllQuery.isLoading ? (
           <LoadingScreen />
         ) : rows.length === 0 ? (
-          <EmptyBadgeList />
+          <EmptyBadgeList title={t('minibadge.no.result')} />
         ) : (
           <Table>
             <Table.Thead>

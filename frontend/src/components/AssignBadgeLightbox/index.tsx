@@ -1,8 +1,8 @@
-import { Alert, Button, IconButton, Modal, useEdificeClient, useToast } from '@edifice.io/react';
-import { IconDelete } from '@edifice.io/react/icons';
+import { Alert, Button, Modal, useEdificeClient, useToast } from '@edifice.io/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SelectedUsersList, UserSearchResultsList } from '~/components/UserPickerLists';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { BadgeType } from '~/models/badgeType';
 import { MinibadgeUser } from '~/models/user';
@@ -179,7 +179,7 @@ export const AssignBadgeLightbox = ({ badgeType, isOpen, onClose, onAssigned }: 
         {t('minibadge.badge.assign')} {badgeType?.label}
       </Modal.Header>
       <Modal.Body>
-        <h3>{t('minibadge.choose.users.to.assign')}</h3>
+        <h3 className="h6 mb-8">{t('minibadge.choose.users.to.assign')}</h3>
         {/* `UserSearchBar` (Phase 1) is uncontrolled internally (no `value`
             prop — see its own doc comment), so remounting it via `key` is
             how its visible text is cleared, mirroring `onSelectUser`'s
@@ -206,57 +206,47 @@ export const AssignBadgeLightbox = ({ badgeType, isOpen, onClose, onAssigned }: 
             (`ts/directives/search/search-results/search-results.html:16`). */}
         <div aria-live="polite">
           {trimmedQuery && results.length > 0 ? (
-            <ul aria-label={t('minibadge.choose.users.to.assign')}>
-              {results.map((candidate) => (
-                <li key={candidate.id}>
-                  <button type="button" onClick={() => handleSelect(candidate)}>
-                    {displayUserName(candidate)}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <UserSearchResultsList
+              users={results}
+              ariaLabel={t('minibadge.choose.users.to.assign')}
+              getLabel={displayUserName}
+              onSelect={handleSelect}
+            />
           ) : null}
           {trimmedQuery && results.length === 0 && !searchUsersQuery.isFetching ? (
-            <p>{t('minibadge.no.result')}</p>
+            <p className="small text-gray-700 mb-0">{t('minibadge.no.result')}</p>
           ) : null}
         </div>
 
-        <h3>
+        <h3 className="h6 mb-8 mt-16">
           {t('minibadge.selected.persons')}&nbsp;:
         </h3>
-        <ul aria-label={t('minibadge.selected.persons')}>
-          {selectedUsers.map((selected) => (
-            <li key={selected.id}>
-              <span>{displayUserName(selected)}</span>
-              {/* The real `minibadge-selected-list` directive gives this icon
-                  NO accessible label at all (`<i class="close" ng-click="...">`,
-                  `selected-list.html:3`) — a plain hardcoded string (not an
-                  i18n key: the plan's "no new i18n key" constraint is about the
-                  translation bundles, not about improving on a total a11y gap
-                  the source never addressed) naming the specific person is
-                  strictly better a11y and, unlike reusing an unrelated
-                  existing key (e.g. "minibadge.cancel", already the footer's
-                  own button label), it stays unambiguous per row. */}
-              <IconButton
-                icon={<IconDelete />}
-                aria-label={`Retirer ${displayUserName(selected)}`}
-                color="danger"
-                variant="ghost"
-                onClick={() => handleRemove(selected.id)}
-              />
-            </li>
-          ))}
-        </ul>
+        {/* The real `minibadge-selected-list` directive gives the remove icon
+            NO accessible label at all (`<i class="close" ng-click="...">`,
+            `selected-list.html:3`) — a plain hardcoded string (not an i18n
+            key: the plan's "no new i18n key" constraint is about the
+            translation bundles, not about improving on a total a11y gap the
+            source never addressed) naming the specific person is strictly
+            better a11y and, unlike reusing an unrelated existing key (e.g.
+            "minibadge.cancel", already the footer's own button label), it
+            stays unambiguous per row. */}
+        <SelectedUsersList
+          users={selectedUsers}
+          ariaLabel={t('minibadge.selected.persons')}
+          getLabel={displayUserName}
+          getRemoveLabel={(user) => `Retirer ${displayUserName(user)}`}
+          onRemove={handleRemove}
+        />
 
         {isError ? <Alert type="danger">{t('minibadge.error.assign')}</Alert> : null}
       </Modal.Body>
       <Modal.Footer>
         {isRemainingWarning ? (
-          <Alert type="warning">
+          <Alert type="warning" className="small">
             {t('minibadge.threshold.remaining')}&nbsp;: {remainingLabel}
           </Alert>
         ) : (
-          <span>
+          <span className="small text-gray-700">
             {t('minibadge.threshold.remaining')}&nbsp;: {remainingLabel}
           </span>
         )}

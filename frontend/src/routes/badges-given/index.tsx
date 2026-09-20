@@ -1,4 +1,4 @@
-import { Alert, IconButton, LoadingScreen, Table } from '@edifice.io/react';
+import { Alert, Flex, IconButton, LoadingScreen, Table } from '@edifice.io/react';
 import { IconDelete } from '@edifice.io/react/icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -140,18 +140,28 @@ export const BadgesGiven = () => {
     <div>
       {badgesGivenQuery.isError ? <Alert type="danger">{t('minibadge.error.get.badges')}</Alert> : null}
 
-      <PeriodPicker value={period} onChange={setPeriod} />
-      <UserSearchBar
-        ariaLabel={t('minibadge.badge.given.search')}
-        placeholder={t('minibadge.badge.given.search')}
-        onSearch={setSearchQuery}
-      />
+      {/* Padded gray box matches communities' `SearchBarCommunities`. Kept
+          on a single row (`nowrap`): the search bar grows to fill the
+          remaining space (`flex-fill`) next to the period picker. */}
+      {/* `align="end"`, not `"center"`: `PeriodPicker`'s label sits above
+          its inputs, making it taller than the label-less search bar —
+          centering by overall height would misalign the actual input
+          fields. Aligning to the end (bottom) levels the two input rows. */}
+      <Flex wrap="nowrap" align="end" gap="16" className="p-24 bg-gray-200 mb-16">
+        <PeriodPicker value={period} onChange={setPeriod} />
+        <UserSearchBar
+          ariaLabel={t('minibadge.badge.given.search')}
+          placeholder={t('minibadge.badge.given.search')}
+          onSearch={setSearchQuery}
+          className="flex-fill"
+        />
+      </Flex>
 
       <div aria-live="polite">
         {badgesGivenQuery.isLoading ? (
           <LoadingScreen />
         ) : rows.length === 0 ? (
-          <EmptyBadgeList />
+          <EmptyBadgeList title={t('minibadge.no.result')} />
         ) : (
           <Table>
             <Table.Thead>

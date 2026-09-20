@@ -78,7 +78,7 @@ describe('Statistics', () => {
 
     renderScreen();
 
-    await screen.findByRole('radio', { name: 'minibadge.filter.stats.complete.history' });
+    await screen.findByTestId('segmented-option-all');
     await waitFor(() => expect(lastMinDate).toBeDefined());
     expect(lastMinDate).toBeNull();
   });
@@ -96,16 +96,20 @@ describe('Statistics', () => {
 
     renderScreen();
     // Default fixture has type data => the "Par type" panel (with its own
-    // radio group) is present.
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    // segmented control) is present.
+    await screen.findByTestId('segmented-option-badges');
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.filter.stats.last.thirty.days' }));
+    // Clicking the visible option label, not the (visually hidden,
+    // `pointer-events: none`) underlying radio input `SegmentedControl`
+    // renders per option — a real user clicks the label; a synthetic
+    // pointer event on the input itself is rejected by jsdom/user-event.
+    await user.click(screen.getByTestId('segmented-option-30days'));
 
     // `fakeStatisticsFiltered` has EMPTY type arrays => the panel disappears
     // once the new response lands — proves the data genuinely swapped, not
     // just that some response came back.
     await waitFor(() =>
-      expect(screen.queryByRole('radio', { name: 'minibadge.badges.option' })).not.toBeInTheDocument(),
+      expect(screen.queryByTestId('segmented-option-badges')).not.toBeInTheDocument(),
     );
 
     expect(lastMinDate).not.toBeNull();
@@ -125,9 +129,9 @@ describe('Statistics', () => {
     );
 
     renderScreen();
-    await screen.findByRole('radio', { name: 'minibadge.filter.stats.complete.history' });
+    await screen.findByTestId('segmented-option-all');
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.filter.stats.last.seven.days' }));
+    await user.click(screen.getByTestId('segmented-option-7days'));
 
     await waitFor(() => expect(lastMinDate).not.toBeNull());
     const expected = new Date();
@@ -159,9 +163,9 @@ describe('Statistics', () => {
   it('hides the structure name column in the user grids when isStatisticsViewAllStructures is false', async () => {
     const user = userEvent.setup();
     renderScreen({ isStatisticsViewAllStructures: false });
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.users.option' }));
+    await user.click(screen.getByTestId('segmented-option-users'));
 
     await screen.findByText('minibadge.statistics.top.assigning.users');
     expect(screen.queryByText(fakeUser.structureNames[0])).not.toBeInTheDocument();
@@ -170,9 +174,9 @@ describe('Statistics', () => {
   it('shows the structure name column in the user grids when isStatisticsViewAllStructures is true', async () => {
     const user = userEvent.setup();
     renderScreen({ isStatisticsViewAllStructures: true });
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.users.option' }));
+    await user.click(screen.getByTestId('segmented-option-users'));
 
     await screen.findByText('minibadge.statistics.top.assigning.users');
     expect(screen.getAllByText(fakeUser.structureNames[0]).length).toBeGreaterThan(0);
@@ -184,7 +188,7 @@ describe('Statistics', () => {
     renderScreen();
 
     await screen.findByText('minibadge.statistics.badges.assigned');
-    expect(screen.queryByRole('radio', { name: 'minibadge.badges.option' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('segmented-option-badges')).not.toBeInTheDocument();
     expect(screen.queryByText('minibadge.filter.stats.per.type')).not.toBeInTheDocument();
   });
 
@@ -199,15 +203,15 @@ describe('Statistics', () => {
     );
 
     renderScreen();
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
     expect(requestCount).toBe(1);
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.users.option' }));
+    await user.click(screen.getByTestId('segmented-option-users'));
 
     await screen.findByText('minibadge.statistics.top.assigning.users');
     expect(requestCount).toBe(1);
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.badges.option' }));
+    await user.click(screen.getByTestId('segmented-option-badges'));
     await screen.findByText('minibadge.statistics.badges');
     expect(requestCount).toBe(1);
   });
@@ -236,9 +240,9 @@ describe('Statistics', () => {
   it('shows the top-assigning and top-receiving user grids with avatars in the "Utilisateurs" view', async () => {
     const user = userEvent.setup();
     const { container } = renderScreen();
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
 
-    await user.click(screen.getByRole('radio', { name: 'minibadge.users.option' }));
+    await user.click(screen.getByTestId('segmented-option-users'));
 
     // `fakeUser` is both `topAssigningUsers[0]` and `topReceivingUsers[0]` in
     // the fixture, so "1. Fake User" legitimately appears in both grids.
@@ -315,17 +319,47 @@ describe('Statistics', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: 'minibadge.filter.stats.per.period' }),
     ).toBeInTheDocument();
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
     expect(
       screen.getByRole('heading', { level: 2, name: 'minibadge.filter.stats.per.type' }),
     ).toBeInTheDocument();
   });
 
-  // REVIEW FIX (react-reviewer, LOW): the radiogroups used to duplicate the
-  // adjacent heading's text via their own `aria-label`, two copies of the
-  // same translated string that could drift out of sync. Each radiogroup
-  // now points at the heading via `aria-labelledby` instead.
-  it('labels each radiogroup via aria-labelledby pointing at its adjacent heading, not a duplicated aria-label', async () => {
+  /**
+   * "Participation" used to be a `StatisticsCard`'s own small icon+label
+   * heading, boxed inside the same card as the two figures — now a real,
+   * standalone `h2` section title (same level as "Filtrer par
+   * période"/"Filtrer par type") sitting OUTSIDE the two cards it now heads,
+   * with "badges décernés" and "participants actifs" each in their own card.
+   */
+  it('shows "Participation" as its own h2 section title, outside any card, above the two separate figure cards', async () => {
+    renderScreen();
+
+    const heading = await screen.findByRole('heading', {
+      level: 2,
+      name: 'minibadge.statistics.participation',
+    });
+    // Not a `StatisticsCard`'s own heading (that component's `<section>`
+    // always carries its `bg-white rounded-4 shadow-sm` card chrome) —
+    // its own closest `<section>` is the page's outer section wrapper.
+    expect(heading.closest('section')).not.toHaveClass('shadow-sm');
+
+    const badgesCount = await screen.findByText('minibadge.statistics.badges.assigned');
+    const activeUsers = screen.getByText('minibadge.active.users');
+    expect(badgesCount.closest('section')).not.toBe(activeUsers.closest('section'));
+  });
+
+  /**
+   * `SegmentedControl` (Ant Design) is labelled via `aria-labelledby`
+   * pointing at the adjacent heading, same intent as the original hand-
+   * rolled radiogroup (avoid a second, driftable copy of the same
+   * translated string as a literal `aria-label`) — Ant's own component
+   * still stamps a fixed, generic `aria-label="segmented control"` of its
+   * own regardless, but per the accname spec `aria-labelledby` wins for the
+   * accessible NAME either way, which is what actually matters and is what
+   * `getByRole(..., { name })` below proves.
+   */
+  it('labels each segmented control via aria-labelledby pointing at its adjacent heading', async () => {
     renderScreen();
 
     const periodHeading = await screen.findByRole('heading', {
@@ -334,13 +368,11 @@ describe('Statistics', () => {
     });
     const periodGroup = screen.getByRole('radiogroup', { name: 'minibadge.filter.stats.per.period' });
     expect(periodGroup).toHaveAttribute('aria-labelledby', periodHeading.id);
-    expect(periodGroup).not.toHaveAttribute('aria-label');
 
-    await screen.findByRole('radio', { name: 'minibadge.badges.option' });
+    await screen.findByTestId('segmented-option-badges');
     const typeHeading = screen.getByRole('heading', { level: 2, name: 'minibadge.filter.stats.per.type' });
     const typeGroup = screen.getByRole('radiogroup', { name: 'minibadge.filter.stats.per.type' });
     expect(typeGroup).toHaveAttribute('aria-labelledby', typeHeading.id);
-    expect(typeGroup).not.toHaveAttribute('aria-label');
   });
 
   it('shows a loading indicator during the initial fetch instead of an empty dashboard (Constat #1)', async () => {

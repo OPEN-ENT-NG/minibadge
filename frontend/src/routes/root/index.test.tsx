@@ -56,7 +56,7 @@ describe('Root — reopen charter button', () => {
     renderRoot();
 
     expect(await screen.findByText('Enfant')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'minibadge.settings' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'minibadge.terms.of.use' })).toBeInTheDocument();
   });
 
   it('hides the reopen-charter button when the user has no minibadge workflow right at all', async () => {
@@ -80,7 +80,7 @@ describe('Root — reopen charter button', () => {
     renderRoot();
 
     expect(await screen.findByText('Enfant')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'minibadge.settings' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'minibadge.terms.of.use' })).not.toBeInTheDocument();
   });
 
   it('clicking the reopen-charter button reopens the lightbox even though the chart was already accepted', async () => {
@@ -88,7 +88,7 @@ describe('Root — reopen charter button', () => {
     renderRoot();
 
     await screen.findByText('Enfant');
-    await user.click(screen.getByRole('button', { name: 'minibadge.settings' }));
+    await user.click(screen.getByRole('button', { name: 'minibadge.terms.of.use' }));
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('minibadge.chart.welcome')).toBeInTheDocument();
@@ -104,11 +104,11 @@ describe('Root — reopen charter button', () => {
  * stack end-to-end. These two cases mount the actual stack with a real
  * admin-workflow-right fixture (mirroring the "reopen charter button"
  * `server.use(.../auth/oauth2/userinfo...)` override style above) to confirm
- * the "Administration" nav item genuinely appears — and is navigable — for
+ * the "Administration" tab genuinely appears — and is navigable — for
  * an admin session, and stays hidden otherwise.
  */
 describe('Root — isAdmin wiring end-to-end', () => {
-  it('shows and allows navigating to the Administration nav link for a user with the admin workflow right', async () => {
+  it('shows and allows navigating to the Administration tab for a user with the admin workflow right', async () => {
     const user = userEvent.setup();
     server.use(
       http.get('/auth/oauth2/userinfo', () =>
@@ -134,19 +134,19 @@ describe('Root — isAdmin wiring end-to-end', () => {
     renderRoot();
     await screen.findByText('Enfant');
 
-    const adminLink = screen.getByRole('link', { name: 'minibadge.navbar.badges.admin' });
-    expect(adminLink).toBeInTheDocument();
+    const adminTab = screen.getByRole('tab', { name: 'minibadge.navbar.badges.admin' });
+    expect(adminTab).toBeInTheDocument();
 
-    await user.click(adminLink);
+    await user.click(adminTab);
 
     expect(await screen.findByText('Administration')).toBeInTheDocument();
   });
 
-  it('hides the Administration nav link for a user without the admin workflow right', async () => {
+  it('hides the Administration tab for a user without the admin workflow right', async () => {
     renderRoot();
 
     await screen.findByText('Enfant');
 
-    expect(screen.queryByRole('link', { name: 'minibadge.navbar.badges.admin' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'minibadge.navbar.badges.admin' })).not.toBeInTheDocument();
   });
 });

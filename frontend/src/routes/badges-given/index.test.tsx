@@ -51,6 +51,7 @@ describe('BadgesGiven', () => {
     renderScreen();
 
     expect(await screen.findByText('minibadge.badge.empty.statement')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'minibadge.no.result' })).toBeInTheDocument();
     expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 

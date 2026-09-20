@@ -115,11 +115,15 @@ export const MyBadges = () => {
       {badgesQuery.isError ? (
         <Alert type="danger">{t('minibadge.error.get.badges')}</Alert>
       ) : null}
-      <UserSearchBar
-        ariaLabel={t('minibadge.badge.search')}
-        placeholder={t('minibadge.badge.search')}
-        onSearch={setSearchQuery}
-      />
+      {/* Matches communities' `SearchBarCommunities` (`features/search-bar/SearchBar.tsx`):
+          a padded gray box around the search input, not the bare input alone. */}
+      <div className="p-24 bg-gray-200 mb-16">
+        <UserSearchBar
+          ariaLabel={t('minibadge.badge.search')}
+          placeholder={t('minibadge.badge.search')}
+          onSearch={setSearchQuery}
+        />
+      </div>
       {/* A11Y FIX (react-reviewer, MEDIUM): `LoadingScreen` has no
           `aria-live`/`role="status"` of its own, so the loading→loaded
           transition below was invisible to assistive tech. This outer
@@ -142,12 +146,14 @@ export const MyBadges = () => {
             timing the existing, already-tested transition logic depends on. */}
         <div hidden={badgesQuery.isLoading}>
           <BadgeSection
+            className="mb-16"
             label={t('minibadge.badges.public')}
             icon={<IconSee />}
             badges={publishedBadges}
             getActions={getPublicActions}
           />
           <BadgeSection
+            className="mb-16"
             label={t('minibadge.badges.private')}
             icon={<IconHide />}
             badges={privatizedBadges}

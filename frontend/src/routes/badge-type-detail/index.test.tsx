@@ -30,6 +30,7 @@ function renderScreen({
             <MemoryRouter initialEntries={[`/badge-types/${fakeBadgeType.id}`]}>
               <Routes>
                 <Route path="/badge-types/:typeId" element={<BadgeTypeDetail />} />
+                <Route path="/badge-types" element={<div>Bibliothèque</div>} />
               </Routes>
             </MemoryRouter>
           </MinibadgeAccessContext.Provider>
@@ -148,5 +149,26 @@ describe('BadgeTypeDetail', () => {
     renderScreen();
 
     expect(await screen.findByText('minibadge.error.get.badge.type')).toBeInTheDocument();
+  });
+
+  it('the back button navigates to the badge types library', async () => {
+    const user = userEvent.setup();
+    renderScreen();
+
+    await user.click(await screen.findByRole('button', { name: 'minibadge.back' }));
+
+    expect(await screen.findByText('Bibliothèque')).toBeInTheDocument();
+  });
+
+  it('strips HTML markup from the description instead of showing the literal tags', async () => {
+    server.use(
+      http.get('/minibadge/types/:typeId', () =>
+        HttpResponse.json({ ...fakeBadgeType, descriptionShort: '<p>Acte</p><p>d’entraide</p>' }),
+      ),
+    );
+    renderScreen();
+
+    expect(await screen.findByText('Acte d’entraide')).toBeInTheDocument();
+    expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
   });
 });

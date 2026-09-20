@@ -1,17 +1,14 @@
-import { Alert } from '@edifice.io/react';
+import { Alert, Dropdown, Flex, Grid } from '@edifice.io/react';
+import { IconFilter } from '@edifice.io/react/icons';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { AssignBadgeLightbox } from '~/components/AssignBadgeLightbox';
 import { BadgeCard } from '~/components/BadgeCard';
-import { CategoryChip } from '~/components/CategoryChip';
 import { EmptyBadgeList } from '~/components/EmptyBadgeList';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { BadgeCategory } from '~/models/badgeCategory';
-import { BadgeType } from '~/models/badgeType';
-import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { getBadgeTypes } from '~/services/api/badgeTypes';
 import { useBadgeCategories } from '~/services/queries/badgeCategories';
 
@@ -21,10 +18,12 @@ const unaccent = (value: string): string => value.normalize('NFD').replace(/[̀-
 
 /**
  * Mirrors `badge-types.html` + `badge-types.controller.ts` — "Bibliothèque de
- * badges": search + single-select togglable category chips + an infinite-
- * scroll grid of `BadgeCard`s (catalogue mode), each navigating to
- * `/badge-types/:id` on body click and, only if `canAssign()`, offering a
- * single "Décerner" footer button that opens the shared `AssignBadgeLightbox`.
+ * badges": a search bar + a single category-filter dropdown to its right
+ * (communities' `SearchBarResources` layout, single-select radio items — not
+ * a row of always-visible chips) + an infinite-scroll grid of `BadgeCard`s
+ * (catalogue mode), each navigating to `/badge-types/:id` on click — that
+ * detail screen (not the card itself, communities-card-style) is where
+ * "Décerner" actually lives.
  *
  * PLAN CORRECTION (already flagged at the plan level, restated here): this is
  * a browse/catalogue screen, NOT a CRUD admin screen for badge types — no
@@ -56,12 +55,10 @@ const unaccent = (value: string): string => value.normalize('NFD').replace(/[̀-
  */
 export const BadgeTypeLibrary = () => {
   const { t } = useTranslation('minibadge');
-  const { canAssign } = useMinibadgeAccessContext();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<BadgeCategory>();
-  const [assignBadgeType, setAssignBadgeType] = useState<BadgeType>();
 
   const { categories, query: categoriesQuery } = useBadgeCategories();
 
@@ -111,60 +108,53 @@ export const BadgeTypeLibrary = () => {
         <Alert type="danger">{t('minibadge.error.get.badge.categories')}</Alert>
       ) : null}
 
-      <UserSearchBar
-        ariaLabel={t('minibadge.badge.search')}
-        placeholder={t('minibadge.badge.search')}
-        onSearch={setSearchQuery}
-      />
-
-      {/* No dedicated i18n key exists for "filter by category" (verified: no
-          `categor*` key in `backend/src/main/resources/i18n/fr.json`), and
-          the old `aria-label` reused the unrelated "search badges" string —
-          screen readers announced this group as the search box. Each chip
-          button already has its own accessible name (the category name), so
-          the group role doesn't need a label of its own. */}
-      <div role="group">
-        {sortedCategories.map((category) => {
-          const isSelected = selectedCategory?.id === category.id;
-          return (
-            <button
-              key={category.id}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => handleToggleCategory(category)}
-            >
-              <CategoryChip category={category} />
-            </button>
-          );
-        })}
-      </div>
+      {/* Mirrors communities' `SearchBarResources`: search bar + a single
+          filter dropdown to its right, instead of a row of always-visible
+          togglable category chips (4 categories today, but a row of chips
+          doesn't scale — a platform could configure many more). The padded
+          gray box itself matches `SearchBarCommunities`. */}
+      <Flex gap="8" className="p-24 bg-gray-200 mb-16">
+        <UserSearchBar
+          ariaLabel={t('minibadge.badge.search')}
+          placeholder={t('minibadge.badge.search')}
+          onSearch={setSearchQuery}
+          className="w-100"
+        />
+        <Dropdown>
+          <Dropdown.Trigger
+            label={t('minibadge.filter.by.category')}
+            icon={<IconFilter />}
+            variant="ghost"
+            badgeContent={selectedCategory ? 1 : undefined}
+          />
+          <Dropdown.Menu>
+            {sortedCategories.map((category) => (
+              <Dropdown.RadioItem
+                key={category.id}
+                value={String(category.id)}
+                model={selectedCategory ? String(selectedCategory.id) : ''}
+                onChange={() => handleToggleCategory(category)}
+              >
+                {category.name}
+              </Dropdown.RadioItem>
+            ))}
+          </Dropdown.Menu>
+        </Dropdown>
+      </Flex>
 
       {isEmpty ? (
-        <EmptyBadgeList />
+        <EmptyBadgeList title={t('minibadge.no.result')} />
       ) : (
-        <div>
+        <Grid>
           {badgeTypes.map((badgeType) => (
-            <BadgeCard
-              key={badgeType.id}
-              badgeType={badgeType}
-              onClick={() => navigate(`/badge-types/${badgeType.id}`)}
-              footerAction={
-                canAssign
-                  ? { label: t('minibadge.badge.assign'), onClick: () => setAssignBadgeType(badgeType) }
-                  : undefined
-              }
-            />
+            <Grid.Col sm="4" md="4" lg="4" xl="3" key={badgeType.id}>
+              <BadgeCard badgeType={badgeType} onClick={() => navigate(`/badge-types/${badgeType.id}`)} />
+            </Grid.Col>
           ))}
-        </div>
+        </Grid>
       )}
 
       <div ref={sentinelRef} />
-
-      <AssignBadgeLightbox
-        badgeType={assignBadgeType}
-        isOpen={!!assignBadgeType}
-        onClose={() => setAssignBadgeType(undefined)}
-      />
     </div>
   );
 };

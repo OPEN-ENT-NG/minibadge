@@ -1,3 +1,4 @@
+import { Flex, Grid } from '@edifice.io/react';
 import { IconRafterDown } from '@edifice.io/react/icons';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -78,27 +79,37 @@ export const BadgeSection = ({
 
   return (
     <section className={className}>
+      {/* Divider-style section header — mirrors communities' `Section`
+          (`CommunitiesInvitationsList.tsx`: a `h4 text-gray-500` label
+          followed by a line filling the remaining width). Kept as a
+          `<button>` (not a plain divider) since, unlike communities' static
+          sections, this one still collapses/expands (see the OPEN/CLOSE
+          LOGIC above) — button-reset utilities remove the native chrome so
+          the label+line still reads as a divider. */}
       <button
         type="button"
-        className="minibadge-badge-section-header d-flex align-items-center gap-8"
+        className="w-100 p-0 border-0 bg-transparent text-start mb-16"
         onClick={handleToggle}
         aria-expanded={isVisible}
         disabled={!hasBadges}
       >
-        <IconRafterDown
-          className={isVisible ? 'minibadge-badge-section-icon-opened' : undefined}
-          style={{ transform: isVisible ? 'rotate(0deg)' : 'rotate(-90deg)' }}
-        />
-        {icon}
-        <span>{label}</span>
-        <span>({badges.length})</span>
+        <Flex align="center" gap="8" className="w-100">
+          <IconRafterDown style={{ transform: isVisible ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+          {icon}
+          <span className="h4 text-gray-500 mb-0">
+            {label} ({badges.length})
+          </span>
+          <div className="bg-gray-500" style={{ height: 1, flex: 1, marginLeft: 10 }} />
+        </Flex>
       </button>
       {isVisible ? (
-        <div className="minibadge-badge-cards flex-row f-wrap">
+        <Grid>
           {badges.map((badge) => (
-            <BadgeCard key={badge.id} badge={badge} actions={getActions ? getActions(badge) : undefined} />
+            <Grid.Col sm="4" md="4" lg="4" xl="3" key={badge.id}>
+              <BadgeCard badge={badge} actions={getActions ? getActions(badge) : undefined} />
+            </Grid.Col>
           ))}
-        </div>
+        </Grid>
       ) : null}
     </section>
   );

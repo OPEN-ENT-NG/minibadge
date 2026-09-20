@@ -1,5 +1,6 @@
-import { Alert, Avatar, Heading, LoadingScreen, Radio } from '@edifice.io/react';
+import { Alert, Avatar, Flex, Grid, Heading, LoadingScreen, SegmentedControl } from '@edifice.io/react';
 import { IconCheck, IconHandMove, IconUser, IconUsers } from '@edifice.io/react/icons';
+import { IconMinibadge } from '@edifice.io/react/icons/apps';
 import { TFunction } from 'i18next';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -173,281 +174,294 @@ export const Statistics = () => {
   const showStructuresBlock = isStatisticsViewAllStructures && mostAssigningStructures.length > 0;
 
   return (
-    <div className="minibadge-statistics">
+    <div>
       {query.isError ? <Alert type="danger">{t('minibadge.error.get.statistics')}</Alert> : null}
 
-      <section className="minibadge-statistics-participation">
-        <Heading level="h2" id="minibadge-statistics-period-heading">
-          {t('minibadge.filter.stats.per.period')}
+      <section className="mb-16">
+        {/* Padded gray box matches the search-bar screens
+            (`SearchBarCommunities` style). `SegmentedControl` (Ant Design
+            under the hood, per `@edifice.io/react`) replaces the vertical
+            radio list with a single-row group of selectable buttons. */}
+        <div className="p-24 bg-gray-200 mb-16">
+          <Heading level="h2" headingStyle="h3" id="minibadge-statistics-period-heading" className="mb-8">
+            {t('minibadge.filter.stats.per.period')}
+          </Heading>
+          <SegmentedControl
+            aria-labelledby="minibadge-statistics-period-heading"
+            value={selectedPeriod}
+            onChange={(value) => setSelectedPeriod(value as PeriodOption)}
+            options={[
+              { value: 'all', label: t('minibadge.filter.stats.complete.history') },
+              { value: '30days', label: t('minibadge.filter.stats.last.thirty.days') },
+              { value: '7days', label: t('minibadge.filter.stats.last.seven.days') },
+            ]}
+          />
+        </div>
+
+        {/* Section heading, like "Filtrer par période"/"Filtrer par type"
+            above — moved OUT of the card (it used to be `StatisticsCard`'s
+            own icon+label row, small and boxed-in) so it reads as a real
+            section title over its own two cards below. */}
+        <Heading level="h2" headingStyle="h3" className="mb-8">
+          {t('minibadge.statistics.participation')}
         </Heading>
-        <div role="radiogroup" aria-labelledby="minibadge-statistics-period-heading">
-          <Radio
-            name="statistics-period"
-            value="all"
-            model={selectedPeriod}
-            checked={selectedPeriod === 'all'}
-            onChange={() => setSelectedPeriod('all')}
-            label={t('minibadge.filter.stats.complete.history')}
-          />
-          <Radio
-            name="statistics-period"
-            value="30days"
-            model={selectedPeriod}
-            checked={selectedPeriod === '30days'}
-            onChange={() => setSelectedPeriod('30days')}
-            label={t('minibadge.filter.stats.last.thirty.days')}
-          />
-          <Radio
-            name="statistics-period"
-            value="7days"
-            model={selectedPeriod}
-            checked={selectedPeriod === '7days'}
-            onChange={() => setSelectedPeriod('7days')}
-            label={t('minibadge.filter.stats.last.seven.days')}
-          />
-        </div>
-
-        <p>{t('minibadge.statistics.participation')}</p>
-        <div className="minibadge-statistics-cards">
-          <div className="minibadge-statistics-count-allowed">
-            <p>
-              <IconCheck />
-              <span>{formatMessage(t, 'minibadge.statistics.badges.assigned', [(statistics?.countBadgeAssigned ?? 0).toLocaleString()])}</span>
-            </p>
-            <p>
-              <IconUser />
-              <span>{formatMessage(t, 'minibadge.active.users', [(statistics?.countActiveUsers ?? 0).toLocaleString()])}</span>
-            </p>
-          </div>
-
-          {showStructuresBlock ? (
+        <Grid className="mb-16">
+          <Grid.Col sm="4" md="4" lg="6" xl="6">
             <StatisticsCard
-              className="minibadge-statistics-top-structures"
-              icon={<IconUsers />}
-              label={t('minibadge.statistics.most.active.structures')}
+              centered
+              className="bg-blue-200 text-center"
+              icon={<IconMinibadge width={32} height={32} />}
+              label={formatMessage(t, 'minibadge.statistics.badges.assigned', [(statistics?.countBadgeAssigned ?? 0).toLocaleString()])}
             >
-              <p>{formatMessage(t, 'minibadge.statistics.top', [mostAssigningStructures.length])}</p>
-              <ol>
-                {mostAssigningStructures.map((structure) => (
-                  <li key={structure.id}>
-                    {structure.name} — {displayStructureDistinction(t, structure)}
-                  </li>
-                ))}
-              </ol>
+              {null}
             </StatisticsCard>
+          </Grid.Col>
+          <Grid.Col sm="4" md="4" lg="6" xl="6">
+            <StatisticsCard
+              centered
+              className="bg-green-200 text-center"
+              icon={<IconUser width={32} height={32} />}
+              label={formatMessage(t, 'minibadge.active.users', [(statistics?.countActiveUsers ?? 0).toLocaleString()])}
+            >
+              {null}
+            </StatisticsCard>
+          </Grid.Col>
+        </Grid>
+
+        <Grid>
+          {showStructuresBlock ? (
+            <Grid.Col sm="4" md="4" lg="6" xl="6">
+              <StatisticsCard icon={<IconUsers />} label={t('minibadge.statistics.most.active.structures')}>
+                <p>{formatMessage(t, 'minibadge.statistics.top', [mostAssigningStructures.length])}</p>
+                <ol>
+                  {mostAssigningStructures.map((structure) => (
+                    <li key={structure.id}>
+                      {structure.name} — {displayStructureDistinction(t, structure)}
+                    </li>
+                  ))}
+                </ol>
+              </StatisticsCard>
+            </Grid.Col>
           ) : null}
-        </div>
+        </Grid>
       </section>
 
       {showTypesPanel ? (
-        <section className="minibadge-container-badges">
-          <Heading level="h2" id="minibadge-statistics-type-heading">
-            {t('minibadge.filter.stats.per.type')}
-          </Heading>
-          <div role="radiogroup" aria-labelledby="minibadge-statistics-type-heading">
-            <Radio
-              name="statistics-type"
-              value="badges"
-              model={selectedType}
-              checked={selectedType === 'badges'}
-              onChange={() => setSelectedType('badges')}
-              label={t('minibadge.badges.option')}
-            />
-            <Radio
-              name="statistics-type"
-              value="users"
-              model={selectedType}
-              checked={selectedType === 'users'}
-              onChange={() => setSelectedType('users')}
-              label={t('minibadge.users.option')}
+        <section>
+          <div className="p-24 bg-gray-200 mb-16">
+            <Heading level="h2" headingStyle="h3" id="minibadge-statistics-type-heading" className="mb-8">
+              {t('minibadge.filter.stats.per.type')}
+            </Heading>
+            <SegmentedControl
+              aria-labelledby="minibadge-statistics-type-heading"
+              value={selectedType}
+              onChange={(value) => setSelectedType(value as TypeOption)}
+              options={[
+                { value: 'badges', label: t('minibadge.badges.option') },
+                { value: 'users', label: t('minibadge.users.option') },
+              ]}
             />
           </div>
 
           {selectedType === 'badges' ? (
-            <div className="minibadge-statistics-participation-content">
-              <p>{t('minibadge.statistics.badges')}</p>
-              <div className="minibadge-statistics-badges">
+            <div>
+              <p className="mb-8">{t('minibadge.statistics.badges')}</p>
+              <Grid className="mb-16">
                 {mostAssignedTypes.length > 0 && firstMostAssignedType ? (
-                  <StatisticsCard
-                    className="minibadge-statistics-top-most-allowed"
-                    icon={<IconCheck />}
-                    label={formatMessage(t, 'minibadge.statistics.most.allowed.badges', [
-                      Math.min(3, mostAssignedTypes.length),
-                    ])}
-                  >
-                    <div className="minibadge-most-assigned">
-                      <div className="minibadge-card-simple">
-                        {firstMostAssignedType.pictureId ? (
-                          <img src={`/minibadge/public/img/${firstMostAssignedType.pictureId}`} alt="" />
-                        ) : null}
-                        <span>{firstMostAssignedType.label}</span>
-                      </div>
-                      <div className="minibadge-most-assigned-detail">
-                        <p>
-                          {formatMessage(t, 'minibadge.statistics.assigned.times', [
-                            (firstMostAssignedType.countAssigned ?? 0).toLocaleString(),
-                          ])}
-                        </p>
-                        {firstMostAssignedType.mostAssigningUsers?.length ? (
-                          <>
-                            <p>
-                              {formatMessage(t, 'minibadge.statistics.top', [
-                                firstMostAssignedType.mostAssigningUsers.length,
-                              ])}
-                            </p>
-                            <ul>
-                              {firstMostAssignedType.mostAssigningUsers.map((user) => (
-                                <li key={user.id}>
-                                  {getUserDisplayName(user)} — {(user.countAssigned ?? 0).toLocaleString()}
-                                </li>
-                              ))}
-                            </ul>
-                          </>
-                        ) : null}
-                      </div>
-                      {otherMostAssignedTypes.length > 0 ? (
-                        <div className="minibadge-most-assigned-others">
-                          {otherMostAssignedTypes.map((type) => (
-                            <div key={type.id} className="minibadge-card-type-statistic">
-                              {type.pictureId ? (
-                                <img src={`/minibadge/public/img/${type.pictureId}`} alt="" />
-                              ) : null}
-                              <span>{type.label}</span>
-                              <span>
-                                {formatMessage(t, 'minibadge.statistics.assigned.times', [
-                                  (type.countAssigned ?? 0).toLocaleString(),
+                  <Grid.Col sm="4" md="4" lg="6" xl="6">
+                    <StatisticsCard
+                      icon={<IconCheck />}
+                      label={formatMessage(t, 'minibadge.statistics.most.allowed.badges', [
+                        Math.min(3, mostAssignedTypes.length),
+                      ])}
+                    >
+                      <Flex direction="column" gap="16">
+                        <Flex align="center" gap="8">
+                          {firstMostAssignedType.pictureId ? (
+                            <img src={`/minibadge/public/img/${firstMostAssignedType.pictureId}`} alt="" />
+                          ) : null}
+                          <span>{firstMostAssignedType.label}</span>
+                        </Flex>
+                        <div>
+                          <p>
+                            {formatMessage(t, 'minibadge.statistics.assigned.times', [
+                              (firstMostAssignedType.countAssigned ?? 0).toLocaleString(),
+                            ])}
+                          </p>
+                          {firstMostAssignedType.mostAssigningUsers?.length ? (
+                            <>
+                              <p>
+                                {formatMessage(t, 'minibadge.statistics.top', [
+                                  firstMostAssignedType.mostAssigningUsers.length,
                                 ])}
-                              </span>
-                            </div>
-                          ))}
+                              </p>
+                              <ul>
+                                {firstMostAssignedType.mostAssigningUsers.map((user) => (
+                                  <li key={user.id}>
+                                    {getUserDisplayName(user)} — {(user.countAssigned ?? 0).toLocaleString()}
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                  </StatisticsCard>
+                        {otherMostAssignedTypes.length > 0 ? (
+                          <Grid>
+                            {otherMostAssignedTypes.map((type) => (
+                              <Grid.Col sm="4" md="4" lg="6" xl="6" key={type.id}>
+                                <Flex direction="column" align="center" gap="8" className="text-center">
+                                  {type.pictureId ? (
+                                    <img src={`/minibadge/public/img/${type.pictureId}`} alt="" />
+                                  ) : null}
+                                  <span>{type.label}</span>
+                                  <span>
+                                    {formatMessage(t, 'minibadge.statistics.assigned.times', [
+                                      (type.countAssigned ?? 0).toLocaleString(),
+                                    ])}
+                                  </span>
+                                </Flex>
+                              </Grid.Col>
+                            ))}
+                          </Grid>
+                        ) : null}
+                      </Flex>
+                    </StatisticsCard>
+                  </Grid.Col>
                 ) : null}
 
                 {mostRefusedTypes.length > 0 ? (
+                  <Grid.Col sm="4" md="4" lg="6" xl="6">
+                    <StatisticsCard
+                      label={formatMessage(t, 'minibadge.statistics.most.refused.badges', [mostRefusedTypes.length])}
+                    >
+                      <Grid>
+                        {mostRefusedTypes.map((type) => (
+                          <Grid.Col sm="4" md="4" lg="6" xl="6" key={type.id}>
+                            <Flex direction="column" align="center" gap="8" className="text-center">
+                              {type.pictureId ? <img src={`/minibadge/public/img/${type.pictureId}`} alt="" /> : null}
+                              <p className="mb-0">{type.label}</p>
+                              <p className="mb-0">
+                                {formatMessage(t, 'minibadge.statistics.refused.times', [type.countRefused ?? 0])}
+                              </p>
+                            </Flex>
+                          </Grid.Col>
+                        ))}
+                      </Grid>
+                    </StatisticsCard>
+                  </Grid.Col>
+                ) : null}
+              </Grid>
+
+              <Flex direction="column" gap="16">
+                {mostAssignedTypes.length > 0 ? (
                   <StatisticsCard
-                    className="minibadge-statistics-top-most-refused"
-                    label={formatMessage(t, 'minibadge.statistics.most.refused.badges', [mostRefusedTypes.length])}
+                    label={formatMessage(t, 'minibadge.statistics.most.allowed.badges', [mostAssignedTypes.length])}
                   >
-                    <div>
-                      {mostRefusedTypes.map((type) => (
-                        <div key={type.id} className="minibadge-card-simple">
-                          {type.pictureId ? <img src={`/minibadge/public/img/${type.pictureId}`} alt="" /> : null}
-                          <p>{type.label}</p>
-                          <p>
-                            {formatMessage(t, 'minibadge.statistics.refused.times', [type.countRefused ?? 0])}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                    <BadgeChart
+                      className="minibadge-chart-most-assigned"
+                      type="bar"
+                      series={badgeTypeChartSeries(t, mostAssignedTypes)}
+                      categories={badgeTypeChartCategories(mostAssignedTypes)}
+                      accessibleItems={badgeTypeAccessibleItems(t, mostAssignedTypes)}
+                    />
                   </StatisticsCard>
                 ) : null}
-              </div>
 
-              {mostAssignedTypes.length > 0 ? (
-                <StatisticsCard
-                  className="minibadge-statistics-most-allowed"
-                  label={formatMessage(t, 'minibadge.statistics.most.allowed.badges', [mostAssignedTypes.length])}
-                >
-                  <BadgeChart
-                    className="minibadge-chart-most-assigned"
-                    type="bar"
-                    series={badgeTypeChartSeries(t, mostAssignedTypes)}
-                    categories={badgeTypeChartCategories(mostAssignedTypes)}
-                    accessibleItems={badgeTypeAccessibleItems(t, mostAssignedTypes)}
-                  />
-                </StatisticsCard>
-              ) : null}
-
-              {lessAssignedTypes.length > 0 ? (
-                <StatisticsCard
-                  className="minibadge-statistics-less-allowed"
-                  label={formatMessage(t, 'minibadge.statistics.less.allowed.badges', [lessAssignedTypes.length])}
-                >
-                  {/* GOTCHA (`statistics.html:167-170`): the graph is only
-                      rendered above a strict length of 1 — reproduced
-                      faithfully, not a simplification. */}
-                  {lessAssignedTypes.length > 1 ? (
-                    <BadgeChart
-                      className="minibadge-chart-less-assigned"
-                      type="bar"
-                      series={badgeTypeChartSeries(t, lessAssignedTypes)}
-                      categories={badgeTypeChartCategories(lessAssignedTypes)}
-                      accessibleItems={badgeTypeAccessibleItems(t, lessAssignedTypes)}
-                    />
-                  ) : null}
-                </StatisticsCard>
-              ) : null}
+                {lessAssignedTypes.length > 0 ? (
+                  <StatisticsCard
+                    label={formatMessage(t, 'minibadge.statistics.less.allowed.badges', [lessAssignedTypes.length])}
+                  >
+                    {/* GOTCHA (`statistics.html:167-170`): the graph is only
+                        rendered above a strict length of 1 — reproduced
+                        faithfully, not a simplification. */}
+                    {lessAssignedTypes.length > 1 ? (
+                      <BadgeChart
+                        className="minibadge-chart-less-assigned"
+                        type="bar"
+                        series={badgeTypeChartSeries(t, lessAssignedTypes)}
+                        categories={badgeTypeChartCategories(lessAssignedTypes)}
+                        accessibleItems={badgeTypeAccessibleItems(t, lessAssignedTypes)}
+                      />
+                    ) : null}
+                  </StatisticsCard>
+                ) : null}
+              </Flex>
             </div>
           ) : (
-            <div className="minibadge-statistics-participation">
-              <p>{t('minibadge.users')}</p>
-              <div className="minibadge-statistics-badges">
+            <div>
+              <p className="mb-8">{t('minibadge.users')}</p>
+              <Grid>
                 {topAssigningUsers.length > 0 ? (
-                  <StatisticsCard
-                    className="minibadge-statistics-top-assigning-users"
-                    icon={<IconHandMove />}
-                    label={formatMessage(t, 'minibadge.statistics.top.assigning.users', [topAssigningUsers.length])}
-                  >
-                    <div>
-                      {topAssigningUsers.map((user, index) => (
-                        <div key={user.id} className="minibadge-card-simple">
-                          {/* Decorative: the same name immediately follows as
-                              text below, so a non-empty `alt` would announce
-                              it twice to screen readers. */}
-                          <Avatar
-                            src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
-                            imgPlaceholder="/minibadge/public/img/default-avatar.svg"
-                            alt=""
-                            className="minibadge-statistics-user-img"
-                          />
-                          <p>{`${index + 1}. ${getUserDisplayName(user)}`}</p>
-                          {isStatisticsViewAllStructures ? (
-                            <p className="minibadge-statistics-user-structure">{getUserStructureName(user)}</p>
-                          ) : null}
-                          <p>
-                            {formatMessage(t, 'minibadge.statistics.badges.assigned', [
-                              (user.countAssigned ?? 0).toLocaleString(),
-                            ])}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </StatisticsCard>
+                  <Grid.Col sm="4" md="4" lg="6" xl="6">
+                    <StatisticsCard
+                      icon={<IconHandMove />}
+                      label={formatMessage(t, 'minibadge.statistics.top.assigning.users', [topAssigningUsers.length])}
+                    >
+                      <Grid>
+                        {topAssigningUsers.map((user, index) => (
+                          <Grid.Col sm="4" md="4" lg="6" xl="6" key={user.id}>
+                            <Flex direction="column" align="center" gap="8" className="text-center">
+                              {/* Decorative: the same name immediately follows as
+                                  text below, so a non-empty `alt` would announce
+                                  it twice to screen readers. */}
+                              <Avatar
+                                src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
+                                imgPlaceholder="/minibadge/public/img/default-avatar.svg"
+                                alt=""
+                              />
+                              <div>
+                                <p className="mb-0">{`${index + 1}. ${getUserDisplayName(user)}`}</p>
+                                {isStatisticsViewAllStructures ? (
+                                  <p className="text-muted small mb-0">{getUserStructureName(user)}</p>
+                                ) : null}
+                                <p className="mb-0">
+                                  {formatMessage(t, 'minibadge.statistics.badges.assigned', [
+                                    (user.countAssigned ?? 0).toLocaleString(),
+                                  ])}
+                                </p>
+                              </div>
+                            </Flex>
+                          </Grid.Col>
+                        ))}
+                      </Grid>
+                    </StatisticsCard>
+                  </Grid.Col>
                 ) : null}
 
                 {topReceivingUsers.length > 0 ? (
-                  <StatisticsCard
-                    className="minibadge-statistics-top-receiving-users"
-                    icon={<IconUsers />}
-                    label={formatMessage(t, 'minibadge.statistics.top.receiving.users', [topReceivingUsers.length])}
-                  >
-                    <div>
-                      {topReceivingUsers.map((user, index) => (
-                        <div key={user.id} className="minibadge-card-simple">
-                          <Avatar
-                            src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
-                            imgPlaceholder="/minibadge/public/img/default-avatar.svg"
-                            alt=""
-                            className="minibadge-statistics-user-img"
-                          />
-                          <p>{`${index + 1}. ${getUserDisplayName(user)}`}</p>
-                          {isStatisticsViewAllStructures ? (
-                            <p className="minibadge-statistics-user-structure">{getUserStructureName(user)}</p>
-                          ) : null}
-                          <p>
-                            {formatMessage(t, 'minibadge.statistics.badges.received', [
-                              (user.countAssigned ?? 0).toLocaleString(),
-                            ])}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </StatisticsCard>
+                  <Grid.Col sm="4" md="4" lg="6" xl="6">
+                    <StatisticsCard
+                      icon={<IconUsers />}
+                      label={formatMessage(t, 'minibadge.statistics.top.receiving.users', [topReceivingUsers.length])}
+                    >
+                      <Grid>
+                        {topReceivingUsers.map((user, index) => (
+                          <Grid.Col sm="4" md="4" lg="6" xl="6" key={user.id}>
+                            <Flex direction="column" align="center" gap="8" className="text-center">
+                              <Avatar
+                                src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
+                                imgPlaceholder="/minibadge/public/img/default-avatar.svg"
+                                alt=""
+                              />
+                              <div>
+                                <p className="mb-0">{`${index + 1}. ${getUserDisplayName(user)}`}</p>
+                                {isStatisticsViewAllStructures ? (
+                                  <p className="text-muted small mb-0">{getUserStructureName(user)}</p>
+                                ) : null}
+                                <p className="mb-0">
+                                  {formatMessage(t, 'minibadge.statistics.badges.received', [
+                                    (user.countAssigned ?? 0).toLocaleString(),
+                                  ])}
+                                </p>
+                              </div>
+                            </Flex>
+                          </Grid.Col>
+                        ))}
+                      </Grid>
+                    </StatisticsCard>
+                  </Grid.Col>
                 ) : null}
-              </div>
+              </Grid>
             </div>
           )}
         </section>
