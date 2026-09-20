@@ -112,13 +112,18 @@ export const BadgeTypeLibrary = () => {
           filter dropdown to its right, instead of a row of always-visible
           togglable category chips (4 categories today, but a row of chips
           doesn't scale — a platform could configure many more). The padded
-          gray box itself matches `SearchBarCommunities`. */}
-      <Flex gap="8" className="p-24 bg-gray-200 mb-16">
+          gray box itself matches `SearchBarCommunities`. Row on desktop
+          (`flex-md-row`), stacked full-width on mobile (`direction="column"`
+          is the base/mobile-first value, same pattern as the admin/badges-given
+          filter rows) — without it, the search bar's `flex-fill` and the
+          filter dropdown fought for space on a single un-wrapping row below
+          `md` and overflowed instead of stacking. */}
+      <Flex direction="column" align="stretch" gap="8" className="p-24 bg-gray-200 mb-16 flex-md-row">
         <UserSearchBar
           ariaLabel={t('minibadge.badge.search')}
           placeholder={t('minibadge.badge.search')}
           onSearch={setSearchQuery}
-          className="w-100"
+          className="flex-fill"
         />
         <Dropdown>
           <Dropdown.Trigger

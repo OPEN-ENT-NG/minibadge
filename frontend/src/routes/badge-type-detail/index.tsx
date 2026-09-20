@@ -145,8 +145,12 @@ export const BadgeTypeDetail = () => {
       </Flex>
 
       {/* Body — large image on the left, categories/description on the
-          right (communities-inspired two-column "fiche" layout). */}
-      <Flex gap="24" wrap="nowrap" className="mb-16">
+          right (communities-inspired two-column "fiche" layout) on desktop
+          (`flex-md-row`); stacked image-then-text on mobile
+          (`direction="column"` is the base/mobile-first value) instead of
+          squeezing the fixed 240px image and the description onto one
+          unwrapping row. */}
+      <Flex direction="column" gap="24" wrap="nowrap" className="mb-16 flex-md-row">
         <div
           className="bg-gray-200 d-flex align-items-center justify-content-center"
           style={{ width: 240, flexShrink: 0 }}

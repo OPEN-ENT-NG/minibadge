@@ -65,7 +65,7 @@ export function Root() {
           `className` directly to `<Layout>` would completely REPLACE its
           internally computed layout classes instead of merging with them.
           Padding is therefore applied on this inner wrapper `<div>` instead. */}
-      <div className="px-16 px-md-24">
+      <div className="px-md-24">
         {/* Phase 5: navigation between screens — a sibling of `CharterGate`
             (`view-src/minibadge.html:32`, `<minibadge-navbar>` is a sibling of
             the charter gate, not a child), so it stays visible even while the

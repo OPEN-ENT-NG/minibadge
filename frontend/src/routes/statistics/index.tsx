@@ -186,16 +186,24 @@ export const Statistics = () => {
           <Heading level="h2" headingStyle="h3" id="minibadge-statistics-period-heading" className="mb-8">
             {t('minibadge.filter.stats.per.period')}
           </Heading>
-          <SegmentedControl
-            aria-labelledby="minibadge-statistics-period-heading"
-            value={selectedPeriod}
-            onChange={(value) => setSelectedPeriod(value as PeriodOption)}
-            options={[
-              { value: 'all', label: t('minibadge.filter.stats.complete.history') },
-              { value: '30days', label: t('minibadge.filter.stats.last.thirty.days') },
-              { value: '7days', label: t('minibadge.filter.stats.last.seven.days') },
-            ]}
-          />
+          {/* Ant Design's `Segmented` (behind `SegmentedControl`) never wraps
+              its options onto multiple lines and never shrinks below its
+              content width — with 3 options this overflows past the
+              viewport on narrow phones, dragging the whole page into
+              horizontal scroll. `overflow-auto` contains that scroll to
+              just this widget, same pattern as wrapping a too-wide table. */}
+          <div className="overflow-auto">
+            <SegmentedControl
+              aria-labelledby="minibadge-statistics-period-heading"
+              value={selectedPeriod}
+              onChange={(value) => setSelectedPeriod(value as PeriodOption)}
+              options={[
+                { value: 'all', label: t('minibadge.filter.stats.complete.history') },
+                { value: '30days', label: t('minibadge.filter.stats.last.thirty.days') },
+                { value: '7days', label: t('minibadge.filter.stats.last.seven.days') },
+              ]}
+            />
+          </div>
         </div>
 
         {/* Section heading, like "Filtrer par période"/"Filtrer par type"
@@ -252,15 +260,18 @@ export const Statistics = () => {
             <Heading level="h2" headingStyle="h3" id="minibadge-statistics-type-heading" className="mb-8">
               {t('minibadge.filter.stats.per.type')}
             </Heading>
-            <SegmentedControl
-              aria-labelledby="minibadge-statistics-type-heading"
-              value={selectedType}
-              onChange={(value) => setSelectedType(value as TypeOption)}
-              options={[
-                { value: 'badges', label: t('minibadge.badges.option') },
-                { value: 'users', label: t('minibadge.users.option') },
-              ]}
-            />
+            {/* Same overflow fix as the period filter above. */}
+            <div className="overflow-auto">
+              <SegmentedControl
+                aria-labelledby="minibadge-statistics-type-heading"
+                value={selectedType}
+                onChange={(value) => setSelectedType(value as TypeOption)}
+                options={[
+                  { value: 'badges', label: t('minibadge.badges.option') },
+                  { value: 'users', label: t('minibadge.users.option') },
+                ]}
+              />
+            </div>
           </div>
 
           {selectedType === 'badges' ? (

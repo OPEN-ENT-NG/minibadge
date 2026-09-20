@@ -140,14 +140,27 @@ export const BadgesGiven = () => {
     <div>
       {badgesGivenQuery.isError ? <Alert type="danger">{t('minibadge.error.get.badges')}</Alert> : null}
 
-      {/* Padded gray box matches communities' `SearchBarCommunities`. Kept
-          on a single row (`nowrap`): the search bar grows to fill the
-          remaining space (`flex-fill`) next to the period picker. */}
-      {/* `align="end"`, not `"center"`: `PeriodPicker`'s label sits above
-          its inputs, making it taller than the label-less search bar —
+      {/* Padded gray box matches communities' `SearchBarCommunities`. Row on
+          desktop (`flex-md-row`), stacked on mobile (`direction="column"`
+          is the base/mobile-first value) so `PeriodPicker` and the search bar
+          each get the full width instead of being squeezed into an
+          overflowing single row below `md`. `align="stretch"` is the
+          mobile-first value for the same reason (full-width stacked
+          controls); `align-items-md-end` restores the desktop-only bottom
+          alignment below. Kept on a single row at `md`+ (`nowrap`): the
+          search bar grows to fill the remaining space (`flex-fill`) next to
+          the period picker. */}
+      {/* `align-items-md-end`, not `"center"`: `PeriodPicker`'s label sits
+          above its inputs, making it taller than the label-less search bar —
           centering by overall height would misalign the actual input
           fields. Aligning to the end (bottom) levels the two input rows. */}
-      <Flex wrap="nowrap" align="end" gap="16" className="p-24 bg-gray-200 mb-16">
+      <Flex
+        direction="column"
+        align="stretch"
+        wrap="nowrap"
+        gap="16"
+        className="p-24 bg-gray-200 mb-16 flex-md-row align-items-md-end"
+      >
         <PeriodPicker value={period} onChange={setPeriod} />
         <UserSearchBar
           ariaLabel={t('minibadge.badge.given.search')}
