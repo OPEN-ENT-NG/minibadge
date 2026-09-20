@@ -1,0 +1,107 @@
+import { odeServices } from '@edifice.io/client';
+
+import { BadgeType } from '~/models/badgeType';
+import { MinibadgeUser } from '~/models/user';
+import { request } from '~/services/api/http';
+
+/**
+ * Response envelope of `GET /types` — offset/limit pagination, verified in
+ * `BadgeTypeController.java#getBadgeTypes` + `RequestHelper.formatResponse(limit, offset, list)`.
+ */
+export interface BadgeTypesPage {
+  all: BadgeType[];
+  limit: number;
+  offset: number;
+}
+
+/**
+ * GET /types — verified in `BadgeTypeController.java#getBadgeTypes`.
+ * `offset` is required server-side (`Integer.parseInt(...)` with no default,
+ * throws `NumberFormatException` if absent).
+ */
+export const getBadgeTypes = async (
+  offset: number,
+  limit?: number,
+  query?: string,
+  categoryId?: number,
+): Promise<BadgeTypesPage> => {
+  const response = await request(() =>
+    odeServices.http().get<BadgeTypesPage>('/minibadge/types', {
+      queryParams: { offset, limit, query, categoryId },
+      disableNotifications: true,
+    }),
+  );
+  return response;
+};
+
+/**
+ * GET /minibadge/types/:typeId — verified in `BadgeTypeController.java#getBadgeType`.
+ * Renders `badgeType.toJson()` directly (not wrapped in `{ all }`).
+ */
+export const getBadgeType = async (typeId: number): Promise<BadgeType> => {
+  const response = await request(() =>
+    odeServices.http().get<BadgeType>(`/minibadge/types/${typeId}`, {
+      disableNotifications: true,
+    }),
+  );
+  return response;
+};
+
+/**
+ * Response envelope of `GET /types/:typeId/assigners` — page-based pagination,
+ * verified in `BadgeTypeController.java#getBadgeTypeAssigners` +
+ * `RequestHelper.formatResponse(page, dataTotal, limit, list)`, plus the extra
+ * `userAssignersTotal` field added by the controller itself.
+ */
+export interface BadgeTypeAssignersPage {
+  all: MinibadgeUser[];
+  page: number;
+  pageCount: number;
+  userAssignersTotal: number;
+}
+
+/**
+ * GET /types/:typeId/assigners — verified in `BadgeTypeController.java#getBadgeTypeAssigners`.
+ */
+export const getBadgeTypeAssigners = async (
+  typeId: number,
+  page?: number,
+  limit?: number,
+): Promise<BadgeTypeAssignersPage> => {
+  const response = await request(() =>
+    odeServices.http().get<BadgeTypeAssignersPage>(`/minibadge/types/${typeId}/assigners`, {
+      queryParams: { page, limit },
+      disableNotifications: true,
+    }),
+  );
+  return response;
+};
+
+/**
+ * Response envelope of `GET /types/:typeId/receivers`, mirroring
+ * `BadgeTypeAssignersPage` but with `receiversTotal` (verified in
+ * `BadgeTypeController.java#getBadgeTypeReceivers`).
+ */
+export interface BadgeTypeReceiversPage {
+  all: MinibadgeUser[];
+  page: number;
+  pageCount: number;
+  receiversTotal: number;
+}
+
+/**
+ * GET /types/:typeId/receivers — verified in `BadgeTypeController.java#getBadgeTypeReceivers`.
+ */
+export const getBadgeTypeReceivers = async (
+  typeId: number,
+  page?: number,
+  limit?: number,
+): Promise<BadgeTypeReceiversPage> => {
+  const response = await request(() =>
+    odeServices.http().get<BadgeTypeReceiversPage>(`/minibadge/types/${typeId}/receivers`, {
+      queryParams: { page, limit },
+      disableNotifications: true,
+    }),
+  );
+  return response;
+};

@@ -37,3 +37,9 @@ target
 dependency-reduced-pom.xml
 edifice
 
+# frontend (React/Vite)
+frontend/dist
+frontend/dist-sniplet
+frontend/.env.local
+frontend/*.tsbuildinfo
+

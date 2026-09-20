@@ -1,26 +1,5 @@
 #!/bin/bash
 
-MVN_OPTS="-Duser.home=/var/maven"
-
-if [ ! -e node_modules ]
-then
-  mkdir node_modules
-fi
-
-case `uname -s` in
-  MINGW*)
-    USER_UID=1000
-    GROUP_UID=1000
-    ;;
-  *)
-    if [ -z ${USER_UID:+x} ]
-    then
-      USER_UID=`id -u`
-      GROUP_GID=`id -g`
-    fi
-esac
-
-# If DEBUG env var is set to "true" then set -x to enable debug mode
 if [ "$DEBUG" == "true" ]; then
 	set -x
 	EDIFICE_CLI_DEBUG_OPTION="--debug"
@@ -32,18 +11,15 @@ init() {
   me=`id -u`:`id -g`
   echo "DEFAULT_DOCKER_USER=$me" > .env
 
-  # If CLI_VERSION is empty set to latest
   if [ -z "$CLI_VERSION" ]; then
     CLI_VERSION="latest"
   fi
-  # Create a build.compose.yaml file from following template
   cat <<EOF > build.compose.yaml
 services:
   edifice-cli:
     image: opendigitaleducation/edifice-cli:$CLI_VERSION
     user: "$DEFAULT_DOCKER_USER"
 EOF
-  # Copy /root/edifice from edifice-cli container to host machine
   docker compose -f build.compose.yaml create edifice-cli
   docker compose -f build.compose.yaml cp edifice-cli:/root/edifice ./edifice
   docker compose -f build.compose.yaml rm -fsv edifice-cli
@@ -52,87 +28,27 @@ EOF
   ./edifice version $EDIFICE_CLI_DEBUG_OPTION
 }
 
-clean () {
-  docker-compose run --rm maven mvn $MVN_OPTS clean
-}
+if [ "$#" -eq 0 ]; then
+  cd frontend
+  ./build.sh --no-docker clean init build
+  cd ..
 
-buildNode () {
-  case `uname -s` in
-    MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js build && yarn run build:sass"
-      ;;
-    *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js build && yarn run build:sass"
-  esac
-}
+  cd backend
+  # NOTE: unlike collaborative-wall, the React dist is copied into a
+  # dedicated subfolder (public/react/) instead of being merged into
+  # public/ directly. The old AngularJS frontend still lives under
+  # src/main/resources/public/{ts,sass,template,img} and must not be
+  # touched or deleted by this script while the migration is in progress.
+  mkdir -p ./src/main/resources/public/react
+  rm -rf ./src/main/resources/public/react/*
+  cp -R ../frontend/dist/* ./src/main/resources/public/react/
 
+  ./build.sh init clean install
+  cd ..
 
-buildGulp() {
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js build"
-}
-
-buildCss() {
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn run build:sass"
-}
-
-testNode () {
-  rm -rf coverage
-  rm -rf */build
-  case `uname -s` in
-    MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache &&  yarn test"
-      ;;
-    *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js drop-cache && yarn test"
-  esac
-}
-
-testNodeDev () {
-  rm -rf coverage
-  rm -rf */build
-  case `uname -s` in
-    MINGW*)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install --no-bin-links && node_modules/gulp/bin/gulp.js drop-cache &&  yarn run test:dev"
-      ;;
-    *)
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "yarn install && node_modules/gulp/bin/gulp.js drop-cache && yarn run test:dev"
-  esac
-}
-
-
-publish() {
-    version=`docker-compose run --rm maven mvn $MVN_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout`
-    level=`echo $version | cut -d'-' -f3`
-
-    case "$level" in
-        *SNAPSHOT)
-            export nexusRepository='snapshots'
-            ;;
-        *)
-            export nexusRepository='releases'
-            ;;
-    esac
-
-    docker-compose run --rm maven mvn $MVN_OPTS -DrepositoryId=ode-$nexusRepository -DskiptTests -Dmaven.test.skip=true --settings /var/maven/.m2/settings.xml deploy
-}
-
-publishNexus() {
-  version=`docker compose run --rm maven mvn $MVN_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout`
-  level=`echo $version | cut -d'-' -f3`
-  case "$level" in
-    *SNAPSHOT) export nexusRepository='snapshots' ;;
-    *)         export nexusRepository='releases' ;;
-  esac
-  docker compose run --rm  maven mvn $MVN_OPTS -DrepositoryId=ode-$nexusRepository -Durl=$repo -DskipTests -Dmaven.test.skip=true --settings /var/maven/.m2/settings.xml deploy
-}
-
-install() {
-    docker-compose run --rm maven mvn $MVN_OPTS install -DskipTests
-}
-
-test() {
-    docker-compose run --rm maven mvn $MVN_OPTS test
-}
+  rm -rf frontend/dist
+  exit 0
+fi
 
 if [ ! -e .env ]; then
   init
@@ -143,42 +59,6 @@ do
   case $param in
     init)
       init
-      ;;
-    clean)
-      clean
-      ;;
-    buildNode)
-      buildNode
-      ;;
-    buildMaven)
-      install
-      ;;
-    install)
-      buildNode && install
-      ;;
-    buildGulp)
-      buildGulp
-      ;;
-    buildCss)
-      buildCss
-      ;;
-    publish)
-      publish
-      ;;
-    publishNexus)
-      publishNexus
-      ;;
-    test)
-      testNode ; test
-      ;;
-    testNode)
-      testNode
-      ;;
-    testNodeDev)
-      testNodeDev
-      ;;
-    testMaven)
-      test
       ;;
     *)
       echo "Invalid argument : $param"

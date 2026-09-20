@@ -1,3 +1,12 @@
+## Structure du dépôt
+
+- `backend/` : application Java/Vert.x (Entcore), inchangée fonctionnellement.
+- `frontend/` : application React, seul frontend du module (migration terminée — l'ancien frontend AngularJS a été intégralement supprimé). Deux builds distincts : l'application principale (`pnpm run build`, servie comme vue par défaut) et le sniplet portail "Décerner un badge" (`pnpm run build:sniplet`, publié en tant que `public/js/behaviours.js`).
+
+Voir `.claude/PRPs/plans/foundations-react-migration.plan.md`, `.claude/PRPs/plans/estimation-migration-react-minibadge.plan.md` et `.claude/PRPs/plans/phase-8-cutover-final.plan.md` pour le contexte complet de cette migration.
+
+---
+
 # À propos de l'application Minibadge
 
 * Licence : [AGPL v3](http://www.gnu.org/licenses/agpl.txt) - Copyright Région Hauts de France

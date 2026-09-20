@@ -2,26 +2,58 @@
 
 pipeline {
     agent any
+
     stages {
-        stage("Initialization") {
+      stage("Initialization") {
+        steps {
+          script {
+            sh './build.sh init'
+            def version = sh(returnStdout: true, script: 'docker run --rm -u `id -u`:`id -g` --env MAVEN_CONFIG=/var/maven/.m2 -w /usr/src/maven -v ./backend/:/usr/src/maven -v ~/.m2:/var/maven/.m2  opendigitaleducation/mvn-java8-node20:latest mvn -Duser.home=/var/maven help:evaluate -Dexpression=project.version -DforceStdout -q')
+            buildName "${env.GIT_BRANCH.replace("origin/", "")}@${version}"
+          }
+        }
+      }
+        stage('Frontend') {
             steps {
-                script {
-                    sh './build.sh init'
-                    def version = sh(returnStdout: true, script: 'docker run --rm -u `id -u`:`id -g` --env MAVEN_CONFIG=/var/maven/.m2 -w /usr/src/maven -v ./:/usr/src/maven -v ~/.m2:/var/maven/.m2  opendigitaleducation/mvn-java8-node20:latest mvn -Duser.home=/var/maven help:evaluate -Dexpression=project.version -DforceStdout -q')
-                    buildName "${env.GIT_BRANCH.replace("origin/", "")}@${version}"
+                dir('frontend') {
+                    sh './build.sh clean init build'
                 }
             }
         }
-        stage('Build') {
+
+        stage('Backend') {
             steps {
-                checkout scm
-                sh './build.sh init clean install publish'
+                dir('backend') {
+                    // React is now the real entry point (Phase 8 cutover, mirrors
+                    // ~/EDIFICE/app/collaborative-wall/JenkinsFile): `frontend/dist/`'s
+                    // single `index.html` becomes the view Entcore's default
+                    // ControllerHelper convention serves, and its `public/` folder is
+                    // merged directly into `src/main/resources/public/` (verified
+                    // empirically: `frontend/dist/` contains exactly one `.html` file
+                    // at its root plus one `public/` directory of assets — no separate
+                    // `img/` to relocate, unlike collaborative-wall, since minibadge's
+                    // `frontend/public/` is empty).
+                    sh 'mkdir -p ./src/main/resources/view || TRUE'
+                    sh 'cp -R ../frontend/dist/* ./src/main/resources/'
+                    sh 'mv ./src/main/resources/*.html ./src/main/resources/view/'
+                    // Portal "behaviours bundle" for the badge-assign sniplet — the
+                    // Entcore convention path recovered from the old gulpfile
+                    // (`gulp.dest('./src/main/resources/public/js')`).
+                    sh 'mkdir -p ./src/main/resources/public/js'
+                    sh 'cp ../frontend/dist-sniplet/behaviours.js ./src/main/resources/public/js/behaviours.js'
+                    sh './build.sh init clean install publish'
+                }
             }
         }
-      stage('Build image') {
-        steps {
-          sh './edifice image --rebuild=false'
+        stage('Build image') {
+            steps {
+                sh './edifice image --rebuild=false'
+            }
         }
-      }
+    }
+    post {
+        cleanup {
+            sh 'cd backend && (docker-compose down || true) && cd ../frontend && (docker-compose down || true)'
+        }
     }
 }

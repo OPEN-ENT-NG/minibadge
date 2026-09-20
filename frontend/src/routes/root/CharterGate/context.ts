@@ -1,0 +1,32 @@
+import { createContext, useContext } from 'react';
+
+/**
+ * Exposes the gate's already-resolved access rights to every screen
+ * rendered inside `<CharterGate>`, so a screen like `my-badges` reads
+ * `canReceive` from context instead of calling `useMinibadgeAccess()` again
+ * itself (the plan's Task 5 gotcha: "ce droit doit venir du
+ * CharterGate/contexte, pas être re-fetché ici"). Only ever provided with a
+ * value once the gate has resolved and lets `children` through — see
+ * `CharterGate`'s render — so `null` here only ever means "used outside a
+ * `CharterGate`", not "still loading".
+ */
+export interface MinibadgeAccessContextValue {
+  canAssign: boolean;
+  canReceive: boolean;
+  /** `hasWorkflow(rights.workflow.admin)` — see `useMinibadgeAccess` (Phase 5). Gates `/admin` and the `AppNavbar` "Administration" item. */
+  isAdmin: boolean;
+  /** `hasWorkflow(rights.workflow.statisticsView)` — see `useMinibadgeAccess` (Phase 6). Gates `/statistics` and the `AppNavbar` "Statistiques" item. */
+  isStatisticsView: boolean;
+  /** `hasWorkflow(rights.workflow.statisticsViewAllStructures)` — see `useMinibadgeAccess` (Phase 6). Gates extra sections INSIDE `/statistics` only (never a route). Independent from `isStatisticsView`. */
+  isStatisticsViewAllStructures: boolean;
+}
+
+export const MinibadgeAccessContext = createContext<MinibadgeAccessContextValue | null>(null);
+
+export const useMinibadgeAccessContext = (): MinibadgeAccessContextValue => {
+  const context = useContext(MinibadgeAccessContext);
+  if (!context) {
+    throw new Error('useMinibadgeAccessContext must be used within a <CharterGate>');
+  }
+  return context;
+};
