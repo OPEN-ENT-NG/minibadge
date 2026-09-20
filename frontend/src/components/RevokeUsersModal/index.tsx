@@ -9,52 +9,19 @@ import { useRevokeCharter } from '~/services/queries/charter';
 import { useSearchUsersAdmin } from '~/services/queries/users';
 
 /**
- * Mirrors `revoke-users.directive.ts`/`.html` — the "Révoquer des
- * utilisateurs" action from `/admin` (Task 6): search+select one or more
- * users, then confirm/deny revoking their Mini-badges access for good.
+ * "Révoquer des utilisateurs" (admin): search+select one or more users, then
+ * confirm/deny revoking their Mini-badges access for good.
  *
- * NOT to be confused with the Phase 1/3 `RevokeModal` (`~/components/RevokeModal`),
- * which revokes ONE already-given badge assignment
- * (`PUT /minibadge/revoked/given/:badgeId`). This revokes a USER'S right to
- * use Mini-badges at all (`PUT /minibadge/revoke`, `useRevokeCharter`,
- * built in Phase 1 but never consumed until now) — see the plan's "Correction
- * importante" section for why these two are easy to conflate.
+ * NOT to be confused with `RevokeModal`, which revokes ONE already-given
+ * badge assignment — this revokes a USER'S right to use Mini-badges at all.
  *
- * MIRROR: `AssignBadgeLightbox` for the search/select/selected-list block
- * (same `aria-live="polite"` region + `minibadge.no.result` pattern);
- * `CharterGate` for the two-nested-modals structure and its Escape-guard
- * fix (see below).
- *
- * REVIEW-STYLE FIX carried over proactively (CharterGate's CRITICAL Fix 1):
- * `Modal` (`node_modules/@edifice.io/react/dist/components/Modal/Modal.js`)
- * calls `useKeyPress(onModalClose, ["Escape"])` UNCONDITIONALLY, regardless of
- * its own `isOpen` prop. Both modals below stay mounted the whole time (only
- * `isOpen`/`isConfirmOpen` toggle their visibility), so each `onModalClose`
- * is guarded by ITS OWN modal's open state — an Escape press while neither
- * (or only the other) is open does nothing, instead of firing a real
- * mutation or resetting state pre-emptively.
- *
- * REVIEW FIX (react-reviewer, HIGH): that per-modal guard alone was not
- * enough for the OUTER modal, because while confirming a revocation BOTH
- * modals are simultaneously `isOpen`/`isConfirmOpen` — a single Escape press
- * then fired BOTH `onModalClose` handlers. The inner one correctly closed
- * just the confirm step, but the outer guard (`if (isOpen) ...`) also fired,
- * closing the entire modal and wiping the admin's selection. The outer
- * guard now also requires `!isConfirmOpen` (see `handleModalClose` below),
- * so Escape while confirming only steps back to the selection screen.
- *
- * SUCCESS TOAST (post-migration improvement plan, Constat #2, confirmed gap
- * #2): this component used to hand-roll a toast simulation — its own
- * `isSuccessVisible` state driving a floating `<Alert type="success"
- * position="bottom-right" autoClose>` — added in an earlier phase precisely
- * BECAUSE no real toast mechanism was known to exist yet at the time.
- * `useToast().success(...)` (`@edifice.io/react`, backed by
- * `react-hot-toast`, already available with zero extra setup since `Layout`
- * — mounted once in `routes/root/index.tsx` — renders its own `<Toaster/>`
- * internally) replaces it outright: the hand-rolled state/JSX is removed
- * rather than kept alongside the real mechanism. Mirrors the original
- * `notify.success('minibadge.confirm.revoke.users.success')`
- * (`admin.controller.ts:142`).
+ * `Modal` calls `useKeyPress(onModalClose, ["Escape"])` unconditionally
+ * regardless of its own `isOpen` prop, and both modals below stay mounted at
+ * all times. While confirming a revocation, BOTH modals are simultaneously
+ * open, so each `onModalClose` must guard on its own open state AND (for the
+ * outer one) `!isConfirmOpen` — otherwise a single Escape press fires both
+ * handlers, closing the entire modal and wiping the admin's selection
+ * instead of just stepping back to the selection screen.
  */
 export interface RevokeUsersModalProps {
   isOpen: boolean;
@@ -67,19 +34,18 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<MinibadgeUser[]>([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  // See `AssignBadgeLightbox`'s own doc comment for why a dedicated token
-  // (bumped only on selection) rather than `selectedUsers.length` drives the
-  // `UserSearchBar` remount: removing a selected user must not also clear
-  // whatever the admin is currently typing.
+  // A dedicated token, bumped only in `handleSelect`, decouples clearing
+  // `UserSearchBar`'s text from the selected-count changing — keying on
+  // `selectedUsers.length` instead would also clear in-progress typing when
+  // removing a previously-selected user via the trash icon, not just when
+  // selecting one.
   const [searchBarResetToken, setSearchBarResetToken] = useState(0);
 
   const trimmedQuery = searchQuery.trim();
   const { users: searchResults, query: searchUsersQuery } = useSearchUsersAdmin(trimmedQuery || undefined);
   const { mutate: revokeUsers, isPending, isError } = useRevokeCharter();
 
-  // Mirrors `onCloseRevokeUsersModal` resetting `selectedUsers`/`search`/
-  // `userSearchResults` (`admin.controller.ts:122-127`): whenever this
-  // component's own modal closes, the next open starts clean.
+  // Whenever this modal closes, the next open starts clean.
   useEffect(() => {
     if (!isOpen) {
       setSearchQuery('');
@@ -94,7 +60,6 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
   };
 
   const selectedIds = new Set(selectedUsers.map((selected) => selected.id));
-  // Mirrors `onSearchUser`'s implicit filtering via `isUserSelected`.
   const results = (searchResults ?? []).filter((candidate) => !selectedIds.has(candidate.id));
 
   const handleSelect = (candidate: MinibadgeUser) => {
@@ -110,16 +75,9 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
   };
 
   const handleClose = () => onClose();
-  // Fix 1 (mirrors CharterGate): only close while THIS modal is actually open
-  // AND the confirm step isn't showing on top of it. Both `Modal`s register
-  // their own global Escape listener unconditionally, so while confirming a
-  // revocation BOTH modals are technically `isOpen` at once — without the
-  // `!isConfirmOpen` guard, a single Escape press fired both `onModalClose`
-  // handlers: the inner one correctly stepped back to the selection screen,
-  // but this outer one ALSO ran, closing the whole modal and wiping the
-  // admin's search/selection state via the reset `useEffect` above. Escape
-  // while confirming should only step back one level, matching the inner
-  // modal's own behavior.
+  // Only close while this modal is open AND the confirm step isn't showing
+  // on top of it — see the class doc comment for why the `!isConfirmOpen`
+  // guard is needed.
   const handleModalClose = () => {
     if (isOpen && !isConfirmOpen) handleClose();
   };
@@ -190,19 +148,14 @@ export const RevokeUsersModal = ({ isOpen, onClose }: RevokeUsersModalProps) => 
           </Button>
         </Modal.Footer>
 
-        {/* NESTED (not a sibling) on purpose, mirroring `revoke-users.html`'s
-            actual DOM (the confirm `<lightbox>` sits INSIDE the selection
-            `<lightbox>`, `revoke-users.html:2-74`): `Modal`'s own
-            `useClickOutside(onModalClose)` (`Modal.js`) treats ANY click
-            outside its ref'd DOM subtree as a close request, using
-            `mousedown`/`touchstart`, not just Escape. A sibling `<Modal>`
-            here would put every click inside the confirm dialog "outside" the
-            selection dialog's DOM, spuriously closing the OUTER modal (and
-            firing `onClose`) the moment an admin clicks e.g. "Confirmer" —
-            reproduced by this component's own tests before this fix. Nesting
-            it inside the outer `Modal`'s children keeps confirm-dialog clicks
-            contained within the outer modal's ref, so only the outer
-            modal's OWN outside-click/Escape guard can ever fire for them. */}
+        {/* NESTED (not a sibling) on purpose: `Modal`'s own `useClickOutside`
+            treats any click outside its ref'd DOM subtree as a close
+            request. A sibling `<Modal>` here would put every click inside
+            the confirm dialog "outside" the selection dialog's DOM,
+            spuriously closing the outer modal the moment an admin clicks
+            e.g. "Confirmer". Nesting it inside the outer `Modal`'s children
+            keeps confirm-dialog clicks contained within the outer modal's
+            ref. */}
         <Modal id="minibadge-revoke-users-confirm" isOpen={isConfirmOpen} onModalClose={handleConfirmModalClose}>
           <Modal.Header onModalClose={handleConfirmModalClose}>
             {t('minibadge.confirm.revoke.users.modal.title')}

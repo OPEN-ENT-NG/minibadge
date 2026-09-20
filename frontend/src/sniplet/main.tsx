@@ -54,41 +54,30 @@ function resolveHost(candidate: unknown): HTMLElement {
 }
 
 /**
- * Minimal `Behaviours.register` payload for THIS bundle — deliberately not
- * a full port of the original `minibadgeBehaviours.ts`. Kept:
+ * Minimal `Behaviours.register` payload for this bundle:
  * - `rights`: portal-wide role/right-assignment screens read
  *   `Behaviours.applicationsBehaviours[app].rights` for every registered
- *   app regardless of whether that app has any sniplets, so this is part
- *   of the app-wide contract, not sniplet-specific — reused as-is from
- *   `~/services/queries/charter.ts#MINIBADGE_WORKFLOW_RIGHTS` (already the
- *   exact same constants as the original `rights.const.ts`, ported there in
- *   an earlier phase) rather than duplicated here.
+ *   app regardless of whether that app has any sniplets, so this is part of
+ *   the app-wide contract, not sniplet-specific — reused as-is from
+ *   `~/services/queries/charter.ts#MINIBADGE_WORKFLOW_RIGHTS`.
  * - `sniplets['badge-assign']` and `snipletBadgeAssignService`: the sniplet
  *   itself and the service a portal page uses to trigger it.
  *
- * Deliberately NOT ported: `chartEventsService` / `containerHeaderEventsService`
- * / `infiniteScrollService` from the original `minibadgeBehaviours.ts` —
- * those served the AngularJS SPA shell itself (charts/header/infinite
- * scroll inside the full minibadge app), now fully replaced by the React
- * SPA's own code (`frontend/src/main.tsx`), which never reads them off
- * `Behaviours.applicationsBehaviours`. They have no place in this separate,
- * minimal sniplet bundle.
- */
-/**
+ * Deliberately excludes any chart/header/infinite-scroll services: those
+ * would serve a full SPA shell, which this separate, minimal sniplet bundle
+ * has no need for (that's the React SPA's own code, in `frontend/src/main.tsx`).
+ *
  * TRACKED ASSUMPTIONS — things this bundle cannot verify from the repo alone
- * and that MUST be confirmed against a real recette portal page before this
- * sniplet is trusted in production (see the plan + final report):
+ * and that MUST be confirmed against a real portal page before this sniplet
+ * is trusted in production:
  * 1. `controller.init()`'s `this`-bound host element — see `resolveHost`'s
  *    own doc comment below.
  * 2. The host portal page already has the design-system CSS loaded — see
  *    `~/sniplet/BadgeAssignSniplet.tsx`'s top-of-file doc comment.
  * 3. The host portal page already mounts SOME `<Toaster/>` somewhere on the
  *    page — otherwise `AssignBadgeLightbox`'s success toast (rendered by
- *    this sniplet, via `BadgeAssignSniplet`) fails completely silently, with
- *    no error and no console warning. See the "TRACKED ASSUMPTION" paragraph
- *    in `~/components/AssignBadgeLightbox/index.tsx`'s own doc comment for
- *    the full explanation — flagged here too so it isn't missed alongside
- *    assumptions 1 and 2 above.
+ *    this sniplet) fails completely silently, with no error and no console
+ *    warning. See that component's own doc comment for the full explanation.
  */
 const minibadgeBehaviours = {
   rights: { workflow: MINIBADGE_WORKFLOW_RIGHTS },
@@ -98,20 +87,12 @@ const minibadgeBehaviours = {
       public: false,
       controller: {
         /**
-         * GOTCHA flagged in the plan, NOT verifiable from this repo alone:
-         * assumes the portal invokes `controller.init()` with `this` bound
-         * to the sniplet's host DOM element (the historical AngularJS
-         * `controller.init()` never needed a host element itself — the
-         * portal's own `$compile` handled DOM insertion via the sniplet's
-         * separate `.html` template, a mechanism this React sniplet no
-         * longer uses). If the real contract instead passes the host
-         * element as an argument, or expects a pre-existing DOM node
-         * instead of one created here, this must be adjusted once verified
-         * against a real portal (see the plan + final report). Falls back
-         * to `document.body` rather than throwing if `this` isn't an
-         * `HTMLElement`, but loudly (`console.warn`, see below) rather than
-         * silently, since this is exactly the kind of assumption that could
-         * misplace a widget on a live portal page with no other signal.
+         * Assumes the portal invokes `controller.init()` with `this` bound
+         * to the sniplet's host DOM element. If the real contract instead
+         * passes the host element as an argument, or expects a pre-existing
+         * DOM node instead of one created here, this must be adjusted once
+         * verified against a real portal. See `resolveHost`'s own doc
+         * comment for the fallback behavior if this assumption is wrong.
          */
         init(this: unknown): void {
           if (mountedRoot) {
@@ -136,11 +117,10 @@ const minibadgeBehaviours = {
           mountedNode = mountNode;
         },
         /**
-         * No confirmed portal contract calls a destroy hook today (see the
-         * plan's residual-risk notes), but nothing prevents one from being
-         * added later, and having this makes the `init()` idempotency guard
-         * above independently testable (init -> destroy -> init cleanly
-         * remounts). Mirrors `init()`'s bookkeeping in reverse.
+         * No confirmed portal contract calls a destroy hook today, but
+         * nothing prevents one from being added later, and having this
+         * makes the `init()` idempotency guard above independently testable
+         * (init -> destroy -> init cleanly remounts).
          */
         destroy(): void {
           mountedRoot?.unmount();
@@ -154,9 +134,7 @@ const minibadgeBehaviours = {
   snipletBadgeAssignService,
 };
 
-// Effect-of-side registration at module load, mirroring the original
-// `ts/behaviours.ts` (`Behaviours.register(MINIBADGE_APP, minibadgeBehaviours)`).
-// Defensive: `window.entcore` is a portal-provided global, absent in any
-// environment where this bundle is loaded outside the portal (e.g. tests) —
-// must not throw in that case.
+// `window.entcore` is a portal-provided global, absent in any environment
+// where this bundle is loaded outside the portal (e.g. tests) — must not
+// throw in that case.
 window.entcore?.Behaviours?.register(MINIBADGE_APP, minibadgeBehaviours);

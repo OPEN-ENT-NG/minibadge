@@ -21,12 +21,12 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 
 /**
  * jsdom doesn't implement `IntersectionObserver` either, which
- * `routes/badge-types` (Phase 4) uses to trigger the next page of its
- * infinite scroll once a sentinel element at the bottom of the grid comes
- * into view. jsdom has no real layout/scroll geometry to make that
- * meaningful, so — like the `ResizeObserver` stub above — this fires
- * `isIntersecting: true` synchronously on every `observe()` call rather than
- * only when the target is genuinely scrolled into view. That's enough for
+ * `routes/badge-types` uses to trigger the next page of its infinite scroll
+ * once a sentinel element at the bottom of the grid comes into view. jsdom
+ * has no real layout/scroll geometry to make that meaningful, so — like the
+ * `ResizeObserver` stub above — this fires `isIntersecting: true`
+ * synchronously on every `observe()` call rather than only when the target
+ * is genuinely scrolled into view. That's enough for
  * `routes/badge-types/index.test.tsx` to exercise the real
  * `useInfiniteQuery` pagination mechanism end-to-end (each `fetchNextPage()`
  * that resolves with `hasNextPage` still `true` triggers this effect again,
@@ -85,9 +85,7 @@ if (typeof SVGElement !== 'undefined' && !SVGElementCtor.prototype.getBBox) {
 /**
  * `EdificeClientProvider` bootstraps a session/config on mount via
  * `@edifice.io/client` (axios-based HTTP calls to the ENT Core platform).
- * This app has no features yet, so the only thing tests need is for that
- * bootstrap to resolve without ever reaching a real network — hence MSW,
- * mirroring the pattern used by the other already-migrated Edifice apps.
+ * MSW ensures that bootstrap resolves without ever reaching a real network.
  */
 
 // Enable API mocking before tests.

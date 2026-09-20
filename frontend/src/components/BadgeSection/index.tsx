@@ -6,40 +6,22 @@ import { BadgeCard, BadgeCardAction } from '~/components/BadgeCard';
 import { Badge } from '~/models/badge';
 
 /**
- * Mirror of `minibadge-badge-list` (`badge-list.directive.ts` +
- * `badge-list.html`): a clickable header (label/icon/count) that
- * collapses/expands a grid of `BadgeCard`s.
+ * A clickable header (label/icon/count) that collapses/expands a grid of
+ * `BadgeCard`s.
  *
- * OPEN/CLOSE LOGIC — verified line-by-line against
- * `badge-list.directive.ts#checkOpenedListStatus` (not just against the
- * plan's paraphrase of it, which reads as if `defaultOpen={false}` still
- * auto-reopens on an empty→non-empty transition; the real source guards the
- * OPENING branch only, not the closing one):
- *
- * ```ts
- * if ((!oldBadges || !oldBadges.length) && (newBadges && !!newBadges.length) &&
- *     !(typeof isDefaultOpenedList === 'boolean' && isDefaultOpenedList === false))
- *   isOpenedList = true;
- * else if (oldBadges && newBadges && !!oldBadges.length && (!newBadges || !newBadges.length))
- *   isOpenedList = false;
- * ```
- *
- * i.e. transitioning from an empty list to a non-empty one auto-*opens* the
- * section, UNLESS `defaultOpen` was explicitly passed as `false` (the
- * "refused" section on `main.html`) — that guard exists only on the opening
- * branch. Transitioning from non-empty back to empty always auto-*closes*
- * it, with no such guard, regardless of `defaultOpen`. `forceOpen` mirrors
- * `is-opened-option` — bound only on the refused section on `main.html`,
- * forcing the body visible (without touching the collapsed/expanded state
- * itself) whenever there is an active search query.
+ * The auto-toggle is asymmetric: transitioning from an empty list to a
+ * non-empty one auto-*opens* the section, unless `defaultOpen` was
+ * explicitly passed as `false`. Transitioning from non-empty back to empty
+ * always auto-*closes* it, with no such guard, regardless of `defaultOpen`.
  */
 export interface BadgeSectionProps {
   label: string;
   icon?: ReactNode;
   badges: Badge[];
-  /** Explicit `false` mirrors `is-default-opened-list="false"`. Omit/`true` for the default (auto-open) sections. */
+  /** Omit or `true` for the default (auto-open) sections; pass `false` to
+   * keep it closed even when badges first appear. */
   defaultOpen?: boolean;
-  /** Mirrors `is-opened-option`: forces the body visible regardless of the collapsed state. */
+  /** Forces the body visible regardless of the collapsed state. */
   forceOpen?: boolean;
   getActions?: (badge: Badge) => BadgeCardAction[];
   className?: string;

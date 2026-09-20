@@ -48,10 +48,9 @@ describe('MyBadges', () => {
     renderScreen();
 
     expect(await screen.findByRole('searchbox', { name: 'minibadge.badge.search' })).toBeInTheDocument();
-    // The 3 sections are hidden (not unmounted, see `routes/my-badges`'s own
-    // doc comment) while `badgesQuery.isLoading` (Constat #1) — so, like the
-    // search box above, they must be awaited rather than asserted
-    // synchronously.
+    // The 3 sections are hidden (not unmounted) while `badgesQuery.isLoading`
+    // — so, like the search box above, they must be awaited rather than
+    // asserted synchronously.
     expect(await screen.findByRole('button', { name: /minibadge.badges.public/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /minibadge.badges.private/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /minibadge.badges.refuse/ })).toBeInTheDocument();
@@ -145,7 +144,7 @@ describe('MyBadges', () => {
     renderScreen();
 
     // The refused section starts closed — open it manually before reaching
-    // into its actions menu (mirrors clicking the header, `clickList()`).
+    // into its actions menu.
     const refusedHeader = await screen.findByRole('button', { name: /minibadge.badges.refuse/ });
     await waitFor(() => expect(refusedHeader).not.toBeDisabled());
     await user.click(refusedHeader);
@@ -166,7 +165,7 @@ describe('MyBadges', () => {
     expect(await screen.findByText('minibadge.error.get.badges')).toBeInTheDocument();
   });
 
-  it('shows a loading indicator during the initial fetch, then the sections once resolved (Constat #1: no more empty-state flash)', async () => {
+  it('shows a loading indicator during the initial fetch, then the sections once resolved (no empty-state flash)', async () => {
     server.use(
       http.get('/minibadge/badges', async () => {
         await delay(50);

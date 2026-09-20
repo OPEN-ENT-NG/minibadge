@@ -4,12 +4,8 @@ import { BadgeAssigned } from '~/models/badgeAssigned';
 import { request } from '~/services/api/http';
 
 /**
- * Shared query params for `/assigned/given` and `/assigned/all` — verified in
- * `BadgeAssignedController.java#get` and `#getAll`: both read the exact same
- * four params (`Request.QUERY/START_DATE/END_DATE/SORTBY/SORTASC`).
- *
- * This confirms the plan's "à confirmer" note for `/assigned/all`: it does use
- * the same params as `/assigned/given` (query, startDate, endDate, sortBy, sortAsc).
+ * Shared query params for `/assigned/given` and `/assigned/all`: both read
+ * the same four params (query, startDate, endDate, sortBy, sortAsc).
  */
 export interface BadgeAssignedFilters {
   query?: string;
@@ -20,8 +16,7 @@ export interface BadgeAssignedFilters {
 }
 
 /**
- * GET /assigned/given — verified in `BadgeAssignedController.java#get`.
- * Response wrapped in `{ all: BadgeAssigned[] }`.
+ * GET /assigned/given. Response wrapped in `{ all: BadgeAssigned[] }`.
  */
 export const getBadgesGiven = async (
   filters: BadgeAssignedFilters = {},
@@ -36,8 +31,8 @@ export const getBadgesGiven = async (
 };
 
 /**
- * GET /minibadge/assigned/all — verified in `BadgeAssignedController.java#getAll` (AdminRight).
- * Same params and response shape as `getBadgesGiven`.
+ * GET /minibadge/assigned/all (admin only). Same params and response shape
+ * as `getBadgesGiven`.
  */
 export const getBadgesAssignedAll = async (
   filters: BadgeAssignedFilters = {},
@@ -52,18 +47,16 @@ export const getBadgesAssignedAll = async (
 };
 
 /**
- * PUT /minibadge/revoked/given/:badgeId — verified in `BadgeAssignedController.java#revoke`,
- * which just does `response().setStatusCode(200).end()`: no body at all, so this
- * resolves `void` (per the plan's explicit gotcha for this exact endpoint).
+ * PUT /minibadge/revoked/given/:badgeId — the response has no body, so this
+ * resolves `void`.
  */
 export const revokeBadgeAssigned = async (badgeId: number): Promise<void> => {
   await request(() => odeServices.http().put<void>(`/minibadge/revoked/given/${badgeId}`));
 };
 
 /**
- * POST /minibadge/types/:typeId/assign — verified in `BadgeAssignedController.java#assign`.
- * Body is `{ ownerIds: string[] }` (`Field.OWNERIDS`). Renders an empty JSON
- * object on success: no usable body, resolves `void`.
+ * POST /minibadge/types/:typeId/assign. Body is `{ ownerIds: string[] }`.
+ * Renders an empty JSON object on success, so this resolves `void`.
  */
 export const assignBadge = async (typeId: number, ownerIds: string[]): Promise<void> => {
   await request(() => odeServices.http().post<void>(`/minibadge/types/${typeId}/assign`, { ownerIds }));

@@ -8,16 +8,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { router } from '~/routes';
 
 /**
- * REVIEW FIX (typescript-reviewer, HIGH): `@edifice.io/client`'s
- * `CacheService` (used internally by `useUser()` -> `getUser()` ->
- * `GET /auth/oauth2/userinfo`) is a module-level singleton cache keyed by
- * URL with no expiry — it survives across every `it()` in this file
- * regardless of the fresh `QueryClient` per test. This suite doesn't
- * currently override that endpoint via `server.use(...)`, but
- * `routes/root/CharterGate/index.test.tsx` already had to add this exact
- * `beforeEach` to keep such overrides from silently no-oping once an earlier
- * test populated the cache — mirrored here for consistency and to prevent
- * latent flakiness as this suite grows.
+ * `@edifice.io/client`'s `CacheService` (used internally by `useUser()` ->
+ * `getUser()` -> `GET /auth/oauth2/userinfo`) is a module-level singleton
+ * cache keyed by URL with no expiry — it survives across every `it()` in
+ * this file regardless of the fresh `QueryClient` per test. Clearing it here
+ * keeps a future `server.use(...)` override on that endpoint from silently
+ * no-oping once an earlier test has already populated the cache.
  */
 beforeEach(() => odeServices.cache().clearCache());
 
@@ -31,8 +27,7 @@ beforeEach(() => odeServices.cache().clearCache());
  * since `@edifice.io/react@2.6`, it injects a static mock user with empty
  * `authorizedActions` instead of exercising `EdificeClientProvider`, which
  * would make every workflow-rights check in this app resolve to `false`
- * regardless of the MSW fixtures (mirrors the pattern already used by
- * `routes/root/CharterGate/index.test.tsx`).
+ * regardless of the MSW fixtures.
  */
 function renderApp(initialPath: string) {
   window.history.pushState({}, '', initialPath);
@@ -56,13 +51,10 @@ describe('App router', () => {
   it('renders the root route without throwing', async () => {
     renderApp('/');
 
-    // The index route now renders the real "my-badges" screen (Phase 2) —
-    // this replaces the Foundations-lot placeholder text, a documented,
-    // expected change (see `phase-2-mes-badges-recus.plan.md`'s Task 6),
-    // not a regression. The default MSW fixtures (`~/mocks/handlers`)
-    // represent a fully-entitled, already-accepted, non-revoked user, so
-    // `CharterGate` lets the screen through directly (no lightbox) and its
-    // search box is the first visible, stable marker of that screen.
+    // The default MSW fixtures represent a fully-entitled, already-accepted,
+    // non-revoked user, so `CharterGate` lets the "my-badges" screen through
+    // directly (no lightbox) and its search box is the first visible,
+    // stable marker of that screen.
     expect(
       await screen.findByRole('searchbox', { name: 'minibadge.badge.search' }),
     ).toBeInTheDocument();

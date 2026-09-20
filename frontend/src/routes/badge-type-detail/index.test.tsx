@@ -117,13 +117,6 @@ describe('BadgeTypeDetail', () => {
     expect(within(dialog).queryByText('minibadge.choose.users.to.assign')).not.toBeInTheDocument();
   });
 
-  /**
-   * Mirrors `refreshBadgeTypeData()`: after a successful assignation (via
-   * either modal), the type + assigners list must be refreshed.
-   * `useAssignBadge`'s own invalidation doesn't cover `['badgeType', typeId]`
-   * / `['badgeTypeAssigners', typeId]` (see the component's doc comment), so
-   * this screen's own `onAssigned` callback must.
-   */
   it('invalidates the badge type + assigners queries after a successful "Me décerner" assignation', async () => {
     server.use(http.get('/minibadge/types/:typeId', () => HttpResponse.json({
       ...fakeBadgeType,

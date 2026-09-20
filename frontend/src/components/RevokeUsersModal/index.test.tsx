@@ -9,10 +9,9 @@ import { server } from '~/mocks/server';
 
 import { RevokeUsersModal } from '.';
 
-// Post-migration improvement plan, Constat #2 (confirmed gap #2): same
-// mocking pattern as `AssignBadgeLightbox/index.test.tsx` — lets the
-// success test assert the toast fires, without depending on a `<Toaster/>`
-// (only `Layout`, mounted in `routes/root`, provides one at runtime).
+// Lets the success test assert the toast fires, without depending on a
+// `<Toaster/>` (only `Layout`, mounted in `routes/root`, provides one at
+// runtime).
 const toastSuccess = vi.fn();
 vi.mock('@edifice.io/react', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@edifice.io/react')>();
@@ -191,11 +190,6 @@ describe('RevokeUsersModal', () => {
 
     await waitFor(() => expect(receivedUserIds).toEqual([fakeUser.id]));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
-    // Post-migration improvement plan, Constat #2 (confirmed gap #2): the
-    // hand-rolled floating `Alert` toast simulation is gone — success
-    // feedback now goes through the real `useToast().success(...)`, mirroring
-    // the original `notify.success('minibadge.confirm.revoke.users.success')`
-    // (`admin.controller.ts:142`).
     expect(toastSuccess).toHaveBeenCalledTimes(1);
     expect(toastSuccess).toHaveBeenCalledWith('minibadge.confirm.revoke.users.success');
   });
@@ -219,7 +213,7 @@ describe('RevokeUsersModal', () => {
     expect(toastSuccess).not.toHaveBeenCalled();
   });
 
-  describe('Escape key (mirrors CharterGate Fix 1: each onModalClose guarded by its own open state)', () => {
+  describe('Escape key (each onModalClose guarded by its own open state)', () => {
     it('pressing Escape while only the search modal is open closes only that modal', async () => {
       const user = userEvent.setup();
       const { onClose } = renderModal(true);
@@ -241,12 +235,12 @@ describe('RevokeUsersModal', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
-    // REGRESSION (react-reviewer, HIGH): both `Modal`s register their own
-    // global Escape listener unconditionally, so while the confirmation
-    // sub-dialog is showing on top of the outer search/select modal, BOTH
-    // are simultaneously "open". A single Escape press must only step back
-    // to the selection screen (closing the confirm step), never discard the
-    // admin's search/selection state by closing the whole modal.
+    // Both `Modal`s register their own global Escape listener
+    // unconditionally, so while the confirmation sub-dialog is showing on
+    // top of the outer search/select modal, BOTH are simultaneously "open".
+    // A single Escape press must only step back to the selection screen
+    // (closing the confirm step), never discard the admin's
+    // search/selection state by closing the whole modal.
     it('pressing Escape while the confirmation sub-dialog is open only closes the confirmation, keeping the selection intact', async () => {
       const user = userEvent.setup();
       const { onClose } = renderModal(true);

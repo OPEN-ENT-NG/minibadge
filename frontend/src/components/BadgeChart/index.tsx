@@ -3,31 +3,18 @@ import { ApexOptions } from 'apexcharts';
 import Chart from 'react-apexcharts';
 
 /**
- * Minimal wrapper around `react-apexcharts`, chosen because the `apexcharts`
- * engine is already what the current AngularJS frontend uses for its charts
- * (see `chart.directive.ts` / `column-graph.directive.ts`), guaranteeing
- * visual parity once the Statistics screen (Phase 6) is ported. There is no
- * chart component in `@edifice.io/react` (verified: no `Chart` export in
- * `node_modules/@edifice.io/react/dist/components/index.d.ts`) — this is a
- * genuine gap, not a design-system wrapper.
+ * Minimal wrapper around `react-apexcharts` — there is no chart component in
+ * `@edifice.io/react`.
  *
- * Props verified against the installed `react-apexcharts` type declaration
- * (`node_modules/react-apexcharts/types/react-apexcharts.d.ts`): `type`,
- * `series`, `options`, `height`.
- *
- * REVIEW FIX (react-reviewer, HIGH): the SVG the chart engine renders has no
- * text alternative at all for assistive tech — a screen-reader user gets
- * nothing. `accessibleItems`, when provided, renders the exact same
- * label/value pairs the bars represent as real text, hidden visually but
- * present in the accessibility tree, via `@edifice.io/react`'s own
- * `VisuallyHidden` (verified: `VisuallyHidden` IS exported from
- * `node_modules/@edifice.io/react/dist/components/index.d.ts`, so no ad-hoc
- * sr-only CSS class is needed). `VisuallyHidden` only renders a `<span>`
- * (`VisuallyHidden.js`), which is phrasing content and cannot legally
- * contain a `<ul>`/`<li>` list — so the fallback is a single run of nested
- * `<span>`s (also phrasing content) rather than list markup, kept valid
- * HTML while still exposing every item, not just however many the visible
- * chart/cards elsewhere on the same screen happen to show.
+ * The SVG the chart engine renders has no text alternative for assistive
+ * tech. `accessibleItems`, when provided, renders the same label/value pairs
+ * the bars represent as real text, hidden visually but present in the
+ * accessibility tree, via `VisuallyHidden`. `VisuallyHidden` only renders a
+ * `<span>`, which is phrasing content and cannot legally contain a
+ * `<ul>`/`<li>` list — so the fallback is a single run of nested `<span>`s
+ * instead, kept valid HTML while still exposing every item, not just
+ * however many the visible chart/cards elsewhere on the same screen happen
+ * to show.
  */
 export type BadgeChartType = 'bar' | 'line' | 'pie' | 'donut';
 

@@ -17,59 +17,39 @@ import { toIsoDate } from '~/utils/date';
 import { formatMessage } from '~/utils/translate';
 
 /**
- * Mirror of `statistics.controller.ts` + `statistics.html`: "Statistiques"
- * (`/statistics`) — usage statistics for the module (participation, most/
- * least assigned/refused badge types, most active users/structures),
- * filterable by a sliding period.
+ * "Statistiques" (`/statistics`) — usage statistics for the module
+ * (participation, most/least assigned/refused badge types, most active
+ * users/structures), filterable by a sliding period.
  *
- * - Endpoint: `GET /minibadge/statistics?minDate=yyyy-MM-dd` (optional) —
- *   `useStatistics` (Phase 1), never consumed by a screen until now.
- * - Right gating: `isStatisticsView` (`hasWorkflow(statisticsView)`) redirects
- *   to `/` when absent, mirroring `main.ts:90-98` — same pattern as
- *   `routes/badges-admin`'s `isAdmin` guard (Phase 5): every hook is called
- *   unconditionally above the redirect, only the JSX is conditional.
- *   `isStatisticsViewAllStructures` gates extra sections/columns INSIDE this
- *   already-accessible screen only (never the route itself) — the
- *   "établissements les plus actifs" block and the structure-name column in
- *   the user grids below.
+ * - Right gating: `isStatisticsView` redirects to `/` when absent — every
+ *   hook is called unconditionally above the redirect, only the JSX is
+ *   conditional. `isStatisticsViewAllStructures` gates extra sections/columns
+ *   INSIDE this already-accessible screen only (never the route itself) —
+ *   the "établissements les plus actifs" block and the structure-name column
+ *   in the user grids below.
  * - Period (`selectedPeriod`, default `'all'`): changing it recomputes
- *   `minDate` and re-queries `useStatistics` from scratch (no partial merge),
- *   mirroring `onChangePeriod()` (`statistics.controller.ts:47-56`). `'all'`
- *   sends no `minDate` at all (`startDate = null`).
- * - Type toggle (`selectedType`, default `'badges'`): PURELY local — toggles
- *   which already-loaded fields are displayed, no server call
- *   (`isBadgesSelected`/`isUsersSelected`, no `ng-change` on that radio
- *   group in `statistics.html:67-78`, unlike the period radios which do have
- *   `ng-change="vm.onChangePeriod()"`).
+ *   `minDate` and re-queries `useStatistics` from scratch (no partial merge).
+ *   `'all'` sends no `minDate` at all.
+ * - Type toggle (`selectedType`, default `'badges'`): purely local — toggles
+ *   which already-loaded fields are displayed, no server call.
  * - The "Par type" panel is entirely absent when the user has no type data
- *   at all (`!!mostAssignedTypes.length || !!mostRefusedTypes.length`,
- *   `statistics.html:62`) — unlike the "Participation" panel above it, which
- *   is always rendered regardless of data.
- * - GOTCHA reproduced faithfully (`statistics.html:161-172`): the
- *   "less assigned" card's TITLE shows whenever `lessAssignedTypes.length`,
- *   but the bar chart INSIDE it only renders when `lessAssignedTypes.length
- *   > 1` — with exactly 1 element the card is visible with an empty body.
- *   This is a real quirk of the source app, not a simplification to fix.
+ *   at all — unlike the "Participation" panel above it, which is always
+ *   rendered regardless of data.
+ * - GOTCHA: the "less assigned" card's title shows whenever
+ *   `lessAssignedTypes.length`, but the bar chart inside it only renders
+ *   when `lessAssignedTypes.length > 1` — with exactly 1 element the card is
+ *   visible with an empty body. Intentional, not a bug to fix.
  *
- * LOADING INDICATOR (post-migration improvement plan, Constat #1): before
- * this fix, every derived array defaulted to `?? []`, so the whole dashboard
- * silently rendered as "no data" during the initial fetch. Unlike
- * `my-badges`/`badges-given` (persistent search/filter shell + partial
- * content swap), this screen's period/type radios are meaningless without
- * `statistics` already loaded once, so — mirroring `routes/badge-type-detail`
- * exactly — `LoadingScreen` replaces the ENTIRE screen while `query.isLoading`,
- * placed after the `isStatisticsView` redirect (every hook above it is still
- * called unconditionally, matching the established gating order in
- * `routes/badges-admin`/`CharterGate`).
+ * This screen's period/type radios are meaningless without `statistics`
+ * already loaded once, so `LoadingScreen` replaces the entire screen while
+ * `query.isLoading` (placed after the `isStatisticsView` redirect; every
+ * hook above it is still called unconditionally).
  *
- * A11Y FIX (react-reviewer, MEDIUM): `LoadingScreen` itself has no
- * `aria-live`/`role="status"`, so its appearance/disappearance was invisible
- * to assistive tech. Unlike `my-badges`/`badges-given`/`badges-admin` (a
- * single container present across both states), this screen swaps its ENTIRE
- * return value on `query.isLoading`, so there's no shared persistent element
- * to hang `aria-busy` on — the loading return is instead wrapped in its own
- * `<div aria-live="polite">`, still the same established convention as
- * `AssignBadgeLightbox`/`RevokeUsersModal`'s search-results regions.
+ * `LoadingScreen` itself has no `aria-live`/`role="status"`, so its
+ * appearance/disappearance would otherwise be invisible to assistive tech —
+ * since this screen swaps its entire return value on `query.isLoading`
+ * (no shared persistent element to hang `aria-busy` on), the loading return
+ * is wrapped in its own `<div aria-live="polite">` instead.
  */
 
 type PeriodOption = 'all' | '30days' | '7days';
@@ -80,34 +60,20 @@ const minDateForPeriod = (period: PeriodOption): string | undefined => {
   const days = period === '30days' ? 30 : 7;
   const date = new Date();
   date.setDate(date.getDate() - days);
-  // REVIEW NOTE (react-reviewer, MEDIUM — investigated, not changed): the
-  // source (`statistic.service.ts`) formats this boundary with
-  // `minDate.toISOString().split('T')[0]` (UTC day boundary), whereas
-  // `toIsoDate` (`~/utils/date`) uses local `getFullYear`/`getMonth`/
-  // `getDate` — a real divergence near local midnight depending on the
-  // user's timezone. This is intentional, not an oversight: `toIsoDate` is
-  // the established local-day convention already used consistently for
-  // every other period computation in this app (`defaultPeriod` in
-  // `~/utils/date`, consumed by `routes/badges-given` since Phase 3 and
-  // `routes/badges-admin` since Phase 5) — switching only this call site to
-  // UTC would make THIS screen the inconsistent one.
+  // `toIsoDate` uses the local calendar day (`getFullYear`/`getMonth`/
+  // `getDate`), not UTC — this is the convention used consistently for every
+  // other period computation in this app (`defaultPeriod` in `~/utils/date`),
+  // so this call site stays local too rather than becoming the odd one out.
   return toIsoDate(date);
 };
 
-/** Mirrors `User.getDisplayName()` (`user.model.ts:73`). */
 const getUserDisplayName = (user: MinibadgeUser): string =>
   user.displayName || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
 
-/** Mirrors `User.getStructureName()` (`user.model.ts:79`). */
 const getUserStructureName = (user: MinibadgeUser): string =>
   user.structureNames && user.structureNames.length ? user.structureNames[0] : '';
 
-/**
- * Mirrors `Structure.displayItemDistinction` (`structure.model.ts:38-46`)
- * EXACTLY, including the lower-cased option labels — no model class exists
- * on the React side for this (per the plan: display logic lives in the
- * screen, not a port of the AngularJS class hierarchy).
- */
+/** The option/participant labels are deliberately lower-cased here. */
 const displayStructureDistinction = (t: TFunction, structure: MinibadgeStructure): string => {
   const optionsLabel = t('minibadge.badges.option').toLowerCase();
   const baseText = `${(structure.countAssigned ?? 0).toLocaleString()} ${optionsLabel}`;
@@ -123,10 +89,9 @@ const badgeTypeChartSeries = (t: TFunction, types: BadgeType[]) => [
 const badgeTypeChartCategories = (types: BadgeType[]): string[] => types.map((type) => type.label);
 
 /**
- * REVIEW FIX (react-reviewer, HIGH): textual equivalent of the "most"/"less
- * assigned" bar charts' data (`BadgeChart`'s `accessibleItems`), for
- * assistive tech — mirrors `badgeTypeChartSeries`/`badgeTypeChartCategories`
- * exactly (same source array, same `countAssigned` field, same order), so
+ * Textual equivalent of the "most"/"less assigned" bar charts' data
+ * (`BadgeChart`'s `accessibleItems`), for assistive tech — same source
+ * array, same order as `badgeTypeChartSeries`/`badgeTypeChartCategories`, so
  * every bar the chart draws also has a corresponding text item, including
  * everything past the 3 the compact cards on the same screen show.
  */
@@ -146,8 +111,7 @@ export const Statistics = () => {
 
   const { statistics, query } = useStatistics(minDateForPeriod(selectedPeriod));
 
-  // Mirrors `main.ts:90-98`'s immediate redirect when `statisticsView` is
-  // absent — every hook above this line is called unconditionally first.
+  // Every hook above this line is called unconditionally first.
   if (!isStatisticsView) {
     return <Navigate to="/" replace />;
   }
@@ -382,9 +346,8 @@ export const Statistics = () => {
                   <StatisticsCard
                     label={formatMessage(t, 'minibadge.statistics.less.allowed.badges', [lessAssignedTypes.length])}
                   >
-                    {/* GOTCHA (`statistics.html:167-170`): the graph is only
-                        rendered above a strict length of 1 — reproduced
-                        faithfully, not a simplification. */}
+                    {/* The graph is intentionally only rendered above a
+                        strict length of 1 — see the class doc comment. */}
                     {lessAssignedTypes.length > 1 ? (
                       <BadgeChart
                         className="minibadge-chart-less-assigned"

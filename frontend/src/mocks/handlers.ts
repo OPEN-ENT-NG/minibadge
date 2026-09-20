@@ -3,11 +3,7 @@ import { HttpResponse, http } from 'msw';
 /**
  * Minimal set of ENT Core platform endpoints hit by `@edifice.io/client`
  * while `EdificeClientProvider` bootstraps a session (useSession) and the
- * app configuration (useConf). Mirrors the pattern used by the other
- * already-migrated Edifice apps (e.g. edifice-react-boilerplate) so tests
- * never hit the real network.
- *
- * This app has no features yet: keep this list to bootstrap-only routes.
+ * app configuration (useConf), so tests never hit the real network.
  */
 const defaultHandlers = [
   http.get('/auth/oauth2/userinfo', () => {
@@ -24,9 +20,7 @@ const defaultHandlers = [
       // Default fixture represents a fully-entitled user (both workflow
       // rights) so the app shell renders real screen content out of the box;
       // tests of the "no rights" / "not yet accepted" gates override this via
-      // `server.use(...)`. Names verified against
-      // `backend/.../ts/core/constants/rights.const.ts`
-      // (`rights.workflow.assign`/`receive`).
+      // `server.use(...)`.
       authorizedActions: [
         { name: 'fr.openent.minibadge.controller.FakeRight|assign', displayName: 'assign', type: 'WORKFLOW' },
         { name: 'fr.openent.minibadge.controller.FakeRight|receive', displayName: 'receive', type: 'WORKFLOW' },
@@ -82,14 +76,12 @@ const defaultHandlers = [
     });
   }),
 
-  // `AppHeader`'s unread-messages badge (added by @edifice.io/react since
-  // this app's original 2.2.4 pin) polls this endpoint unconditionally.
+  // `AppHeader`'s unread-messages badge polls this endpoint unconditionally.
   http.get('/conversation/api/count/inbox', () => {
     return HttpResponse.json({ count: 0 });
   }),
 
-  // Per-app public conf (added by @edifice.io/client since this app's
-  // original 2.2.4 pin), fetched unconditionally by `EdificeClientProvider`.
+  // Per-app public conf, fetched unconditionally by `EdificeClientProvider`.
   http.get('/minibadge/conf/public', () => {
     return HttpResponse.json({});
   }),
@@ -148,11 +140,8 @@ const defaultHandlers = [
 ];
 
 /**
- * Fixtures + handlers for the minibadge API surface covered by Phase 1
- * (models/services/queries socle). Shapes mirror the interfaces in
- * `~/models/*` exactly, which were themselves verified against the backend
- * `toJson()` methods — see the `services/api` and `services/queries` files
- * for the endpoint-by-endpoint source references.
+ * Fixtures + handlers for the minibadge API surface. Shapes mirror the
+ * interfaces in `~/models/*` exactly.
  */
 import { Badge } from '~/models/badge';
 import { BadgeAssigned } from '~/models/badgeAssigned';
@@ -174,12 +163,11 @@ export const fakeUser: MinibadgeUser = {
 };
 
 /**
- * PHASE 5 (`components/RevokeUsersModal`): two extra `/admin/users-search`
- * candidates, distinct from `fakeUser` — one carrying `minibadgeUserState`
- * (to exercise `displayUser`'s "(Actif)"/"(Inactif)"/"(Révoqué)" suffix, per
- * `revoke-users.directive.ts:72-78`), the other a plain second person (to
- * exercise the plural revocation-confirmation question, which needs 2+
- * selected users).
+ * Two extra `/admin/users-search` candidates, distinct from `fakeUser` — one
+ * carrying `minibadgeUserState` (to exercise the "(Actif)"/"(Inactif)"/
+ * "(Révoqué)" display suffix), the other a plain second person (to exercise
+ * the plural revocation-confirmation question, which needs 2+ selected
+ * users).
  */
 export const fakeAdminSearchUserRevoked: MinibadgeUser = {
   id: 'q1r2s3t4',
@@ -243,10 +231,10 @@ export const fakeBadge: Badge = {
 };
 
 /**
- * PHASE 2 (`routes/my-badges`): one badge fixture per status
- * (`~/utils/badgeStatus`), so the `GET /minibadge/badges` handler below can
- * return a set that actually exercises the 3-way public/private/refused
- * split, instead of only ever the single public `fakeBadge`.
+ * One badge fixture per status (`~/utils/badgeStatus`), so the
+ * `GET /minibadge/badges` handler below can return a set that actually
+ * exercises the 3-way public/private/refused split, instead of only ever
+ * the single public `fakeBadge`.
  */
 export const fakeBadgePrivatized: Badge = {
   ...fakeBadge,
@@ -274,14 +262,14 @@ export const fakeBadgeAssigned: BadgeAssigned = {
 };
 
 /**
- * PHASE 3 (`routes/badges-given`): a second given-badge fixture, deliberately
- * distinct from `fakeBadgeAssigned` in every sortable column (badge type
- * label, receiver display name, creation date, revocation date) and already
- * revoked. Lets the `/minibadge/assigned/given` handler below prove real
+ * A second given-badge fixture, deliberately distinct from
+ * `fakeBadgeAssigned` in every sortable column (badge type label, receiver
+ * display name, creation date, revocation date) and already revoked. Lets
+ * the `/minibadge/assigned/given` handler below prove real
  * `sortBy`/`sortAsc`/`startDate`/`endDate` handling (not just that some
  * response comes back), and lets `routes/badges-given` exercise the
- * "already revoked" row (`badge-given-array.html:46`, the "Révocation" text
- * instead of the trash icon) without a dedicated mutation.
+ * "already revoked" row (the "Révocation" text instead of the trash icon)
+ * without a dedicated mutation.
  */
 export const fakeBadgeAssignedRevoked: BadgeAssigned = {
   id: 1001,
@@ -300,15 +288,13 @@ export const fakeBadgeAssignedRevoked: BadgeAssigned = {
 };
 
 /**
- * PHASE 5 (`routes/badges-admin`): a second `/assigned/all` fixture, distinct
- * from `fakeBadgeAssigned` in every one of the 4 admin-table sortable columns
- * (label, ASSIGNOR display name, owner/receiver display name, creation date)
- * — mirrors `fakeBadgeAssignedRevoked`'s role for `/assigned/given`, but this
- * endpoint sorts on `assignor_display_name`/`receiver_display_name` (its own
- * dedicated `acceptedSort`, see `routes/badges-admin/index.tsx`'s
- * `SORT_COLUMNS`), not the single-user `display_name` `/assigned/given` uses,
- * so it needs its own assignor identity distinct from `fakeBadgeAssigned`'s
- * (both assigned by `fakeUser`).
+ * A second `/assigned/all` fixture, distinct from `fakeBadgeAssigned` in
+ * every one of the 4 admin-table sortable columns (label, assignor display
+ * name, owner/receiver display name, creation date) — this endpoint sorts
+ * on `assignor_display_name`/`receiver_display_name` (see
+ * `routes/badges-admin/index.tsx`'s `SORT_COLUMNS`), not the single-user
+ * `display_name` `/assigned/given` uses, so it needs its own assignor
+ * identity distinct from `fakeBadgeAssigned`'s.
  */
 export const fakeBadgeAssignedAllSecond: BadgeAssigned = {
   id: 2000,
@@ -326,14 +312,13 @@ export const fakeBadgeAssignedAllSecond: BadgeAssigned = {
 };
 
 /**
- * PHASE 6 (`routes/statistics`): a second badge-type fixture, distinct from
- * `fakeBadgeType`, purely so `fakeStatistics.mostAssignedTypes` can have 2
- * elements — exercising `mostAssignedTypes.slice(1, 3)` (the "other top
- * badges" compact cards, `statistics.html:110-116`) without inflating to 3+
- * (a real 3rd-place scenario isn't needed to prove the slice works). No
- * `mostAssigningUsers` of its own, unlike `fakeBadgeType` — proves the
- * "top assigning users" sub-list is only rendered for the FIRST (detailed)
- * element, never the compact ones.
+ * A second badge-type fixture, distinct from `fakeBadgeType`, purely so
+ * `fakeStatistics.mostAssignedTypes` can have 2 elements — exercising
+ * `mostAssignedTypes.slice(1, 3)` (the "other top badges" compact cards)
+ * without inflating to 3+ (a real 3rd-place scenario isn't needed to prove
+ * the slice works). No `mostAssigningUsers` of its own, unlike
+ * `fakeBadgeType` — proves the "top assigning users" sub-list is only
+ * rendered for the FIRST (detailed) element, never the compact ones.
  */
 export const fakeBadgeTypeSecond: BadgeType = {
   ...fakeBadgeType,
@@ -396,9 +381,8 @@ export const fakeStatisticsNoTypes: Statistics = {
 };
 
 /**
- * REVIEW FIX (react-reviewer, HIGH — `routes/statistics`'s bar charts had no
- * textual equivalent): `mostAssignedTypes` of length 4, i.e. one MORE than
- * the 3 the "most allowed badges" compact cards ever display
+ * `mostAssignedTypes` of length 4, i.e. one MORE than the 3 the "most
+ * allowed badges" compact cards ever display
  * (`otherMostAssignedTypes = mostAssignedTypes.slice(1, 3)`, on top of
  * `firstMostAssignedType`). Lets a test prove the chart's visually-hidden
  * textual fallback exposes ALL 4 labels, not just the 3 rendered as visible
@@ -415,21 +399,17 @@ export const fakeStatisticsManyMostAssigned: Statistics = {
 };
 
 /**
- * REVIEW FIX (react-reviewer, MEDIUM): the handlers below used to ignore
- * query params/request body entirely and return a fixed fixture, so a future
- * regression in what a `services/api/*.ts` call actually sends (e.g. a
- * dropped/renamed query param) would never fail a test — every request got
- * the same canned response regardless of what was asked for. These handlers
- * now read `request.url.searchParams` and return a distinguishable response
- * (an empty list when a `query` param doesn't match the fixture, or a 400
- * when a genuinely required param is missing/malformed), so the
- * corresponding `services/queries/*.test.tsx` tests can prove the param was
- * actually sent and read — see the added tests there.
+ * The handlers below read `request.url.searchParams` and return a
+ * distinguishable response (an empty list when a `query` param doesn't
+ * match the fixture, or a 400 when a genuinely required param is
+ * missing/malformed) rather than a fixed fixture regardless of what was
+ * asked for, so the corresponding `services/queries/*.test.tsx` tests can
+ * prove the param was actually sent and read.
  */
 
 /**
- * PHASE 3 helpers for the `/minibadge/assigned/given` handler below — kept
- * outside the handlers array since they're plain data-shaping functions, not
+ * Helpers for the `/minibadge/assigned/given` handler below — kept outside
+ * the handlers array since they're plain data-shaping functions, not
  * request handlers themselves.
  */
 function isCreatedWithinRange(
@@ -450,9 +430,8 @@ function sortValueFor(item: BadgeAssigned, sortBy: string): string {
   switch (sortBy) {
     case 'label':
       return item.badge.badgeType.label;
-    // REVIEW FIX (react-reviewer, HIGH): the real backend's accepted sort
-    // column for the owner/receiver name is `display_name`, not
-    // `receiver_display_name` (see the matching fix + explanation in
+    // The accepted sort column for the owner/receiver name is
+    // `display_name`, not `receiver_display_name` (see
     // `routes/badges-given/index.tsx`'s `SORT_COLUMNS`).
     case 'display_name':
       return item.badge.owner?.displayName ?? '';
@@ -465,8 +444,8 @@ function sortValueFor(item: BadgeAssigned, sortBy: string): string {
 }
 
 const minibadgeHandlers = [
-  // Badges — kept as the single public `fakeBadge` by default (Phase 1's
-  // `services/queries/badges.test.tsx` asserts exactly `[fakeBadge]`).
+  // Badges — kept as the single public `fakeBadge` by default (see
+  // `services/queries/badges.test.tsx`, which asserts exactly `[fakeBadge]`).
   // `query` filters by badge type label (case-insensitive, mirroring other
   // list endpoints below), so `useBadges(searchQuery)` tests can prove the
   // param is forwarded and read. `routes/my-badges` tests that need all 3
@@ -484,24 +463,15 @@ const minibadgeHandlers = [
   http.put('/minibadge/types/:typeId/badge/refuse', () => HttpResponse.json({})),
 
   /**
-   * BadgeTypes — `offset` is required server-side (see
-   * `BadgeTypeController.java#getBadgeTypes`, `Integer.parseInt` with no
-   * default); `query` filters the fixture by label to prove it's read.
+   * BadgeTypes — `offset` is required server-side (no default); `query`
+   * filters the fixture by label to prove it's read.
    *
-   * PHASE 4 (`routes/badge-types`) FIX: this used to hardcode `limit: 10` and
-   * always return `[fakeBadgeType]` regardless of `offset`/`limit` — i.e. it
-   * never actually paginated, so nothing could prove a real
-   * `useInfiniteQuery` "next page" request works. Now genuinely slices
-   * `offset`..`offset+limit` (default `limit` 10 when the param is absent,
-   * matching every existing test's explicit `limit=10`, and echoing back
-   * whatever `limit` WAS requested — mirrors the real backend's
-   * `RequestHelper.formatResponse(limit, offset, badgeTypes)`, verified in
-   * `BadgeTypeController.java`). Still only ever backed by the single
-   * `fakeBadgeType` fixture, so every pre-existing test here (`limit=10`,
-   * one item, at offset 0) is unaffected — real multi-page scroll behavior is
-   * exercised by a dedicated `server.use(...)` override with more fixtures in
-   * `routes/badge-types/index.test.tsx`, not by inflating this shared
-   * default dataset.
+   * Genuinely slices `offset`..`offset+limit` (default `limit` 10 when the
+   * param is absent, echoing back whatever `limit` WAS requested) so a real
+   * `useInfiniteQuery` "next page" request can be proven to work — still
+   * only ever backed by the single `fakeBadgeType` fixture; real multi-page
+   * scroll behavior is exercised by a dedicated `server.use(...)` override
+   * with more fixtures in `routes/badge-types/index.test.tsx`.
    */
   http.get('/minibadge/types', ({ request }) => {
     const url = new URL(request.url);
@@ -533,18 +503,13 @@ const minibadgeHandlers = [
   // name to prove the param is actually forwarded and read (see
   // `BadgeAssignedFilters` in `services/api/badgeAssigned.ts`).
   /**
-   * PHASE 3 FIX (`routes/badges-given`): this used to only ever read `query`,
-   * silently ignoring `sortBy`/`sortAsc`/`startDate`/`endDate` — so nothing
-   * could prove those params were actually sent/read (only that SOME
-   * response came back). `startDate`+`endDate` now gate a second fixture
-   * (`fakeBadgeAssignedRevoked`) into the response, filtered by its real
-   * `createdAt` against the requested range (parsed as `DD-MM-YYYY`, per
-   * `date.enum.ts`'s `DATE_FORMAT.DAY_MONTH_YEAR_MOMENT`); `sortBy`/`sortAsc`
-   * then really reorder whatever that narrowed down to. Below any sort, the
-   * two fixtures are deliberately returned in "wrong" (non-ascending) order,
-   * so a test can prove a sort click genuinely reorders rows rather than
-   * merely matching an already-sorted fixture list. The original no-params
-   * behavior (`useBadgesGiven()`, Phase 1) is untouched: no `startDate`/
+   * `startDate`+`endDate` gate a second fixture (`fakeBadgeAssignedRevoked`)
+   * into the response, filtered by its real `createdAt` against the
+   * requested range (parsed as `DD-MM-YYYY`); `sortBy`/`sortAsc` then really
+   * reorder whatever that narrowed down to. Below any sort, the two
+   * fixtures are deliberately returned in "wrong" (non-ascending) order, so
+   * a test can prove a sort click genuinely reorders rows rather than
+   * merely matching an already-sorted fixture list. No `startDate`/
    * `endDate` still falls back to the single-item branch, so
    * `services/queries/badgeAssigned.test.tsx`'s exact `[fakeBadgeAssigned]`
    * assertions keep passing unchanged.
@@ -564,12 +529,10 @@ const minibadgeHandlers = [
           )
         : [fakeBadgeAssigned];
 
-    // REVIEW FIX (react-reviewer, HIGH): the real backend's `WHERE` clause
-    // searches `[DISPLAY_NAME, LABEL]` (the badge owner/receiver's display
-    // name and the badge type label) — never the assignor's name, since the
-    // assignor is always "me" for this endpoint (`WHERE ba.assignor_id = ?`
-    // already scopes to the current user). Verified against
-    // `DefaultBadgeAssignedService.java#getBadgesGivenRequest`.
+    // The real backend's `WHERE` clause searches the badge owner/receiver's
+    // display name and the badge type label — never the assignor's name,
+    // since the assignor is always "me" for this endpoint (already scoped
+    // to the current user).
     if (query) {
       const lowerQuery = query.toLowerCase();
       all = all.filter(
@@ -589,14 +552,12 @@ const minibadgeHandlers = [
     return HttpResponse.json({ all });
   }),
   /**
-   * PHASE 5 (`routes/badges-admin`) FIX, mirroring the same one already made
-   * to `/minibadge/assigned/given` above: this used to ignore
-   * `sortBy`/`sortAsc`/`startDate`/`endDate` entirely. `startDate`+`endDate`
-   * now gate `fakeBadgeAssignedAllSecond` into the response (same
+   * Same pattern as `/minibadge/assigned/given` above: `startDate`+`endDate`
+   * gate `fakeBadgeAssignedAllSecond` into the response (same
    * `isCreatedWithinRange` helper); no dates still falls back to the
    * single-item branch, so `services/queries/badgeAssigned.test.tsx`'s exact
-   * `[fakeBadgeAssigned]` assertions (Phase 1, unaware of `/admin`) keep
-   * passing unchanged. `sortBy` accepts this endpoint's OWN 4 columns
+   * `[fakeBadgeAssigned]` assertions keep passing unchanged. `sortBy`
+   * accepts this endpoint's OWN 4 columns
    * (`label`/`assignor_display_name`/`receiver_display_name`/`created_at` —
    * see `routes/badges-admin/index.tsx`'s `SORT_COLUMNS`), distinct from
    * `/assigned/given`'s `display_name`.
@@ -649,12 +610,7 @@ const minibadgeHandlers = [
   http.put('/minibadge/revoked/given/:badgeId', () => new HttpResponse(null, { status: 200 })),
   http.post('/minibadge/types/:typeId/assign', () => HttpResponse.json({})),
 
-  /**
-   * PHASE 6 (`routes/statistics`) FIX: this used to ignore `minDate` entirely
-   * and always return `fakeStatistics`, so nothing could prove a period
-   * change actually sends a new request and swaps the data. Now returns the
-   * distinguishable `fakeStatisticsFiltered` whenever `minDate` is present.
-   */
+  /** Returns the distinguishable `fakeStatisticsFiltered` whenever `minDate` is present. */
   http.get('/minibadge/statistics', ({ request }) => {
     const url = new URL(request.url);
     const minDate = url.searchParams.get('minDate');
@@ -675,14 +631,10 @@ const minibadgeHandlers = [
     return HttpResponse.json({ all });
   }),
   /**
-   * PHASE 5 (`components/RevokeUsersModal`) FIX: this used to only ever be
-   * able to return `fakeUser` (no `minibadgeUserState`), so nothing could
-   * exercise `displayUser`'s "(Actif)"/"(Inactif)"/"(Révoqué)" suffix or the
-   * plural confirmation question (which needs 2+ selectable results).
-   * Generalized to filter a small candidate pool by display name, same as
-   * every other search handler above — `query=fake` still resolves to
-   * exactly `[fakeUser]` (the only candidate whose name contains "fake"),
-   * so `services/queries/users.test.tsx`'s existing assertions are untouched.
+   * Filters a small candidate pool by display name, same as every other
+   * search handler above — `query=fake` still resolves to exactly
+   * `[fakeUser]` (the only candidate whose name contains "fake"), so
+   * `services/queries/users.test.tsx`'s existing assertions are unaffected.
    */
   http.get('/minibadge/admin/users-search', ({ request }) => {
     const url = new URL(request.url);
@@ -731,13 +683,12 @@ const minibadgeHandlers = [
   http.put('/minibadge/revoke', () => HttpResponse.json({})),
   http.get('/minibadge/revoked', () => HttpResponse.json({ revoked: false })),
 
-  // Minibadge "chart" (charter consent) — a generic ENT Core user preference,
-  // NOT a `/minibadge/*` route (see the deviation note in
-  // `~/services/api/charter.ts`). Default fixture: charter already fully
-  // accepted, so the transverse `CharterGate` lets the default fixture user
-  // straight through without a lightbox — dedicated `CharterGate` tests
-  // override this via `server.use(...)` to exercise the "not yet accepted"
-  // and other states.
+  // Minibadge "chart" (charter consent) — a generic ENT Core user
+  // preference, NOT a `/minibadge/*` route. Default fixture: charter
+  // already fully accepted, so the transverse `CharterGate` lets the
+  // default fixture user straight through without a lightbox — dedicated
+  // `CharterGate` tests override this via `server.use(...)` to exercise the
+  // "not yet accepted" and other states.
   http.get('/userbook/preference/minibadge.chart', () =>
     HttpResponse.json({
       preference: JSON.stringify({
@@ -752,8 +703,4 @@ const minibadgeHandlers = [
   http.put('/userbook/preference/minibadge.chart', () => HttpResponse.json({})),
 ];
 
-/**
- * MSW Handlers
- * Mock HTTP methods for your own application
- */
 export const handlers = [...defaultHandlers, ...minibadgeHandlers];

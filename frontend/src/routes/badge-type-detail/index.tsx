@@ -18,48 +18,13 @@ const displayUserName = (user: MinibadgeUser): string =>
   user.displayName ?? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
 
 /**
- * Mirrors `badge-type.html` + `badge-type.controller.ts` — the badge type
- * detail screen: fiche (image/label/categories) + description + the list of
- * people who assigned ME this badge (only if `canReceive()`), plus the two
- * action buttons ("Me décerner" / "Décerner").
+ * Badge type detail screen: image/label/categories, description, and (only
+ * when the current user can receive this badge) the list of people who
+ * assigned it to them.
  *
- * Layout inspired by how communities displays a community
- * (`features/communities-tabs/CommunityTabs.tsx`'s `community-header`): a
- * sticky top bar with a back button + title on the left and the action
- * buttons on the right (moved here from their own separate row), then a
- * two-column body — a large image on the left, categories/description on
- * the right. Not a literal copy (that file's own body is a community-
- * specific 3-column members/announcements layout with no image+text split
- * to mirror), but the same header idiom, adapted to what this screen
- * actually shows.
- *
- * NOT PORTED (deliberately, matching the plan's stated scope for this
- * screen — "fiche du type (image/label/catégories), description, liste
- * 'assigners'"): `id-type.html`'s extra metadata (owner/creation date,
- * `displayAssignors()`/`displayReceivers()`, the "N personnes ont obtenu ce
- * badge sur la plateforme" stat) and the receivers list/pagination. The
- * receivers list is fetched by the real controller
- * (`getBadgeTypeReceivers`) but never actually rendered anywhere in
- * `badge-type.html` either (only its `receiversTotal` count feeds that
- * unported stat line) — so nothing is silently dropped that the real UI
- * shows. Assigners pagination beyond page 0 is left as a fixed first page:
- * the plan's own testing strategy for this screen doesn't exercise paging,
- * and the real pager (`minibadge-paging`) has no already-shipped i18n copy
- * to reuse faithfully (`grep` found none), so inventing labels for it would
- * violate the plan's explicit "no new i18n key" constraint.
- *
- * Description rendering: the real template uses `bind-html` for
- * `descriptionShort`/`description` (`description-type.html:5-6`) — real
- * content can contain HTML markup. This still never uses
- * `dangerouslySetInnerHTML` for admin-authored content (`CharterGate`'s own
- * doc comment reserves that API for the app's own fixed i18n bundle text),
- * so `stripHtmlTags` (see its own doc comment, already used by `BadgeCard`)
- * shows the text without the literal tags.
- *
- * Back button: always navigates to `/badge-types` (mirrors communities'
- * `backToList`'s `navigate("/")`, an explicit route rather than browser
- * history) — this screen is only ever reached by clicking a card in that
- * catalogue (`routes/badge-types`), so there is no other "back" target.
+ * `descriptionShort`/`description` may contain HTML markup, so they're run
+ * through `stripHtmlTags` rather than rendered with `dangerouslySetInnerHTML`
+ * — this is admin-authored content, not fixed app copy.
  */
 export const BadgeTypeDetail = () => {
   const { t } = useTranslation('minibadge');
@@ -70,20 +35,17 @@ export const BadgeTypeDetail = () => {
   const queryClient = useQueryClient();
 
   const { badgeType, query: badgeTypeQuery } = useBadgeType(typeId);
-  // Always called (React hooks can't be conditional) — the same established
-  // compromise as `routes/my-badges` (Phase 2): the query fires regardless,
-  // only its RESULT is gated behind `canReceive` below, mirroring
-  // `getBadgeTypeAssigners`'s real-source guard
-  // (`if (this.badgeType && this.$scope.setting.userPermissions.canReceive())`).
+  // Always called (hooks can't be conditional) — only the result is gated
+  // behind `canReceive` below.
   const { assigners, query: assignersQuery } = useBadgeTypeAssigners(typeId, 0);
 
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isAssignMyselfOpen, setIsAssignMyselfOpen] = useState(false);
 
-  // Mirrors `refreshBadgeTypeData()` — `useAssignBadge`'s own invalidation
-  // (`['assigned']`/`['badges']`/`['badgeTypes']`, plural) does not cover the
-  // singular `['badgeType', typeId]` detail query nor `['badgeTypeAssigners',
-  // typeId]`, so this screen invalidates those two itself on top.
+  // `useAssignBadge`'s own invalidation (`['assigned']`/`['badges']`/
+  // `['badgeTypes']`, plural) doesn't cover the singular `['badgeType',
+  // typeId]`/`['badgeTypeAssigners', typeId]` queries, so this screen
+  // invalidates those itself.
   const handleAssigned = () => {
     queryClient.invalidateQueries({ queryKey: ['badgeType', typeId] });
     queryClient.invalidateQueries({ queryKey: ['badgeTypeAssigners', typeId] });
@@ -100,8 +62,7 @@ export const BadgeTypeDetail = () => {
   const showAssignMyself = canAssign && badgeType.setting.isSelfAssignable;
   const showAssign = canAssign;
   // Extracted so TypeScript can narrow `assignersAll` directly at the point
-  // of use below (a plain boolean like the old `showAssigners` can't carry
-  // that narrowing, which is what previously forced a `assigners!.all` `!`).
+  // of use below, instead of needing a non-null assertion.
   const assignersAll = assigners?.all;
   const imageSrc = badgeType.pictureId ? `/minibadge/public/img/${badgeType.pictureId}` : commonPlaceholder;
   const descriptionShort = badgeType.descriptionShort ? stripHtmlTags(badgeType.descriptionShort) : undefined;
@@ -109,8 +70,8 @@ export const BadgeTypeDetail = () => {
 
   return (
     <div>
-      {/* Top bar — mirrors communities' `community-header`: back button +
-          title on the left, action buttons on the right, in one sticky row. */}
+      {/* Sticky header row — back button + title on the left, action buttons
+          on the right. */}
       <Flex
         align="center"
         justify="between"
@@ -144,12 +105,11 @@ export const BadgeTypeDetail = () => {
         </Flex>
       </Flex>
 
-      {/* Body — large image on the left, categories/description on the
-          right (communities-inspired two-column "fiche" layout) on desktop
-          (`flex-md-row`); stacked image-then-text on mobile
-          (`direction="column"` is the base/mobile-first value) instead of
-          squeezing the fixed 240px image and the description onto one
-          unwrapping row. */}
+      {/* Two-column body on desktop (`flex-md-row`) — image on the left,
+          categories/description on the right; stacked image-then-text on
+          mobile (`direction="column"` is the base/mobile-first value)
+          instead of squeezing the fixed 240px image and the description
+          onto one unwrapping row. */}
       <Flex direction="column" gap="24" wrap="nowrap" className="mb-16 flex-md-row">
         <div
           className="bg-gray-200 d-flex align-items-center justify-content-center"

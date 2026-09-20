@@ -7,23 +7,15 @@ import { useGlobalSettings } from '~/services/queries/config';
 import { areThresholdsReached, assignableNumbersLabel } from '~/utils/threshold';
 
 /**
- * Mirrors `badge-assign-myself.directive.ts` + `badge-assign-myself.html` — a
- * small, dedicated confirmation modal for "Me décerner", distinct from the
- * shared `AssignBadgeLightbox` (no user search: the only possible owner is
- * the connected user, `model.me.userId` in the source ->
- * `useUser().user.userId` here).
+ * Small, dedicated confirmation modal for "Me décerner", distinct from
+ * `AssignBadgeLightbox` — there's no user search since the only possible
+ * owner is the connected user.
  *
- * GOTCHA (verified against the real source, not assumed to mirror
- * `AssignBadgeLightbox`'s own disable logic just because both are "an assign
- * button"): `badge-assign-myself.html:25`'s
- * `ng-disabled="vm.numberAssignable <= 0 || vm.badgeType.isSelfAssigned"`
- * binds `numberAssignable` to `setting.assignableNumbers(0)` — addingNumber
- * `0`, not `1`, even though confirming adds exactly one assignation. As shown
- * in `utils/threshold.ts`'s doc comment, `assignableNumbers(0) <= 0` is
- * algebraically `isThresholdReached(0)` (the `>=` variant) — NOT
- * `isThresholdOutmoded` (the `>` variant the shared lightbox uses for its own
- * "Décerner" button). Ported as `areThresholdsReached(thresholds, 0)` here,
- * deliberately different from `AssignBadgeLightbox`.
+ * Deliberately uses `areThresholdsReached(thresholds, 0)` (the `>=` variant,
+ * checking "is the threshold already reached before this assignment"), not
+ * `areThresholdsOutmoded` (the `>` variant `AssignBadgeLightbox` uses) —
+ * even though confirming here adds exactly one assignation, the disable
+ * check itself is evaluated at zero added assignations.
  */
 export interface AssignMyselfModalProps {
   badgeType: BadgeType | undefined;

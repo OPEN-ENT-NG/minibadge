@@ -3,26 +3,11 @@ import { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
- * GAP FROM PLAN: there is no `DatePicker` component in `@edifice.io/react`
- * 2.2.4 (verified: no such export in
- * `node_modules/@edifice.io/react/dist/components/index.d.ts`). Built instead
- * from `FormControl.Input` (`type="date"`) + `FormControl.Label`, using the
- * existing translation keys `minibadge.periode.date.from` ("Du") /
- * `minibadge.periode.date.to` ("Au") already shipped in
- * `backend/src/main/resources/i18n/fr.json` — no new i18n key added.
- *
- * RUNTIME TRAP AVOIDED (verified by reading the actual `.js` sources, not
- * just the `.d.ts` types — mirrors the plan's `PageLayout` warning, one level
- * deeper): the standalone `Input` and `Label` components both call
- * `useFormControl()` unconditionally (see
- * `node_modules/@edifice.io/react/dist/components/{Input,Label}/{Input,Label}.js`)
- * and THROW ("Cannot be rendered outside the FormControl component") if not
- * nested inside a `FormControl`. `FormControl` provides that context via
- * `FormControl.Label`/`FormControl.Input`, which also handles the
- * `id`/`htmlFor` wiring internally — no manual `id`/`htmlFor` props needed or
- * even accepted (see `Input.d.ts`'s `OmitInputProps`/`Label.d.ts`'s
- * `OmitLabelProps`, which exclude them). This is exactly what `SearchBar`
- * itself does internally (`FormControl, { id: "search-bar", ... }`).
+ * Built from `FormControl.Input`/`FormControl.Label` rather than a
+ * standalone `Input`/`Label`: those throw ("Cannot be rendered outside the
+ * FormControl component") if not nested inside a `FormControl`, which also
+ * handles the `id`/`htmlFor` wiring internally — no manual `id`/`htmlFor`
+ * props needed or accepted.
  */
 export interface PeriodPickerValue {
   startDate?: string;

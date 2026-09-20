@@ -2,31 +2,19 @@ import { Table } from '@edifice.io/react';
 import { IconArrowDown, IconArrowUp } from '@edifice.io/react/icons';
 
 /**
- * Clickable `Table.Th` for a sortable column.
+ * Clickable `Table.Th` for a sortable column. Fully controlled (no internal
+ * state): clicking a column just reports it via `onSort(sortKey)`, and the
+ * caller decides the actual sort direction — switching to ascending on a
+ * newly-clicked column, or flipping direction when re-clicking the already
+ * active one.
  *
- * `Table` (`node_modules/@edifice.io/react/dist/components/Table/components/Table.d.ts`)
- * is a plain semantic wrapper (`Table`/`Table.Thead`/`Table.Th`/`Table.Tbody`/
- * `Table.Tr`/`Table.Td`, props = standard `HTMLAttributes`) — no sorting
- * logic built in. This mirrors exactly what the AngularJS
- * `minibadgeBadgeGivenArray` directive's `onClick` does
- * (`badge-given-array.ts:70-79`): clicking a *different* column always
- * switches to ascending on that column; re-clicking the *already active*
- * column flips its direction. That decision belongs to whoever owns the
- * `sortKey`/`isAsc` state (the `badges-given` screen, per the plan's Task 2)
- * — this component only reports which column was clicked via
- * `onSort(sortKey)` and renders whatever active/direction state it's given,
- * so it stays a small, reusable, fully controlled piece (no internal state).
+ * Arrow direction is intentionally counterintuitive: a DOWN arrow means
+ * ascending, an UP arrow means descending — don't "fix" this to the more
+ * common convention (down = desc), it matches the rest of this app.
  *
- * Arrow direction mirrors the source exactly, counterintuitive as it looks:
- * `badge-given-array.html:5-6` shows a DOWN arrow (`sort-arrow-down` CSS
- * class) while `vm.isAsc` is true, and an UP arrow while descending. Kept
- * as-is rather than "corrected" to the more common convention (down = desc),
- * since this is a faithful port of existing behavior, not a redesign.
- *
- * `aria-sort` (the native ARIA attribute for sortable `<th>` cells) is also
- * set, exposing the active column/direction to assistive tech independently
- * of the (decorative, `aria-hidden`) icon, and giving tests a robust,
- * icon-free way to assert sort state.
+ * `aria-sort` exposes the active column/direction to assistive tech
+ * independently of the (decorative, `aria-hidden`) icon, and gives tests a
+ * robust, icon-free way to assert sort state.
  */
 export interface SortableTableHeaderProps<K extends string = string> {
   /** Already-translated column label. */

@@ -171,10 +171,10 @@ describe('useMinibadgeAccess', () => {
   });
 
   /**
-   * Phase 6: `statisticsView`/`statisticsViewAllStructures` are two
-   * INDEPENDENT rights — neither is derived from the other. Each case below
-   * grants exactly one of the two (never both, never neither) to prove there
-   * is no artificial dependency coded between them.
+   * `statisticsView`/`statisticsViewAllStructures` are two INDEPENDENT
+   * rights — neither is derived from the other. Each case below grants
+   * exactly one of the two (never both, never neither) to prove there is no
+   * artificial dependency coded between them.
    */
   it('exposes isStatisticsView from its own workflow right, with isStatisticsViewAllStructures false when absent', async () => {
     mockUser = { authorizedActions: [{ name: MINIBADGE_WORKFLOW_RIGHTS.statisticsView }] };
@@ -364,19 +364,15 @@ describe('useValidateCharter', () => {
     expect(refuseCalled).toBe(false);
   });
 
-  describe('Fix 5 regression: saveUserChart used to rely on ConfService.savePreference, which fire-and-forgets its PUT', () => {
+  describe('saveUserChart surfaces failures even right after an unrelated successful request', () => {
     it('surfaces an ApiError when the chart preference PUT actually fails, even right after an unrelated successful request', async () => {
       server.use(
         http.put('/userbook/preference/minibadge.chart', () => new HttpResponse(null, { status: 500 })),
       );
 
       // Forces `odeServices.http().latestResponse` to be a stale SUCCESS
-      // immediately before the failing PUT below. Pre-fix, `saveUserChart`
-      // called `odeServices.conf().savePreference(...)`, whose PUT is
-      // fire-and-forget — `checkHttpResponse()` right after it would read
-      // THIS stale 200 instead of the real (failing) PUT's outcome, so the
-      // mutation would wrongly resolve as a success. This test would have
-      // passed with `isSuccess`, not `isError`, before the fix.
+      // immediately before the failing PUT below, proving `saveUserChart`
+      // reads the failing PUT's own response rather than this leftover one.
       await getCharterRevokedStatus();
 
       const { Wrapper } = createWrapper();

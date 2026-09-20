@@ -9,12 +9,12 @@ import {
 } from '~/services/api/badgeAssigned';
 
 /**
- * Query keys are nested under a common `'assigned'` root — `['assigned', 'given', ...]`
- * / `['assigned', 'all', ...]` — rather than flattened into a single string like
- * `'assigned-given'`, specifically so that `queryClient.invalidateQueries({ queryKey:
- * ['assigned'] })` (see the mutations below, mirroring MUTATION_PATTERN) invalidates
- * both lists via React Query's prefix matching. A flattened key would not match that
- * invalidation call at all.
+ * Query keys are nested under a common `'assigned'` root —
+ * `['assigned', 'given', ...]` / `['assigned', 'all', ...]` — rather than
+ * flattened into a single string like `'assigned-given'`, so that
+ * `queryClient.invalidateQueries({ queryKey: ['assigned'] })` (see the
+ * mutations below) invalidates both lists via React Query's prefix matching.
+ * A flattened key would not match that invalidation call at all.
  */
 export const badgesGivenQueryOptions = (filters: BadgeAssignedFilters = {}) =>
   queryOptions({
@@ -55,13 +55,10 @@ export const useBadgesAssignedAll = (filters: BadgeAssignedFilters = {}) => {
 };
 
 /**
- * REVIEW FIX (react-reviewer, HIGH): assigning/revoking a badge also changes
- * `Badge.counts.assigned` and `BadgeType.countAssigned` server-side (see
- * `backend/.../model/BadgeType.java`'s `countAssigned` field), so the
- * `['badges']` and `['badgeTypes']` query-key roots (from `services/queries/
- * badges.ts` / `badgeTypes.ts`) must be invalidated alongside `['assigned']`,
- * or any screen reading those caches would show stale counts after an
- * assign/revoke.
+ * Assigning/revoking a badge also changes counts server-side, so the
+ * `['badges']` and `['badgeTypes']` query-key roots must be invalidated
+ * alongside `['assigned']`, or any screen reading those caches would show
+ * stale counts after an assign/revoke.
  */
 export const useRevokeBadgeAssigned = () => {
   const queryClient = useQueryClient();

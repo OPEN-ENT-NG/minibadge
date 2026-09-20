@@ -47,16 +47,10 @@ describe('UserSearchBar', () => {
 
     expect(onSearch).not.toHaveBeenCalled();
 
-    // Post-migration improvement plan, Constat #3: now that debouncing goes
-    // through `@edifice.io/react`'s `useDebounce` (an intermediate state
-    // update, `value` → `debouncedValue`) plus this component's own effect
-    // watching `debouncedValue`, the 300ms timer firing triggers TWO chained
-    // React updates instead of one direct `setTimeout` callback. Wrapping the
-    // timer advance in `act(...)` ensures both are flushed before asserting,
-    // exactly as the browser would before the next paint — a test-harness
-    // adjustment for the new implementation, not a behavior change (still
-    // exactly one `onSearch` call, still with the final value, still at
-    // 300ms).
+    // The 300ms timer firing triggers two chained React updates (`value` →
+    // `debouncedValue` via `useDebounce`, then this component's own effect
+    // watching `debouncedValue`) — `act(...)` ensures both are flushed
+    // before asserting, as the browser would before the next paint.
     act(() => {
       vi.advanceTimersByTime(300);
     });

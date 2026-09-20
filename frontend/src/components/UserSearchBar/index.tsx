@@ -2,42 +2,21 @@ import { SearchBar, useDebounce } from '@edifice.io/react';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 
 /**
- * GAP FROM PLAN: there is no `UserSearch` component in `@edifice.io/react`
- * 2.2.4 (verified: no such export in
- * `node_modules/@edifice.io/react/dist/components/index.d.ts`) — only
- * `SearchBar`. This wraps `SearchBar` in its "dynamic" mode (`isVariant: true`,
- * per `SearchBar.d.ts`'s `DynamicSearchBar` variant, which fires `onChange` as
- * the user types rather than requiring a submit click).
+ * Wraps `SearchBar` in its "dynamic" mode (`isVariant: true`), which fires
+ * `onChange` as the user types rather than requiring a submit click.
  *
- * Props verified against `node_modules/@edifice.io/react/dist/components/SearchBar/SearchBar.d.ts`.
+ * `ariaLabel` is required: `SearchBar`'s own `placeholder` prop is not a
+ * valid accessible name (placeholder text disappears on input and isn't
+ * reliably exposed to every AT). It's forwarded as `aria-label` through an
+ * untyped spread since `SearchBarProps` doesn't declare that attribute in
+ * its type, but `SearchBar` does spread unknown props onto its underlying
+ * `<input>`.
  *
- * REVIEW FIX (react-reviewer, HIGH): `SearchBar`'s own `placeholder` prop is
- * NOT a valid accessible name per WCAG 1.3.1/4.1.2 (placeholder text
- * disappears on input and isn't reliably exposed to every AT). `ariaLabel` is
- * therefore a required prop here, forwarded as `aria-label` — `SearchBar.js`
- * spreads `...restProps` onto its internal `FormControl.Input`, so this
- * reaches the real `<input>` at runtime. `SearchBarProps` doesn't declare
- * `aria-label` in its type, so it's passed through an untyped spread to avoid
- * an excess-property error while still type-checking every other prop.
- *
- * REVIEW FIX (react-reviewer, MEDIUM): `onSearch` used to fire on every
- * keystroke. A debounce delays the call by 300ms, the common UX convention,
- * and is skipped on the initial render so mounting the component never
- * fires a search with the empty starting value.
- *
- * DEBOUNCE MECHANISM (post-migration improvement plan, Constat #3): now uses
- * `@edifice.io/react`'s `useDebounce<T>(value, delay)` instead of a hand-rolled
- * `setTimeout`/`clearTimeout`. Verified its exact implementation first
- * (`node_modules/@edifice.io/react/dist/hooks/useDebounce/useDebounce.js`):
- * `useState(value)` initializes the returned debounced value to `value`
- * IMMEDIATELY on mount (no delay for the very first render) — only
- * SUBSEQUENT changes are delayed via a `setTimeout`. This means the
- * `isFirstRender` guard below is STILL required despite switching to the
- * shared hook: without it, the effect watching the debounced value would
- * still fire once on mount with the empty starting value, exactly the bug
- * this guard originally existed to prevent. The plan explicitly flagged this
- * as something to verify rather than assume, since the hook "does not
- * provide this semantics natively."
+ * `useDebounce` initializes its returned value to the current value
+ * immediately on mount (no delay for the first render) — only subsequent
+ * changes are delayed. The `isFirstRender` guard below is still needed
+ * despite that, since without it the effect watching the debounced value
+ * would still fire once on mount with the empty starting value.
  */
 export interface UserSearchBarProps {
   ariaLabel: string;

@@ -31,8 +31,7 @@ function renderScreen({ isAdmin = true }: { isAdmin?: boolean } = {}) {
 
 /**
  * Both `/assigned/all` fixtures sit in January 2024 (see `~/mocks/handlers`),
- * outside the screen's default "today minus 1 month" period — mirrors
- * `routes/badges-given`'s own test helper.
+ * outside the screen's default "today minus 1 month" period.
  */
 function widenPeriodToCoverFixtures() {
   const [startInput, endInput] = document.querySelectorAll('input[type="date"]');
@@ -110,13 +109,6 @@ describe('BadgesAdmin', () => {
     expect(await screen.findByText('minibadge.error.get.badges')).toBeInTheDocument();
   });
 
-  /**
-   * CRITICAL (plan): this endpoint's `sortBy` values are DIFFERENT from
-   * `/assigned/given`'s — `assignor_display_name`/`receiver_display_name`,
-   * verified against `DefaultBadgeAssignedService.java#getAllAssignedBadgesRequest`.
-   * Reusing `badges-given`'s `SORT_COLUMNS` (`display_name`) here would fall
-   * outside this endpoint's `acceptedSort` and silently no-op the sort.
-   */
   it('sends assignor_display_name as sortBy when the "Décerné par" column is clicked, and re-sorts the rows', async () => {
     const user = userEvent.setup();
     let lastSortBy: string | null = null;
@@ -183,7 +175,7 @@ describe('BadgesAdmin', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
   });
 
-  it('shows a loading indicator during the initial fetch instead of the empty-state message (Constat #1)', async () => {
+  it('shows a loading indicator during the initial fetch instead of the empty-state message', async () => {
     server.use(
       http.get('/minibadge/assigned/all', async () => {
         await delay(50);

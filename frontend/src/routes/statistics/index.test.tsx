@@ -276,13 +276,12 @@ describe('Statistics', () => {
     await waitFor(() => expect(screen.getAllByText(onlyType.label).length).toBeGreaterThan(0));
   });
 
-  // REVIEW FIX (react-reviewer, HIGH): the "most assigned" bar chart plots
-  // ALL of `mostAssignedTypes`, but the visible compact cards only ever show
-  // the first 3 (`firstMostAssignedType` + `otherMostAssignedTypes.slice(1,
-  // 3)`) — anything ranked 4th+ existed only as an unlabeled SVG bar,
-  // invisible to screen-reader users. `fakeStatisticsManyMostAssigned` has 4
-  // types, so this proves the chart's visually-hidden textual fallback
-  // covers all 4, not just the 3 the cards show.
+  // The "most assigned" bar chart plots ALL of `mostAssignedTypes`, but the
+  // visible compact cards only ever show the first 3 — anything ranked 4th+
+  // would otherwise exist only as an unlabeled SVG bar, invisible to
+  // screen-reader users. `fakeStatisticsManyMostAssigned` has 4 types, so
+  // this proves the chart's visually-hidden textual fallback covers all 4,
+  // not just the 3 the cards show.
   it('exposes a visually-hidden textual list of ALL most-assigned types next to the chart, not just the 3 shown as visible cards', async () => {
     server.use(
       http.get('/minibadge/statistics', () => HttpResponse.json(fakeStatisticsManyMostAssigned)),
@@ -308,10 +307,9 @@ describe('Statistics', () => {
     });
   });
 
-  // REVIEW FIX (react-reviewer, HIGH): app-wide heading hierarchy used to
-  // skip from `Root`'s `<h1>Minibadge</h1>` straight to `<h3>` — these are
-  // the screen's own section titles, now `h2` so `StatisticsCard`'s nested
-  // `h3` labels form a correct, non-skipping h1 -> h2 -> h3 chain.
+  // These are the screen's own section titles: `h2`, so `StatisticsCard`'s
+  // nested `h3` labels form a correct, non-skipping h1 -> h2 -> h3 chain
+  // under `Root`'s `<h1>Minibadge</h1>`.
   it('uses h2 for its own section titles (no h1 -> h3 skip)', async () => {
     renderScreen();
 

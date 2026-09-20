@@ -8,12 +8,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { ErrorFallback } from '.';
 
 /**
- * Deliberately throws on render — mirrors the plan's testing strategy for
- * Constat #4 ("un composant de test qui lève délibérément une erreur, monté
- * sous la boundary, doit afficher le fallback au lieu de crasher tout
- * l'arbre"). `shouldThrow` lets the same component be reused after a
- * `resetErrorBoundary` call to prove recovery actually re-renders real
- * children instead of getting stuck on the fallback forever.
+ * Deliberately throws on render. `shouldThrow` lets the same component be
+ * reused after a `resetErrorBoundary` call to prove recovery actually
+ * re-renders real children instead of getting stuck on the fallback forever.
  */
 function Bomb({ shouldThrow = true }: { shouldThrow?: boolean }) {
   if (shouldThrow) {
@@ -47,9 +44,6 @@ describe('ErrorFallback', () => {
     const user = userEvent.setup();
 
     function Harness() {
-      // Mirrors a real caller: the thing that made the child throw is fixed
-      // externally, then `resetErrorBoundary` (wired to "Réessayer") is what
-      // makes the boundary attempt to render children again.
       const [shouldThrow, setShouldThrow] = useState(true);
       return (
         <ErrorBoundary
@@ -73,20 +67,11 @@ describe('ErrorFallback', () => {
   });
 
   /**
-   * REVIEW FIX (react-reviewer, MEDIUM — `main.tsx`'s `ErrorBoundary` had no
-   * `resetKeys`/`onReset`, so "Réessayer" just re-rendered the exact same
-   * tree with the exact same inputs, silently doing nothing for a
-   * deterministic render bug). `main.tsx` wires
-   * `onReset={() => queryClient.clear()}` (a corrupt/stale React Query cache
-   * entry is a very plausible real cause of a persistent render error in this
-   * heavily React-Query-driven app) rather than a route-based `resetKeys`,
-   * because `ErrorBoundary` sits OUTSIDE the router (around
-   * `<RouterProvider>` itself, see `main.tsx`), so `useLocation()` isn't
-   * available at that level. This test proves that exact mechanism actually
-   * recovers: a component that throws while the query cache holds corrupt
-   * data recovers on the SECOND "Réessayer" click once `onReset` has cleared
-   * that cache — mirroring `main.tsx`'s real wiring rather than the generic
-   * `useState` harness above.
+   * `main.tsx` wires `onReset={() => queryClient.clear()}` on its
+   * `ErrorBoundary` rather than route-based `resetKeys`, since the boundary
+   * sits outside the router (around `<RouterProvider>` itself) where
+   * `useLocation()` isn't available. This proves that mechanism actually
+   * recovers a component that throws on a corrupt cached value.
    */
   it('recovers via `onReset={() => queryClient.clear()}` (main.tsx\'s actual reset mechanism) once the corrupt cache entry is cleared', async () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

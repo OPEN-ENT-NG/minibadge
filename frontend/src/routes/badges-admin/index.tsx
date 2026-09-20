@@ -13,61 +13,28 @@ import { useBadgesAssignedAll } from '~/services/queries/badgeAssigned';
 import { defaultPeriod, formatDisplayDate, toBackendDate } from '~/utils/date';
 
 /**
- * Mirror of `admin.controller.ts` + `admin.html` + `all-badges-array.ts`/`.html`:
- * "Administration" (`/admin`) — a read-only, sortable/filterable audit table
- * of EVERY badge ever assigned on the platform (not just "mine", unlike
- * `/badges-given`), plus the "Révoquer des utilisateurs" action.
+ * "Administration" (`/admin`): a read-only, sortable/filterable audit table
+ * of every badge ever assigned on the platform (not just "mine", unlike
+ * `/badges-given`), plus the "Révoquer des utilisateurs" action. No per-row
+ * revocation here — this is a pure audit view.
  *
- * - Endpoint: `GET /minibadge/assigned/all` (`useBadgesAssignedAll`, Phase 1) —
- *   same 5 params as `/assigned/given` (`query`/`startDate`/`endDate`/
- *   `sortBy`/`sortAsc`), confirmed in `BadgeAssignedController.java#getAll`.
- * - Right gating: unlike `/badges-given` (deliberately ungated), this route
- *   redirects to `/` immediately when the `admin` workflow right is absent —
- *   mirrors `main.ts:81-89`'s `if (!model.me.hasWorkflow(rights.workflow.admin))
- *   this.$location.path('/')`, not just a hidden nav item. `isAdmin` is read
- *   from `CharterGate`'s already-resolved context (same pattern as
- *   `canAssign`/`canReceive` elsewhere), not re-fetched here. Every hook is
- *   called unconditionally ABOVE the redirect (mirrors `CharterGate`'s own
- *   `if (isLoading) return <LoadingScreen />` placement, after all its
- *   hooks) — only the JSX below it is conditional.
- * - Default period: today minus 1 month → today, identical to `/badges-given`
- *   (`admin.controller.ts:70-71`) — reuses `~/utils/date`'s helpers (Task 1)
- *   instead of redefining them.
- * - 4 sortable columns — label / assignor / owner(receiver) / date — NO
- *   per-row revocation action (`all-badges-array.html` has none; this is a
- *   pure audit view, unlike `/badges-given`'s trash icon).
- * - Row image: same `/minibadge/public/img/${pictureId}` static asset,
- *   optional exactly like `/badges-given`.
+ * Redirects to `/` when the `admin` right is absent. Every hook is still
+ * called unconditionally above that redirect (hooks can't be conditional) —
+ * only the JSX below it is gated.
  *
- * LOADING INDICATOR (post-migration improvement plan, Constat #1 — REVIEW FIX,
- * react-reviewer, HIGH): this screen had the exact same bug already fixed in
- * `my-badges`/`badges-given`/`statistics` — `rows = badgesAssignedAll ?? []`
- * fed straight into the empty-state check, so `EmptyBadgeList` rendered
- * during the initial fetch too, indistinguishable from a genuine empty
- * result. Fixed identically to `routes/badges-given` (same shape of screen —
- * persistent period picker/search bar/"Révoquer" button shell, single
- * results area swapping between loading/empty/table): `LoadingScreen` now
- * gates `badgesAssignedAllQuery.isLoading` ahead of the empty/table check.
- *
- * A11Y FIX (react-reviewer, MEDIUM, applies to all 4 screens with a
- * `LoadingScreen`): `LoadingScreen` itself has no `aria-live`/`role="status"`,
- * so the loading→loaded transition was invisible to assistive tech. The
- * results area is wrapped in `<div aria-live="polite">`, mirroring the exact
- * pattern already established by `AssignBadgeLightbox`/`RevokeUsersModal`'s
- * search-results regions.
+ * The results area is wrapped in `aria-live="polite"` since `LoadingScreen`
+ * has no `aria-live`/`role="status"` of its own, so the loading→loaded
+ * transition would otherwise be invisible to assistive tech.
  */
 
 /**
- * SQL column names THIS endpoint accepts — verified against
- * `DefaultBadgeAssignedService.java#getAllAssignedBadgesRequest`'s
- * `acceptedSort = [LABEL, CREATED_AT, REVOKED_AT, RECEIVER_DISPLAY_NAME,
- * ASSIGNOR_DISPLAY_NAME]`. Deliberately a SEPARATE mapping from
- * `routes/badges-given`'s `SORT_COLUMNS` (`display_name`, singular): that
- * endpoint only ever joins one user table (badge owner/receiver, since the
- * assignor is always "me"), whereas `/assigned/all` joins two aliased user
- * tables (assignor + receiver), so it has two distinct, differently-named
- * columns instead of one. Sending the wrong endpoint's constant here would
- * fall outside THIS endpoint's `acceptedSort` and silently no-op the sort.
+ * SQL column names this endpoint accepts. Deliberately separate from
+ * `routes/badges-given`'s own `SORT_COLUMNS`: that endpoint only joins one
+ * user table (the badge owner, since the assignor is always "me"), while
+ * this one joins two aliased user tables (assignor + receiver), so the
+ * column names differ. Sending the wrong endpoint's constant here would
+ * fall outside this endpoint's accepted sort keys and silently no-op the
+ * sort.
  */
 const SORT_COLUMNS = {
   label: 'label',
@@ -95,8 +62,6 @@ export const BadgesAdmin = () => {
     sortAsc: sortColumn ? isAsc : undefined,
   });
 
-  // Mirrors `main.ts:82`'s immediate `$location.path('/')` redirect when the
-  // `admin` right is absent.
   if (!isAdmin) {
     return <Navigate to="/" replace />;
   }

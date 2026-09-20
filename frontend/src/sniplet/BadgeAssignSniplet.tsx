@@ -12,21 +12,15 @@ import { badgeTypeQueryOptions } from '~/services/queries/badgeTypes';
 import { SnipletBadgeAssignService } from './snipletBadgeAssignService';
 
 /**
- * Mirrors `frontend/src/main.tsx`'s provider stack (same `QueryClient` /
- * `QueryCache` "redirect to /auth/login on session expiry" behavior, same
- * `EdificeClientProvider` → `EdificeThemeProvider` nesting), MINUS the
- * router (this sniplet is a single embedded widget, not a full-screen
- * routed app) and MINUS the global `@edifice.io/bootstrap` CSS import — the
- * portal host page is expected to already have the design-system CSS
- * loaded (see Phase 8 plan, Part A note). This is one of the assumptions
- * that can only be confirmed by the user against a real recette portal
- * page; see the final report.
+ * No global `@edifice.io/bootstrap` CSS import here: this sniplet is
+ * embedded into a host portal page, which is expected to already have the
+ * design-system CSS loaded.
  *
- * A single module-level `QueryClient`, like `main.tsx`'s, rather than one
- * per mount: the sniplet is expected to be mounted at most once per page in
- * practice (one "badge-assign" widget), and sharing the client across
- * remounts (if the portal ever tears down and recreates the host element)
- * keeps the badge-type cache warm rather than refetching every time.
+ * A single module-level `QueryClient` rather than one per mount: the
+ * sniplet is expected to be mounted at most once per page in practice, and
+ * sharing the client across remounts (if the portal ever tears down and
+ * recreates the host element) keeps the badge-type cache warm rather than
+ * refetching every time.
  */
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -50,10 +44,10 @@ export interface BadgeAssignSnipletProps {
 }
 
 /**
- * Root component mounted by `main.tsx`'s `controller.init()` on the DOM
- * node the sniplet owns. Renders the exact same `AssignBadgeLightbox`
- * (Phase 4) the main SPA uses for "Décerner" — see `BadgeAssignSnipletContent`
- * below for how it's driven by `service`.
+ * Root component mounted by `main.tsx`'s `controller.init()` on the DOM node
+ * the sniplet owns. Renders the same `AssignBadgeLightbox` the main SPA uses
+ * for "Décerner" — see `BadgeAssignSnipletContent` below for how it's driven
+ * by `service`.
  */
 export function BadgeAssignSniplet({ service }: BadgeAssignSnipletProps) {
   return (
@@ -68,17 +62,15 @@ export function BadgeAssignSniplet({ service }: BadgeAssignSnipletProps) {
 }
 
 /**
- * Subscribes to the two ways a portal page can ask this sniplet to open
- * (mirrors the original `ViewModel` constructor's two subscriptions in
- * `badge-assign.sniplet.ts`):
- * - `getBadgeTypeSubject()`: caller already has the full `BadgeType` —
- *   open immediately.
+ * Subscribes to the two ways a portal page can ask this sniplet to open:
+ * - `getBadgeTypeSubject()`: caller already has the full `BadgeType` — open
+ *   immediately.
  * - `getBadgeTypeIdSubject()`: caller only has an id — resolve it via the
- *   SAME query definition `~/services/queries/badgeTypes.ts#useBadgeType`
- *   uses (`badgeTypeQueryOptions`, fetched imperatively through
+ *   same query definition `~/services/queries/badgeTypes.ts#useBadgeType`
+ *   uses (`badgeTypeQueryOptions`), fetched imperatively through
  *   `QueryClient#fetchQuery` so a repeat request for the same id still
  *   re-triggers the open, unlike a `useQuery(..., { enabled })` keyed on
- *   state that wouldn't change), then open.
+ *   state that wouldn't change.
  */
 function BadgeAssignSnipletContent({ service }: BadgeAssignSnipletProps) {
   const { t } = useTranslation('minibadge');
@@ -88,10 +80,7 @@ function BadgeAssignSnipletContent({ service }: BadgeAssignSnipletProps) {
   // path, there's no badge type here to open `AssignBadgeLightbox` with, so
   // this component renders its own visible `Alert` for that case (the
   // `console.error` in the `.catch` below is developer-facing only and gives
-  // the end user zero feedback on its own). Reuses `minibadge.error.get.badge.type`
-  // — the exact key the original AngularJS controller passed to
-  // `notify.error(...)` for this same failure (`badge-assign.sniplet.ts:96`)
-  // — rather than inventing a new key.
+  // the end user zero feedback on its own).
   const [resolveError, setResolveError] = useState(false);
   const reactQueryClient = useQueryClient();
   // Identifies the most recently issued `sendBadgeTypeId` resolution, so that
@@ -100,8 +89,7 @@ function BadgeAssignSnipletContent({ service }: BadgeAssignSnipletProps) {
   // superseded and bail out instead of clobbering state with outdated data.
   const latestRequestIdRef = useRef(0);
   // Guards against calling `setState` after this component has unmounted
-  // while a `fetchQuery` promise is still in flight — mirrors this same
-  // effect's `subscription.unsubscribe()` cleanup for the RxJS side.
+  // while a `fetchQuery` promise is still in flight.
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -139,13 +127,11 @@ function BadgeAssignSnipletContent({ service }: BadgeAssignSnipletProps) {
             setIsOpen(true);
           })
           .catch((error: unknown) => {
-            // Mirrors the AngularJS controller's `notify.error(...)` on
-            // failure. The portal's `notify` helper (from the `entcore`
-            // package) is deliberately NOT imported into this standalone
-            // bundle (only framework-agnostic pieces were ported, per the
-            // plan) — logging is kept for developers, but the `Alert`
-            // rendered below `resolveError` is what actually surfaces this
-            // to the end user.
+            // The portal's `notify` helper (from the `entcore` package) is
+            // deliberately NOT imported into this standalone bundle (only
+            // framework-agnostic pieces are ported here) — logging is kept
+            // for developers, but the `Alert` rendered below `resolveError`
+            // is what actually surfaces this to the end user.
             console.error('minibadge: failed to resolve badge type for sniplet', error);
             if (!isMountedRef.current || requestId !== latestRequestIdRef.current) {
               return;
@@ -158,9 +144,8 @@ function BadgeAssignSnipletContent({ service }: BadgeAssignSnipletProps) {
     return () => subscription.unsubscribe();
   }, [service, reactQueryClient]);
 
-  // Mirrors `closeLightbox()` clearing `this.badgeType` — resets so a later
-  // `sendBadgeType`/`sendBadgeTypeId` (possibly for a different badge type)
-  // starts clean.
+  // Resets so a later `sendBadgeType`/`sendBadgeTypeId` (possibly for a
+  // different badge type) starts clean.
   const handleClose = useCallback(() => {
     setIsOpen(false);
     setBadgeType(undefined);

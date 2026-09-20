@@ -22,8 +22,7 @@ function renderScreen() {
  * Both fixtures' `createdAt` sit in January 2024 (see `~/mocks/handlers`),
  * while the screen's default period is "today minus 1 month" — so a test
  * needs to widen the period before either fixture can appear, exactly as a
- * real user narrowing/widening the date range would. Mirrors `PeriodPicker`'s
- * own tests: it speaks the native `<input type="date">` ISO format.
+ * real user narrowing/widening the date range would.
  */
 function widenPeriodToCoverFixtures() {
   const [startInput, endInput] = document.querySelectorAll('input[type="date"]');
@@ -92,15 +91,11 @@ describe('BadgesGiven', () => {
   });
 
   /**
-   * CRITICAL (plan + review fix): `sortBy` sent to the backend must be the
-   * raw SQL column name the REAL endpoint actually accepts — `display_name`,
-   * not `receiver_display_name` (that constant belongs to the sibling
-   * `/assigned/all` endpoint; see the fix + explanation in
-   * `routes/badges-given/index.tsx`'s `SORT_COLUMNS`). If the screen sent
-   * anything else, this override's `switch`-less exact-match comparison
-   * below would fail to reorder anything, and the assertion on row order
-   * (not just on the captured param) would catch it even if the
-   * captured-string assertion were somehow wrong.
+   * `sortBy` must be the raw SQL column name this endpoint accepts
+   * (`display_name`, not `receiver_display_name` — see `SORT_COLUMNS`'s own
+   * doc comment). Asserting on row order too, not just the captured param,
+   * means a wrong column name that this mock's exact-match comparison
+   * silently ignores still gets caught.
    */
   it('sends the raw SQL column name as sortBy (not a translated i18n key) and re-sorts the rows', async () => {
     const user = userEvent.setup();
@@ -166,9 +161,8 @@ describe('BadgesGiven', () => {
     // Re-queried fresh before each click rather than cached: `useBadgesGiven`
     // has no `placeholderData`, so `badgesGiven` (and therefore the whole
     // `<Table>`) genuinely unmounts/remounts on every sort change while the
-    // new query is in flight — mirroring `badges-given.controller.ts:75`
-    // (`this.badgesGiven = []` set synchronously before the fetch even
-    // starts). A cached element reference would go stale across that.
+    // new query is in flight. A cached element reference would go stale
+    // across that.
     await user.click(screen.getByRole('button', { name: 'minibadge.given.array.owner' }));
     await waitFor(() => expect(sortAscValues).toEqual(['true']));
     await screen.findByRole('table');
@@ -264,7 +258,7 @@ describe('BadgesGiven', () => {
     expect(await screen.findByText('minibadge.error.get.badges')).toBeInTheDocument();
   });
 
-  it('shows a loading indicator during the initial fetch instead of the empty-state message (Constat #1)', async () => {
+  it('shows a loading indicator during the initial fetch instead of the empty-state message', async () => {
     server.use(
       http.get('/minibadge/assigned/given', async () => {
         await delay(50);

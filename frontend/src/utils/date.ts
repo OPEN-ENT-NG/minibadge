@@ -3,11 +3,6 @@ import { PeriodPickerValue } from '~/components/PeriodPicker';
 /**
  * Date helpers shared by every screen that filters a badge list by a
  * `PeriodPicker` range (`routes/badges-given`, `routes/badges-admin`).
- *
- * Extracted verbatim from `routes/badges-given/index.tsx` (Phase 3) — this is
- * a pure refactor (Phase 5, Task 1): no behavior change, only a shared home
- * so Phase 5's `/admin` screen doesn't redefine the exact same four
- * functions.
  */
 
 export const pad2 = (value: number): string => `${value}`.padStart(2, '0');
@@ -22,7 +17,7 @@ export const toBackendDate = (isoDate?: string): string | undefined => {
   return `${day}-${month}-${year}`;
 };
 
-/** Backend timestamp (`YYYY-MM-DD HH:mm:ss.SSS`) -> `DD-MM-YYYY` for display, mirroring `DATE_FORMAT.DAY_MONTH_YEAR_KEBAB`. */
+/** Backend timestamp (`YYYY-MM-DD HH:mm:ss.SSS`) -> `DD-MM-YYYY` for display. */
 export const formatDisplayDate = (timestamp?: string): string => {
   if (!timestamp) return '';
   const [year, month, day] = timestamp.split(' ')[0].split('-');
