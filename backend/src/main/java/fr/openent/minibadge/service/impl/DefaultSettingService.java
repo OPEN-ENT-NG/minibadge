@@ -7,6 +7,8 @@ import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.GlobalSettings;
 import fr.openent.minibadge.model.ThresholdSetting;
+import fr.openent.minibadge.service.PdfExportService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.SettingService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -27,10 +29,12 @@ public class DefaultSettingService implements SettingService {
     }
 
     private final Sql sql = Sql.getInstance();
+    private final PdfExportService pdfExportService = ServiceRegistry.getService(PdfExportService.class);
 
     public Future<GlobalSettings> getGlobalSettings(UserInfos user) {
         Promise<GlobalSettings> promise = Promise.promise();
-        GlobalSettings globalSettings = new GlobalSettings(new JsonObject().put(Request.PAGESIZE, Minibadge.PAGE_SIZE));
+        GlobalSettings globalSettings = new GlobalSettings(new JsonObject().put(Request.PAGESIZE, Minibadge.PAGE_SIZE))
+                .setPdfExportEnabled(pdfExportService.isEnabled());
         getThresholdsByPeriod(user, SettingHelper.getDefaultBadgeSettings())
                 .onSuccess(badgeSettings -> promise.complete(globalSettings.setBadgeSettings(badgeSettings)))
                 .onFailure(promise::fail);

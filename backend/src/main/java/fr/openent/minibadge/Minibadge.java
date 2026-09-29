@@ -3,6 +3,7 @@ package fr.openent.minibadge;
 import fr.openent.minibadge.controller.*;
 import fr.openent.minibadge.model.Config;
 import fr.openent.minibadge.service.ServiceRegistry;
+import fr.openent.minibadge.service.impl.DefaultPdfExportService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.entcore.common.http.BaseServer;
@@ -37,7 +38,10 @@ public class Minibadge extends BaseServer {
         addController(new StatisticController());
         addController(new UserController());
         addController(new ConfigController());
+        addController(new CertificateController());
 
-	    return Future.succeededFuture();
+        // Epic D: decides once whether the PDF certificate is available. Never fails: until it completes,
+        // or when node-pdf-generator is not configured, the export answers a translated 503.
+        return DefaultPdfExportService.getInstance().init(vertx, config);
     }
 }

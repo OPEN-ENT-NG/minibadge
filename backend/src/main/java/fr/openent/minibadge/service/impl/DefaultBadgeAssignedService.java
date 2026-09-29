@@ -202,6 +202,32 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
     @Override
+    public Future<JsonArray> getReceivedAssignments(String ownerId) {
+        Promise<JsonArray> promise = Promise.promise();
+        JsonArray params = new JsonArray().add(ownerId);
+
+        String request = "SELECT ba.id, ba.created_at, ba.expires_at, " + isExpiredColumn("ba") + ", " +
+                " bt.id AS " + BADGE_TYPE_ID + ", bt.label, bt.description, bt.description_short, bt.picture_id, " +
+                " assignor.display_name AS " + ASSIGNOR_DISPLAY_NAME + ", cat." + CATEGORY_NAMES +
+                " FROM " + SqlTable.BADGE_ASSIGNED.getName() + " ba" +
+                " INNER JOIN " + SqlTable.BADGE.getName() + " b ON b.id = ba.badge_id AND b.owner_id = ?" +
+                " INNER JOIN " + SqlTable.BADGE_TYPE.getName() + " bt ON bt.id = b.badge_type_id" +
+                " LEFT JOIN " + SqlTable.USER.getName() + " assignor ON assignor.id = ba.assignor_id" +
+                " LEFT JOIN LATERAL (SELECT string_agg(bc.name, ', ' ORDER BY bc.name) AS " + CATEGORY_NAMES +
+                " FROM " + SqlTable.REL_BADGE_CATEGORY_BADGE_TYPE.getName() + " r" +
+                " INNER JOIN " + SqlTable.BADGE_CATEGORY.getName() + " bc ON bc.id = r.badge_category_id" +
+                " WHERE r.badge_type_id = bt.id) cat ON true" +
+                " WHERE ba.revoked_at IS NULL AND b.refused_at IS NULL AND b.disabled_at IS NULL" +
+                " ORDER BY ba.created_at DESC, ba.id DESC";
+
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
+                String.format("[Minibadge@%s::getReceivedAssignments] Fail to retrieve received assignments",
+                        this.getClass().getSimpleName()))));
+
+        return promise.future();
+    }
+
+    @Override
     public Future<List<User>> getBadgeTypeAssigners(long typeId, UserInfos badgeOwner, int limit, Integer offset) {
         Promise<List<User>> promise = Promise.promise();
 

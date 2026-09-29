@@ -204,4 +204,23 @@ describe('MyBadges', () => {
     expect(within(publicSection).getAllByText('minibadge.badge.expired')).toHaveLength(1);
     expect(screen.getByRole('button', { name: /minibadge.badges.private/ })).toHaveTextContent('(0)');
   });
+
+  /** Epic D: the certificate button only exists when the server can generate the PDF. */
+  it('hides the certificate button unless the PDF export is enabled, and shows it when it is', async () => {
+    withAllStatuses();
+    const { unmount } = renderScreen();
+
+    expect(await screen.findByRole('button', { name: /minibadge.badges.public/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /minibadge.certificate.download/ })).not.toBeInTheDocument();
+    unmount();
+
+    server.use(
+      http.get('/minibadge/global-settings', () =>
+        HttpResponse.json({ pageSize: 10, thresholdSettings: [], pdfExportEnabled: true }),
+      ),
+    );
+    renderScreen();
+
+    expect(await screen.findByRole('button', { name: /minibadge.certificate.download/ })).toBeInTheDocument();
+  });
 });

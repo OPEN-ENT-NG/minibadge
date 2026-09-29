@@ -100,4 +100,19 @@ public interface BadgeAssignedService {
      * @return return future
      */
     Future<List<BadgeAssigned>> getAllAssignedBadges(String query, String startDate, String endDate, String sortType, Boolean sortAsc, List<String> structureIds);
+
+    /**
+     * Epic D: every assignment the owner received, one row each, for the PDF certificate — newest first.
+     * <p>
+     * Expired assignments are included (flagged {@code is_expired}); revoked assignments and the badges
+     * the owner refused (or disabled by refusing the charter) are not. Privatized badges ARE included:
+     * privatizing only hides a badge from other people, this is the owner's own certificate.
+     * Each row carries the badge type ({@code label}, {@code description}, {@code picture_id}...), the
+     * assignor's display name (null when unknown) and the type's category names ({@code category_names},
+     * comma separated, null when none).
+     *
+     * @param ownerId badge owner identifier
+     * @return return future containing the rows
+     */
+    Future<JsonArray> getReceivedAssignments(String ownerId);
 }

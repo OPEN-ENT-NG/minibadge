@@ -177,5 +177,17 @@
   "minibadge.error.badge.already.assigned": "You have already awarded this badge to at least one of these people, and it is still valid.",
   "minibadge.error.badge.type.validity.invalid": "The end date is invalid.",
   "minibadge.error.badge.type.validity.past": "The end date cannot be in the past.",
-  "minibadge.error.badge.type.validity.forbidden": "You can only change the end date of badges created by your establishment."
+  "minibadge.error.badge.type.validity.forbidden": "You can only change the end date of badges created by your establishment.",
+  "minibadge.certificate.download": "Download my certificate",
+  "minibadge.certificate.generating": "Generating certificate…",
+  "minibadge.certificate.title": "Mini-badges certificate",
+  "minibadge.certificate.owner": "Holder:",
+  "minibadge.certificate.generated.on": "Generated on:",
+  "minibadge.certificate.count": "Number of badges received:",
+  "minibadge.certificate.categories": "Categories",
+  "minibadge.certificate.assigned.by": "Awarded by",
+  "minibadge.certificate.date": "Date",
+  "minibadge.certificate.empty": "You have not received any badge yet.",
+  "minibadge.error.certificate.unavailable": "The certificate cannot be generated at the moment. Please try again later.",
+  "minibadge.error.certificate.download": "The certificate download failed."
 }

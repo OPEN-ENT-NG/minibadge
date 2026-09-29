@@ -7,7 +7,11 @@ import { odeServices } from '@edifice.io/client';
  * `error.code` or `error instanceof ApiError`.
  */
 export class ApiError extends Error {
-  constructor(public readonly code: 'unauthorized' | 'notfound' | 'error') {
+  /**
+   * `unavailable` (503) is only answered by `GET /badges/certificate` when the platform PDF service is
+   * not configured or failed (Epic D): a temporary condition, worded as such to the user.
+   */
+  constructor(public readonly code: 'unauthorized' | 'notfound' | 'unavailable' | 'error') {
     super(code);
     this.name = 'ApiError';
   }
@@ -19,6 +23,8 @@ export const checkHttpResponse = () => {
     throw new ApiError('unauthorized');
   } else if (status == 404) {
     throw new ApiError('notfound');
+  } else if (status == 503) {
+    throw new ApiError('unavailable');
   } else if (status >= 400) {
     throw new ApiError('error');
   }
@@ -58,6 +64,8 @@ export const request = async <R>(call: () => Promise<R>): Promise<R> => {
       throw new ApiError('unauthorized');
     } else if (status === 404) {
       throw new ApiError('notfound');
+    } else if (status === 503) {
+      throw new ApiError('unavailable');
     }
     throw new ApiError('error');
   }

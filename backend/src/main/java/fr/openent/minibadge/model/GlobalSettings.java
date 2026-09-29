@@ -12,6 +12,8 @@ import java.util.List;
 public class GlobalSettings implements Model<GlobalSettings> {
 
     private int pageSize;
+    /** Epic D: whether the PDF certificate can be generated (the button is hidden otherwise). */
+    private boolean pdfExportEnabled;
     private List<ThresholdSetting> thresholdSettings = new ArrayList<>();
 
     public GlobalSettings(JsonObject globalSettings) {
@@ -23,9 +25,19 @@ public class GlobalSettings implements Model<GlobalSettings> {
         return this;
     }
 
+    public GlobalSettings setPdfExportEnabled(boolean pdfExportEnabled) {
+        this.pdfExportEnabled = pdfExportEnabled;
+        return this;
+    }
+
+    public boolean pdfExportEnabled() {
+        return pdfExportEnabled;
+    }
+
     @Override
     public GlobalSettings set(JsonObject globalSettings) {
         this.pageSize = globalSettings.getInteger(Request.PAGESIZE);
+        this.pdfExportEnabled = Boolean.TRUE.equals(globalSettings.getBoolean(Field.PDFEXPORTENABLED));
         this.thresholdSettings = new ThresholdSetting().toList(
                 globalSettings.getJsonArray(Field.THRESHOLDSETTINGS, new JsonArray())
         );
@@ -36,7 +48,8 @@ public class GlobalSettings implements Model<GlobalSettings> {
     public JsonObject toJson() {
         return new JsonObject()
                 .put(Request.PAGESIZE, this.pageSize)
-                .put(Field.THRESHOLDSETTINGS, new ThresholdSetting().toArray(thresholdSettings));
+                .put(Field.THRESHOLDSETTINGS, new ThresholdSetting().toArray(thresholdSettings))
+                .put(Field.PDFEXPORTENABLED, pdfExportEnabled);
     }
 
     @Override

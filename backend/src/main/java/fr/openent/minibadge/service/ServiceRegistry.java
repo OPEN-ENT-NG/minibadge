@@ -17,6 +17,8 @@ public final class ServiceRegistry {
     public static synchronized void initServices() {
         if (initialized) return;
 
+        // Epic D: first, DefaultSettingService reads it. Configured later, in Minibadge#initMinibadge.
+        SERVICES.put(PdfExportService.class, DefaultPdfExportService.getInstance());
         SERVICES.put(UserService.class, DefaultUserService.getInstance());
         SERVICES.put(SettingService.class, DefaultSettingService.getInstance());
         SERVICES.put(BadgeService.class, DefaultBadgeService.getInstance());

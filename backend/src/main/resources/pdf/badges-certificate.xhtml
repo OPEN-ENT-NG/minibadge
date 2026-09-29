@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+  Epic D: certificate of the badges a user received, sent as application/xml to node-pdf-generator.
+  Every value is rendered with {{x}} (HTML-escaped), never {{{x}}}: badge descriptions are free text
+  and a single raw "&" or "<" would make this document unreadable as XML.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>{{labels.title}}</title>
+    <style type="text/css">
+        @page {
+            size: A4;
+            margin: 18mm 14mm 20mm 14mm;
+
+            @bottom-center {
+                content: counter(page) " / " counter(pages);
+                font-family: "Roboto", Arial, sans-serif;
+                font-size: 10px;
+                color: #5b6472;
+            }
+        }
+        body {
+            font-family: "Roboto", Arial, sans-serif;
+            color: #333333;
+            font-size: 11px;
+        }
+        h1 {
+            color: #2a9bc7;
+            font-size: 22px;
+            margin: 0 0 12px 0;
+        }
+        .header {
+            border-bottom: 2px solid #2a9bc7;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        .header p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            display: table-header-group;
+        }
+        tr {
+            page-break-inside: avoid;
+        }
+        th {
+            background-color: #e9f5fa;
+            color: #1f6f8f;
+            text-align: left;
+            font-size: 10px;
+            padding: 6px;
+            border-bottom: 1px solid #b8dcea;
+        }
+        td {
+            padding: 6px;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ebef;
+        }
+        td.picture {
+            width: 44px;
+        }
+        td.picture img {
+            width: 40px;
+            height: 40px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .description {
+            color: #5b6472;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        .date {
+            white-space: nowrap;
+        }
+        .expired {
+            color: #c0392b;
+            font-weight: bold;
+        }
+        .active {
+            color: #2e7d32;
+        }
+        .empty {
+            margin-top: 24px;
+            font-style: italic;
+            color: #5b6472;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{labels.title}}</h1>
+        <p><strong>{{labels.owner}}</strong> {{ownerName}}</p>
+        <p><strong>{{labels.generatedOn}}</strong> {{generatedOn}}</p>
+        <p><strong>{{labels.count}}</strong> {{count}}</p>
+    </div>
+    {{#hasAssignments}}
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>{{labels.badge}}</th>
+                <th>{{labels.categories}}</th>
+                <th>{{labels.assignedBy}}</th>
+                <th>{{labels.date}}</th>
+                <th>{{labels.status}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#assignments}}
+            <tr>
+                <td class="picture">{{#image}}<img src="{{image}}" alt="" />{{/image}}</td>
+                <td>
+                    <div class="label">{{label}}</div>
+                    {{#description}}<div class="description">{{description}}</div>{{/description}}
+                </td>
+                <td>{{categories}}</td>
+                <td>{{assignor}}</td>
+                <td class="date">{{date}}</td>
+                <td>{{#expired}}<span class="expired">{{status}}</span>{{/expired}}{{^expired}}<span class="active">{{status}}</span>{{/expired}}</td>
+            </tr>
+            {{/assignments}}
+        </tbody>
+    </table>
+    {{/hasAssignments}}
+    {{^hasAssignments}}
+    <p class="empty">{{labels.empty}}</p>
+    {{/hasAssignments}}
+</body>
+</html>

@@ -27,4 +27,9 @@ export interface ThresholdSetting {
 export interface GlobalSettings {
   pageSize: number;
   thresholdSettings: ThresholdSetting[];
+  /**
+   * Epic D: whether the platform PDF service is configured, decided once at server startup. The
+   * "Télécharger mon certificat" button is only shown when it is `true`.
+   */
+  pdfExportEnabled?: boolean;
 }

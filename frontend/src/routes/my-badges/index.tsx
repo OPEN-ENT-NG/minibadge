@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { BadgeCardAction } from '~/components/BadgeCard';
 import { BadgeSection } from '~/components/BadgeSection';
+import { CertificateDownloadButton } from '~/components/CertificateDownloadButton';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { Badge } from '~/models/badge';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
@@ -21,6 +22,8 @@ import { isPrivatizedBadge, isPublicBadge, isRefusedBadge } from '~/utils/badgeS
  *
  * "Accepter" on a refused badge reuses the same `publishBadge` mutation as
  * "Publier" on a private one — same call, different label/icon.
+ *
+ * Also offers the PDF certificate of every badge received (Epic D), when the server can generate it.
  */
 export const MyBadges = () => {
   const { t } = useTranslation('minibadge');
@@ -58,6 +61,8 @@ export const MyBadges = () => {
       {badgesQuery.isError ? (
         <Alert type="danger">{t('minibadge.error.get.badges')}</Alert>
       ) : null}
+      {/* Epic D: renders nothing (wrapper included) unless the platform PDF service is configured. */}
+      <CertificateDownloadButton className="d-flex justify-content-end mb-16" />
       <div className="p-24 bg-gray-200 mb-16">
         <UserSearchBar
           ariaLabel={t('minibadge.badge.search')}

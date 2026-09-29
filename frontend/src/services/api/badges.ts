@@ -51,3 +51,17 @@ export const privatizeBadge = async (typeId: number): Promise<void> => {
 export const refuseBadge = async (typeId: number): Promise<void> => {
   await request(() => odeServices.http().put<void>(`/minibadge/types/${typeId}/badge/refuse`));
 };
+
+/**
+ * GET /minibadge/badges/certificate — verified in `CertificateController.java#getCertificate` (Epic D).
+ * Answers the PDF itself (`application/pdf`, as an attachment), hence `responseType: 'blob'`; every
+ * failure — PDF service not configured or down included — is a 503, surfaced as
+ * `ApiError('unavailable')`.
+ */
+export const downloadCertificate = async (): Promise<Blob> =>
+  request(() =>
+    odeServices.http().get<Blob>('/minibadge/badges/certificate', {
+      responseType: 'blob',
+      disableNotifications: true,
+    }),
+  );

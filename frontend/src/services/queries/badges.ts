@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  downloadCertificate,
   getBadges,
   privatizeBadge,
   publishBadge,
@@ -41,3 +42,22 @@ export const useRefuseBadge = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['badges'] }),
   });
 };
+
+export interface DownloadCertificateCallbacks {
+  onSuccess?: (blob: Blob) => void;
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Epic D: fetches the certificate PDF (nothing to invalidate — it is a read).
+ *
+ * The callbacks are the mutation's own, not `mutate()`'s: those are dropped once the calling component
+ * unmounts, and a PDF can take long enough to generate for the user to navigate away meanwhile — the
+ * file must still be saved, or the failure still reported.
+ */
+export const useDownloadCertificate = ({ onSuccess, onError }: DownloadCertificateCallbacks = {}) =>
+  useMutation({
+    mutationFn: () => downloadCertificate(),
+    onSuccess: (blob) => onSuccess?.(blob),
+    onError: (error) => onError?.(error),
+  });

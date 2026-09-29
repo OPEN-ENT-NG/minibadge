@@ -19,6 +19,13 @@
       "org.entcore.common.http.health.Neo4jProbe",
       "org.entcore.common.http.health.MongoProbe"
     ],
+{% if nodePdfToken is defined and nodePdfToken and nodePdfUrl is defined and nodePdfUrl %}
+    "node-pdf-generator" : {
+      "pdf-connector-id": "exportpdf",
+      "auth" : {{ nodePdfToken | tojson }},
+      "url": {{ nodePdfUrl | tojson }}
+    },
+{% endif %}
     "entcore.port" : 8009
   }
 }

@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook, waitFor } from '@testing-library/react';
-import { HttpResponse, http } from 'msw';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { HttpResponse, delay, http } from 'msw';
 import { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -9,6 +9,7 @@ import { server } from '~/mocks/server';
 import { ApiError } from '~/services/api/http';
 import {
   useBadges,
+  useDownloadCertificate,
   usePrivatizeBadge,
   usePublishBadge,
   useRefuseBadge,
@@ -102,5 +103,76 @@ describe('usePublishBadge / usePrivatizeBadge / useRefuseBadge', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['badges'] });
+  });
+});
+
+describe('useDownloadCertificate (Epic D)', () => {
+  it('resolves the PDF as a Blob', async () => {
+    server.use(
+      http.get('/minibadge/badges/certificate', () => {
+        return new HttpResponse(new Blob(['%PDF-1.4'], { type: 'application/pdf' }), {
+          headers: { 'Content-Type': 'application/pdf' },
+        });
+      }),
+    );
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useDownloadCertificate(), { wrapper: Wrapper });
+
+    result.current.mutate();
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toBeInstanceOf(Blob);
+  });
+
+  it('surfaces a 503 (PDF service not configured or down) as ApiError "unavailable"', async () => {
+    server.use(
+      http.get('/minibadge/badges/certificate', () => HttpResponse.json({ error: 'indisponible' }, { status: 503 })),
+    );
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useDownloadCertificate(), { wrapper: Wrapper });
+
+    result.current.mutate();
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeInstanceOf(ApiError);
+    expect((result.current.error as ApiError).code).toBe('unavailable');
+  });
+
+  it('runs its callbacks even once the calling component has unmounted', async () => {
+    server.use(
+      http.get('/minibadge/badges/certificate', async () => {
+        await delay(50);
+        return new HttpResponse(new Blob(['%PDF-1.4'], { type: 'application/pdf' }), {
+          headers: { 'Content-Type': 'application/pdf' },
+        });
+      }),
+    );
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    const { Wrapper } = createWrapper();
+    const { result, unmount } = renderHook(() => useDownloadCertificate({ onSuccess, onError }), {
+      wrapper: Wrapper,
+    });
+
+    act(() => result.current.mutate());
+    unmount();
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(onSuccess.mock.calls[0][0]).toBeInstanceOf(Blob);
+    expect(onError).not.toHaveBeenCalled();
+  });
+
+  it('hands a failure to onError', async () => {
+    server.use(http.get('/minibadge/badges/certificate', () => new HttpResponse(null, { status: 401 })));
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useDownloadCertificate({ onSuccess, onError }), { wrapper: Wrapper });
+
+    act(() => result.current.mutate());
+
+    await waitFor(() => expect(onError).toHaveBeenCalledTimes(1));
+    expect((onError.mock.calls[0][0] as ApiError).code).toBe('unauthorized');
+    expect(onSuccess).not.toHaveBeenCalled();
   });
 });

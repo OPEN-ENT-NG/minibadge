@@ -150,6 +150,11 @@ public class Field {
     public static final String ACTIVE = "active";
     public static final String MAX_EXPIRES_AT = "max_expires_at";
     public static final String MAXEXPIRESAT = "maxExpiresAt";
+
+    // PDF certificate (Epic D)
+    public static final String CATEGORY_NAMES = "category_names";
+    public static final String PDFEXPORTENABLED = "pdfExportEnabled";
+
     /** Flags computed by the single assignment statement (DefaultBadgeAssignedService#assign). */
     public static final String TYPE_EXPIRED = "type_expired";
     public static final String ALREADY_ASSIGNED = "already_assigned";

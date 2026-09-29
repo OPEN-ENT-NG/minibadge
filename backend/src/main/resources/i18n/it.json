@@ -195,5 +195,17 @@
   "minibadge.error.badge.already.assigned": "Vous avez déjà décerné ce badge à au moins une de ces personnes, et il est toujours valable.",
   "minibadge.error.badge.type.validity.invalid": "La date de fin de validité est invalide.",
   "minibadge.error.badge.type.validity.past": "La date de fin de validité ne peut pas être dans le passé.",
-  "minibadge.error.badge.type.validity.forbidden": "Vous ne pouvez modifier la date de fin que des badges créés par votre établissement."
+  "minibadge.error.badge.type.validity.forbidden": "Vous ne pouvez modifier la date de fin que des badges créés par votre établissement.",
+  "minibadge.certificate.download": "Télécharger mon certificat",
+  "minibadge.certificate.generating": "Génération du certificat…",
+  "minibadge.certificate.title": "Certificat de mini-badges",
+  "minibadge.certificate.owner": "Titulaire :",
+  "minibadge.certificate.generated.on": "Généré le :",
+  "minibadge.certificate.count": "Nombre de badges reçus :",
+  "minibadge.certificate.categories": "Catégories",
+  "minibadge.certificate.assigned.by": "Décerné par",
+  "minibadge.certificate.date": "Date",
+  "minibadge.certificate.empty": "Vous n'avez reçu aucun badge pour le moment.",
+  "minibadge.error.certificate.unavailable": "Le certificat ne peut pas être généré pour le moment. Veuillez réessayer plus tard.",
+  "minibadge.error.certificate.download": "Le téléchargement du certificat a échoué."
 }

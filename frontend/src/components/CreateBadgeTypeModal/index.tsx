@@ -38,15 +38,17 @@ export interface CreateBadgeTypeModalProps {
 /**
  * Picks the inline error copy from the coarse `ApiError.code`.
  *
- * `services/api/http`'s shared `request()` collapses every failure into three codes, so the server's
+ * `services/api/http`'s shared `request()` collapses every failure into four codes (`unauthorized`,
+ * `notfound`, `unavailable`, `error`), so the server's
  * own wording (notably the "this label is already taken" slug conflict) never survives the round
  * trip. What the code DOES still distinguish is a dead session from everything else — and telling an
  * admin whose session just expired to go rename their badge sends them chasing a cause that isn't
  * there. Hence: an explicit reconnect message for `unauthorized`, and for the catch-all `error` a
  * message that OFFERS the duplicate-label explanation without asserting it.
  *
- * `notfound` can't be reached from a POST to a static collection route; it falls through to the
- * generic message rather than getting invented copy of its own.
+ * `notfound` can't be reached from a POST to a static collection route, and `unavailable` (a 503) is
+ * not something this route answers; both fall through to the generic message rather than getting
+ * invented copy of their own.
  */
 const errorMessageKey = (error: Error | null): string =>
   error instanceof ApiError && error.code === 'unauthorized'
