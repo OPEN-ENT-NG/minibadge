@@ -13,6 +13,10 @@ public class TypeSetting implements Model<TypeSetting> {
     List<BadgeProtagonistSettingRelation> relations = new ArrayList<>();
     boolean isSelfAssignable;
     String structureId;
+    /** Epic C: end date of the applicable badge_type_setting row ({@code YYYY-MM-DD}), null = permanent. */
+    String validUntil;
+    /** Epic C: {@code validUntil} is before the database's CURRENT_DATE — computed by SQL, never by a client clock. */
+    boolean isExpired;
 
     public TypeSetting() {
         //A changer des que la bdd sera opérationnelle
@@ -55,12 +59,32 @@ public class TypeSetting implements Model<TypeSetting> {
         this.structureId = structureId;
     }
 
+    public String validUntil() {
+        return validUntil;
+    }
+
+    public TypeSetting setValidUntil(String validUntil) {
+        this.validUntil = validUntil;
+        return this;
+    }
+
+    public boolean isExpired() {
+        return isExpired;
+    }
+
+    public TypeSetting setExpired(boolean isExpired) {
+        this.isExpired = isExpired;
+        return this;
+    }
+
     @Override
     public JsonObject toJson() {
         return new JsonObject()
                 .put(RELATIONS, new BadgeProtagonistSettingRelation().toArray(relations))
                 .put(ISSELFASSIGNABLE, isSelfAssignable)
-                .put(STRUCTUREID, structureId);
+                .put(STRUCTUREID, structureId)
+                .put(VALIDUNTIL, validUntil)
+                .put(ISEXPIRED, isExpired);
     }
 
     @Override
@@ -72,6 +96,8 @@ public class TypeSetting implements Model<TypeSetting> {
         this.relations = model.relations();
         this.isSelfAssignable = model.isSelfAssignable();
         this.structureId = model.structureId();
+        this.validUntil = model.validUntil();
+        this.isExpired = model.isExpired();
         return this;
     }
 
@@ -79,6 +105,8 @@ public class TypeSetting implements Model<TypeSetting> {
     public TypeSetting set(JsonObject model) {
         this.isSelfAssignable = model.getBoolean(ISSELFASSIGNABLE, false);
         this.structureId = model.getString(STRUCTUREID);
+        this.validUntil = model.getString(VALIDUNTIL);
+        this.isExpired = model.getBoolean(ISEXPIRED, false);
         this.relations = new BadgeProtagonistSettingRelation()
                 .toList(model.getJsonArray(RELATIONS, new JsonArray()));
         return this;

@@ -10,8 +10,25 @@ import org.entcore.common.user.UserInfos;
 import java.util.List;
 
 public interface BadgeAssignedService {
+    /** Epic C: stable failure (doubling as its i18n key) when the badge type's end date is already past. */
+    String BADGE_TYPE_EXPIRED_ERROR = "minibadge.error.badge.type.expired";
+
     /**
-     * Create badge assigned with badge creation if not exists
+     * Epic C: stable failure (doubling as its i18n key) when the assignor still holds an ACTIVE (not
+     * revoked, not expired) assignment of this badge type to one of the owners.
+     */
+    String ALREADY_ASSIGNED_ERROR = "minibadge.error.badge.already.assigned";
+
+    /**
+     * Create badge assigned with badge creation if not exists.
+     * <p>
+     * Epic C: the end date that applies to the assignor (establishment setting first, central one
+     * otherwise) is frozen into each new assignment's {@code expires_at}. Fails with
+     * {@link #BADGE_TYPE_EXPIRED_ERROR} when that end date is past, and with
+     * {@link #ALREADY_ASSIGNED_ERROR} when an active assignment by the same assignor already exists
+     * (including a concurrent duplicate caught by the unique index). Both decisions are taken by the
+     * INSERT statement itself, against the database clock; on refusal no assignment is written (the
+     * owners' badge rows, created beforehand, may exist without one).
      *
      * @param typeId   type identifier
      * @param ownerIds list of badge owners identifier

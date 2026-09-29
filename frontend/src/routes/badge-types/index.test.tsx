@@ -125,7 +125,7 @@ describe('BadgeTypeLibrary', () => {
     renderScreen();
 
     await screen.findByText(fakeBadgeType.label);
-    await user.click(screen.getByRole('button', { name: 'card.open.resource' }));
+    await user.click(screen.getByRole('button', { name: fakeBadgeType.label }));
 
     expect(await screen.findByText(`Détail :typeId`)).toBeInTheDocument();
   });

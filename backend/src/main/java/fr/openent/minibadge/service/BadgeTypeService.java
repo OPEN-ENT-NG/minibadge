@@ -16,6 +16,18 @@ public interface BadgeTypeService {
      */
     String DUPLICATE_SLUG_ERROR = "minibadge.error.badge.type.duplicate";
 
+    /** Epic C: the submitted end date is not a {@code YYYY-MM-DD} date. Doubles as its i18n key. */
+    String VALIDITY_INVALID_ERROR = "minibadge.error.badge.type.validity.invalid";
+
+    /** Epic C: the submitted end date is already past (today is still accepted). Doubles as its i18n key. */
+    String VALIDITY_PAST_ERROR = "minibadge.error.badge.type.validity.past";
+
+    /**
+     * Epic C: the end date of this badge type cannot be changed by this user — it is a central badge,
+     * belongs to another establishment, or does not exist. Doubles as its i18n key.
+     */
+    String VALIDITY_FORBIDDEN_ERROR = "minibadge.error.badge.type.validity.forbidden";
+
     /**
      * Get list of general / structure based badge types
      *
@@ -57,7 +69,27 @@ public interface BadgeTypeService {
      * @param categoryIds the badge categories to link; ids with no matching row are ignored rather than
      *                    failing the whole creation.
      * @return the created badge type (id and generated slug included). Fails with
-     * {@link #DUPLICATE_SLUG_ERROR} on a slug collision.
+     * {@link #DUPLICATE_SLUG_ERROR} on a slug collision, and with {@link #VALIDITY_INVALID_ERROR} /
+     * {@link #VALIDITY_PAST_ERROR} (before any SQL is issued) when {@code badgeType.getSetting().validUntil()}
+     * — the optional Epic C end date — is not an acceptable date.
      */
     Future<BadgeType> create(BadgeType badgeType, List<Long> categoryIds);
+
+    /**
+     * Epic C, the one edit a local admin may make to a badge type: change its end date — nothing else.
+     * <p>
+     * Only a badge type owned by one of {@code structureIds} can be changed, and only its own
+     * establishment's setting row is written; central badges ({@code structure_id IS NULL}) are always
+     * refused, as they are configured by SQL migration. Assignments already made keep the expiry frozen
+     * into them at assignment time — this never rewrites {@code badge_assigned.expires_at}.
+     *
+     * @param typeId        the badge type
+     * @param structureIds  the caller's OWN structures ({@code UserInfos#getStructures()}), never
+     *                      anything taken from the request
+     * @param validUntil    the new end date ({@code YYYY-MM-DD}, today or later), or null/blank to make
+     *                      the badge permanent again
+     * @return fails with {@link #VALIDITY_INVALID_ERROR}, {@link #VALIDITY_PAST_ERROR} or
+     * {@link #VALIDITY_FORBIDDEN_ERROR}.
+     */
+    Future<Void> updateValidity(long typeId, List<String> structureIds, String validUntil);
 }

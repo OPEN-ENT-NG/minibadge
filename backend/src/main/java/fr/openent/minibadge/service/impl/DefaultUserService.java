@@ -148,7 +148,7 @@ public class DefaultUserService implements UserService {
         return String.format(" SELECT DISTINCT(owner_id) as id " +
                         " FROM %s bav INNER JOIN %s b on b.id = bav.badge_id " +
                         " WHERE assignor_id = ? AND badge_type_id = ? AND owner_id IN %s",
-                        SqlTable.BADGE_ASSIGNED_VALID.getName(), SqlTable.BADGE.getName(), Sql.listPrepared(receiverIds));
+                        SqlTable.BADGE_ASSIGNED_ACTIVE.getName(), SqlTable.BADGE.getName(), Sql.listPrepared(receiverIds));
     }
 
     private String getDisabledBadgeOwnerIdsQuery(long typeId, List<String> receiverIds, JsonArray params) {

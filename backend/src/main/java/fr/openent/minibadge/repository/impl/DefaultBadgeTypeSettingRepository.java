@@ -37,7 +37,10 @@ public class DefaultBadgeTypeSettingRepository implements BadgeTypeSettingReposi
         // in" — that context never reaches this repository. A user belonging to two structures that
         // each configured this badge type is therefore an unhandled edge case; it is outside the
         // stated rule ("establishment beats centralized") and unreachable with the current UI.
-        String query = "SELECT * FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
+        // Epic C: `is_expired` is decided here, against the database clock (the end day itself is
+        // still valid), so neither the JVM nor the browser ever compares valid_until with its own clock.
+        String query = "SELECT *, (valid_until IS NOT NULL AND valid_until < CURRENT_DATE) AS is_expired" +
+                " FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
                 "WHERE badge_type_id = ? AND " + structureFilter + " " +
                 "ORDER BY structure_id NULLS LAST, id LIMIT 1";
 

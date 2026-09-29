@@ -14,6 +14,10 @@ export interface BadgeAssigned {
   updatedAt?: string;
   revokedAt?: string;
   acceptedAt?: string;
+  /** Expiry frozen at assignment time; absent/null when permanent. */
+  expiresAt?: string | null;
+  /** Computed server-side against the database clock (`expires_at <= now()`). */
+  isExpired?: boolean;
   badge: Badge;
   assignor?: MinibadgeUser;
 }

@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
+import { BadgeValidity } from '~/components/BadgeValidity';
 import { CreateBadgeTypeModal } from '~/components/CreateBadgeTypeModal';
+import { EditBadgeValidityModal } from '~/components/EditBadgeValidityModal';
 import { EmptyBadgeList } from '~/components/EmptyBadgeList';
 import { PeriodPicker, PeriodPickerValue } from '~/components/PeriodPicker';
 import { RevokeUsersModal } from '~/components/RevokeUsersModal';
@@ -11,6 +13,7 @@ import { SortableTableHeader } from '~/components/SortableTableHeader';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { useBadgesAssignedAll } from '~/services/queries/badgeAssigned';
+import { isExpiredAssignment } from '~/utils/badgeStatus';
 import { defaultPeriod, formatDisplayDate, toBackendDate } from '~/utils/date';
 import { getPictoSrc } from '~/utils/picto';
 
@@ -18,7 +21,11 @@ import { getPictoSrc } from '~/utils/picto';
  * "Administration" (`/admin`): a read-only, sortable/filterable audit table
  * of every badge ever assigned on the platform (not just "mine", unlike
  * `/badges-given`), plus the "Révoquer des utilisateurs" action. No per-row
- * revocation here — this is a pure audit view.
+ * revocation here — this is a pure audit view. Expired assignments (Epic C) stay in that history,
+ * flagged "Expiré" in the status column.
+ *
+ * "Modifier la date de fin d'un badge" (Epic C) is the one edit a local admin may make to a badge
+ * type, and only to one created by their own establishment (see `EditBadgeValidityModal`).
  *
  * Redirects to `/` when the `admin` right is absent. Every hook is still
  * called unconditionally above that redirect (hooks can't be conditional) —
@@ -56,6 +63,7 @@ export const BadgesAdmin = () => {
   const [isAsc, setIsAsc] = useState(true);
   const [isRevokeUsersModalOpen, setIsRevokeUsersModalOpen] = useState(false);
   const [isCreateBadgeTypeModalOpen, setIsCreateBadgeTypeModalOpen] = useState(false);
+  const [isEditValidityModalOpen, setIsEditValidityModalOpen] = useState(false);
 
   const { badgesAssignedAll, query: badgesAssignedAllQuery } = useBadgesAssignedAll({
     query: searchQuery.trim() || undefined,
@@ -113,6 +121,9 @@ export const BadgesAdmin = () => {
         <Button color="primary" variant="filled" onClick={() => setIsCreateBadgeTypeModalOpen(true)}>
           {t('minibadge.badge.type.create')}
         </Button>
+        <Button color="primary" variant="outline" onClick={() => setIsEditValidityModalOpen(true)}>
+          {t('minibadge.badge.type.validity.edit')}
+        </Button>
         <Button color="danger" variant="filled" onClick={() => setIsRevokeUsersModalOpen(true)}>
           {t('minibadge.revoke.users.modal.title')}
         </Button>
@@ -155,6 +166,7 @@ export const BadgesAdmin = () => {
                   isAsc={isAsc}
                   onSort={handleSort}
                 />
+                <Table.Th>{t('minibadge.badge.status')}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -169,6 +181,13 @@ export const BadgesAdmin = () => {
                   <Table.Td>{badgeAssigned.assignorDisplayName}</Table.Td>
                   <Table.Td>{badgeAssigned.badge.owner?.displayName}</Table.Td>
                   <Table.Td>{formatDisplayDate(badgeAssigned.createdAt)}</Table.Td>
+                  <Table.Td>
+                    {isExpiredAssignment(badgeAssigned) ? (
+                      <BadgeValidity isExpired />
+                    ) : (
+                      <span className="small">{t('minibadge.badge.active')}</span>
+                    )}
+                  </Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -181,6 +200,7 @@ export const BadgesAdmin = () => {
         isOpen={isCreateBadgeTypeModalOpen}
         onClose={() => setIsCreateBadgeTypeModalOpen(false)}
       />
+      <EditBadgeValidityModal isOpen={isEditValidityModalOpen} onClose={() => setIsEditValidityModalOpen(false)} />
     </div>
   );
 };

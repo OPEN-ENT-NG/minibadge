@@ -102,6 +102,10 @@ export default ({ mode }: { mode: string }) => {
     test: {
       watch: false,
       globals: true,
+      // See `configure({ asyncUtilTimeout })` in `src/mocks/setup.ts`: the
+      // 5s default made tests flaky under a loaded full run (several awaited
+      // `findBy*` per test), not because anything was actually slow to appear.
+      testTimeout: 15000,
       environment: 'jsdom',
       include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       setupFiles: ['./src/mocks/setup.ts'],

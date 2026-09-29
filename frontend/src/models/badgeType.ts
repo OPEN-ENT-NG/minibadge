@@ -28,6 +28,16 @@ export interface BadgeTypeSetting {
   relations: BadgeProtagonistSettingRelation[];
   isSelfAssignable: boolean;
   structureId?: string;
+  /**
+   * End date of the badge type (`YYYY-MM-DD`, inclusive: valid for the whole day); absent/null when
+   * permanent. Frozen into each assignment when it is made.
+   */
+  validUntil?: string | null;
+  /**
+   * `validUntil` is before the server's current date (computed by SQL, never by the browser clock).
+   * Absent only from an older backend — see `isBadgeTypeExpired` for the fallback.
+   */
+  isExpired?: boolean;
 }
 
 /**

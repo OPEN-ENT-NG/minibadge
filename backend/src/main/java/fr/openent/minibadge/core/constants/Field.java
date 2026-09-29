@@ -138,6 +138,22 @@ public class Field {
     public static final String THRESHOLDSETTINGS = "thresholdSettings";
     public static final String ASSIGNATIONSNUMBER = "assignationsNumber";
 
+    // Badge validity (Epic C)
+    public static final String VALID_UNTIL = "valid_until";
+    public static final String VALIDUNTIL = "validUntil";
+    public static final String EXPIRES_AT = "expires_at";
+    public static final String EXPIRESAT = "expiresAt";
+    public static final String IS_EXPIRED = "is_expired";
+    public static final String ISEXPIRED = "isExpired";
+    public static final String IS_PAST = "is_past";
+    public static final String COUNT_ACTIVE = "count_active";
+    public static final String ACTIVE = "active";
+    public static final String MAX_EXPIRES_AT = "max_expires_at";
+    public static final String MAXEXPIRESAT = "maxExpiresAt";
+    /** Flags computed by the single assignment statement (DefaultBadgeAssignedService#assign). */
+    public static final String TYPE_EXPIRED = "type_expired";
+    public static final String ALREADY_ASSIGNED = "already_assigned";
+
     // Statistics
     public static final String STATISTICS = "statistics";
     public static final String COUNT_ASSIGNED = "count_assigned";

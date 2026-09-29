@@ -489,6 +489,11 @@ const minibadgeHandlers = [
     return HttpResponse.json({ all, limit, offset });
   }),
   http.get('/minibadge/types/:typeId', () => HttpResponse.json(fakeBadgeType)),
+  // Epic C: echoes the normalized body back, as `BadgeTypeController#updateBadgeTypeValidity` does.
+  http.put('/minibadge/types/:typeId/validity', async ({ params, request }) => {
+    const body = (await request.json()) as { validUntil: string | null };
+    return HttpResponse.json({ id: Number(params.typeId), validUntil: body.validUntil });
+  }),
   http.get('/minibadge/types/:typeId/assigners', () =>
     HttpResponse.json({ all: [fakeUser], page: 0, pageCount: 1, userAssignersTotal: 1 }),
   ),

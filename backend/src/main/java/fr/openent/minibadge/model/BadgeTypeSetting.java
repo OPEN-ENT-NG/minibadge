@@ -1,5 +1,6 @@
 package fr.openent.minibadge.model;
 
+import fr.openent.minibadge.helper.BadgeValidityHelper;
 import io.vertx.core.json.JsonObject;
 
 import static fr.openent.minibadge.core.constants.Field.*;
@@ -10,6 +11,14 @@ public class BadgeTypeSetting implements Model<BadgeTypeSetting> {
     private String badgeTypeId;
     private Boolean isSelfAssignable;
     private String level;
+    /** Epic C: end date of this badge type ({@code YYYY-MM-DD}), {@code null} when permanent. */
+    private String validUntil;
+    /**
+     * Epic C: computed by SQL against the database's {@code CURRENT_DATE} (see
+     * DefaultBadgeTypeSettingRepository), so no caller ever compares {@link #validUntil} with a clock of
+     * its own. False when permanent, or when the row was not read with that column.
+     */
+    private boolean isExpired;
 
     public BadgeTypeSetting(JsonObject badgeTypeSetting) {
         set(badgeTypeSetting);
@@ -27,6 +36,9 @@ public class BadgeTypeSetting implements Model<BadgeTypeSetting> {
         this.badgeTypeId = badgeTypeSetting.getString(BADGE_TYPE_ID, "");
         this.isSelfAssignable = badgeTypeSetting.getBoolean(IS_SELF_ASSIGNABLE, false);
         this.level = badgeTypeSetting.getString(LEVEL, "");
+        this.validUntil = BadgeValidityHelper.format(BadgeValidityHelper.parseValidUntil(
+                badgeTypeSetting.getString(VALID_UNTIL, badgeTypeSetting.getString(VALIDUNTIL))));
+        this.isExpired = badgeTypeSetting.getBoolean(IS_EXPIRED, badgeTypeSetting.getBoolean(ISEXPIRED, false));
         return this;
     }
 
@@ -77,6 +89,24 @@ public class BadgeTypeSetting implements Model<BadgeTypeSetting> {
         return this;
     }
 
+    public String getValidUntil() {
+        return validUntil;
+    }
+
+    public BadgeTypeSetting setValidUntil(String validUntil) {
+        this.validUntil = validUntil;
+        return this;
+    }
+
+    public boolean getIsExpired() {
+        return isExpired;
+    }
+
+    public BadgeTypeSetting setIsExpired(boolean isExpired) {
+        this.isExpired = isExpired;
+        return this;
+    }
+
     @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
@@ -85,6 +115,8 @@ public class BadgeTypeSetting implements Model<BadgeTypeSetting> {
         json.put(BADGETYPEID, this.badgeTypeId);
         json.put(ISSELFASSIGNABLE, this.isSelfAssignable);
         json.put(LEVEL, this.level);
+        json.put(VALIDUNTIL, this.validUntil);
+        json.put(ISEXPIRED, this.isExpired);
         return json;
     }
 }

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, delay, http } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -183,5 +183,25 @@ describe('MyBadges', () => {
       expect(screen.getByRole('button', { name: /minibadge.badges.public/ })).toBeInTheDocument(),
     );
     expect(screen.queryByAltText('loading')).not.toBeInTheDocument();
+  });
+
+  /**
+   * Epic C: "Mes badges reçus" is one row per badge type. A type whose assignments have ALL expired
+   * must stay listed — in the section its visibility puts it in — flagged "Expiré", not vanish.
+   */
+  it('keeps a fully expired badge in its own section, flagged as expired, next to the active ones', async () => {
+    const expiredPublic = { ...fakeBadge, id: 101, counts: { assigned: 2, active: 0 }, maxExpiresAt: '2026-07-01T00:00:00.000' };
+    const activePublic = { ...fakeBadge, id: 102, counts: { assigned: 1, active: 1 } };
+    server.use(http.get('/minibadge/badges', () => HttpResponse.json({ all: [expiredPublic, activePublic] })));
+    renderScreen();
+
+    const publicHeader = await screen.findByRole('button', { name: /minibadge.badges.public/ });
+    expect(publicHeader).toHaveTextContent('(2)');
+    await waitFor(() => expect(publicHeader).toHaveAttribute('aria-expanded', 'true'));
+
+    const publicSection = publicHeader.closest('section') as HTMLElement;
+    expect(within(publicSection).getAllByText(fakeBadge.badgeType.label)).toHaveLength(2);
+    expect(within(publicSection).getAllByText('minibadge.badge.expired')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: /minibadge.badges.private/ })).toHaveTextContent('(0)');
   });
 });

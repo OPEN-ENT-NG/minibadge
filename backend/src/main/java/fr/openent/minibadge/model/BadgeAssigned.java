@@ -12,6 +12,10 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
     private String updatedAt;
     private String revokedAt;
     private String acceptedAt;
+    /** Epic C: the expiry frozen at assignment time, null when permanent. */
+    private String expiresAt;
+    /** Epic C: computed by SQL against now() ({@code expires_at <= now()}); false when permanent. */
+    private boolean isExpired;
     private Badge badge;
 
     public BadgeAssigned() {
@@ -47,6 +51,8 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
         this.updatedAt = badgeAssigned.getString(Field.UPDATED_AT, badgeAssigned.getString(Field.UPDATEDAT));
         this.acceptedAt = badgeAssigned.getString(Field.ACCEPTED_AT, badgeAssigned.getString(Field.ACCEPTEDAT));
         this.revokedAt = badgeAssigned.getString(Field.REVOKED_AT, badgeAssigned.getString(Field.REVOKEDAT));
+        this.expiresAt = badgeAssigned.getString(Field.EXPIRES_AT, badgeAssigned.getString(Field.EXPIRESAT));
+        this.isExpired = badgeAssigned.getBoolean(Field.IS_EXPIRED, badgeAssigned.getBoolean(Field.ISEXPIRED, false));
         this.badge = setBadge(
                 badgeAssigned.getLong(Field.BADGE_ID, badgeAssigned.getLong(Field.BADGEID)),
                 badgeAssigned.getLong(Field.BADGE_TYPE_ID, badgeAssigned.getLong(Field.BADGETYPEID)),
@@ -104,6 +110,14 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
         this.revokedAt = revokedAt;
     }
 
+    public String expiresAt() {
+        return expiresAt;
+    }
+
+    public boolean isExpired() {
+        return isExpired;
+    }
+
     public String acceptedAt() {
         return acceptedAt;
     }
@@ -139,6 +153,8 @@ public class BadgeAssigned implements Model<BadgeAssigned> {
                 .put(Field.UPDATEDAT, this.updatedAt)
                 .put(Field.REVOKEDAT, this.revokedAt)
                 .put(Field.ACCEPTEDAT, this.acceptedAt)
+                .put(Field.EXPIRESAT, this.expiresAt)
+                .put(Field.ISEXPIRED, this.isExpired)
                 .put(Field.BADGE, this.badge.toJson());
 
         if (this.assignor != null)

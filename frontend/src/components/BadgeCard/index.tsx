@@ -3,9 +3,11 @@ import { Card, Dropdown, Flex, Image } from '@edifice.io/react';
 import { IconOptions } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 
+import { BadgeValidity } from '~/components/BadgeValidity';
 import { CategoryChip } from '~/components/CategoryChip';
 import { Badge } from '~/models/badge';
 import { BadgeType } from '~/models/badgeType';
+import { isBadgeTypeExpired, isExpiredBadge } from '~/utils/badgeStatus';
 import { getPictoSrc } from '~/utils/picto';
 import { stripHtmlTags } from '~/utils/stripHtml';
 
@@ -15,9 +17,7 @@ import { stripHtmlTags } from '~/utils/stripHtml';
  * — including when `undefined` is passed through (default parameters apply
  * on `undefined`, not just on an omitted prop). Hardcoded `false` here (no
  * `onSelect` is ever wired) avoids silently showing that dead button.
- * `isClickable` is forced to `!!onClick` for the same reason: `Card` renders
- * a full-cover invisible `<button>` whenever it's true, which would be a
- * pointless (and bad for a11y) click target with no handler.
+ * `isClickable` is always `false` too: see "Click target" below.
  *
  * Image: rendered as a direct child of `Card` (a sibling of `Card.Body`, not
  * nested inside it) so it isn't inset by `Card.Body`'s own padding —
@@ -54,6 +54,17 @@ import { stripHtmlTags } from '~/utils/stripHtml';
  * admin-authored content, so `stripHtmlTags` shows the text without ever
  * rendering that markup.
  *
+ * Click target: `Card`'s own `isClickable` overlay is a full-cover `<button>` whose accessible name is
+ * the fixed, generic `aria-label="card.open.resource"` — it cannot be overridden, and it hides
+ * everything the card says (label, "Expiré"). So `isClickable` stays `false` and this component
+ * renders the same invisible full-cover button itself, named after what it opens: the badge label,
+ * plus "Expiré" when it is.
+ *
+ * Validity (Epic C): a received `badge` shows "Expiré" once all its assignments have expired (the
+ * public/private/refused section it sits in is unchanged — expiry is an overlay, not a status); a
+ * library `badgeType` shows its end date, or "Expiré" once that date is past. A received badge never
+ * shows the type's CURRENT end date: its own assignments carry the date frozen when they were made.
+ *
  * `actions` composes a `Dropdown` in `Card.Footer` (the only slot that
  * accepts arbitrary children) because `Card.onSelect`/`isSelectable` only
  * wire a single generic callback to one fixed icon button — they can't
@@ -89,18 +100,28 @@ export type BadgeCardProps = BadgeCardSource & {
 
 export const BadgeCard = ({ badge, badgeType, isSelected, onClick, actions, className }: BadgeCardProps) => {
   const { t } = useTranslation();
+  const { t: tMinibadge } = useTranslation('minibadge');
   const type = badge ? badge.badgeType : badgeType;
   const imageSrc = getPictoSrc(type.pictureId) ?? commonPlaceholder;
   const description = type.descriptionShort ? stripHtmlTags(type.descriptionShort) : undefined;
+  const isExpired = badge ? isExpiredBadge(badge) : isBadgeTypeExpired(type);
+  const validUntil = badge ? undefined : type.setting?.validUntil;
 
   return (
     <Card
-      isClickable={!!onClick}
+      isClickable={false}
       isSelectable={false}
       isSelected={!!isSelected}
-      onClick={onClick}
-      className={`h-100${className ? ` ${className}` : ''}`}
+      className={`h-100${onClick ? ' c-pointer' : ''}${className ? ` ${className}` : ''}`}
     >
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          className="position-absolute bottom-0 end-0 top-0 start-0 opacity-0 z-1 w-100"
+          aria-label={isExpired ? `${type.label}, ${tMinibadge('minibadge.badge.expired')}` : type.label}
+        />
+      ) : null}
       <div className="bg-gray-200 position-relative">
         <Image src={imageSrc} imgPlaceholder={commonPlaceholder} alt="" ratio="21" objectFit="contain" />
         {type.categories.length > 0 ? (
@@ -113,6 +134,7 @@ export const BadgeCard = ({ badge, badgeType, isSelected, onClick, actions, clas
       </div>
       <Card.Body flexDirection="column" gap="8">
         <Card.Title>{type.label}</Card.Title>
+        <BadgeValidity isExpired={isExpired} validUntil={validUntil} />
         {description ? <p className="card-text small text-break mb-0">{description}</p> : null}
       </Card.Body>
       {actions && actions.length > 0 ? (

@@ -6,7 +6,9 @@ import {
   getBadgeType,
   getBadgeTypeAssigners,
   getBadgeTypeReceivers,
+  getAllBadgeTypes,
   getBadgeTypes,
+  updateBadgeTypeValidity,
 } from '~/services/api/badgeTypes';
 
 export const badgeTypesQueryOptions = (
@@ -84,6 +86,40 @@ export const useCreateBadgeType = () => {
     mutationFn: (payload: BadgeTypeCreatePayload) => createBadgeType(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['badgeTypes'] });
+    },
+  });
+};
+
+/**
+ * Every badge type (all pages), under the `['badgeTypes']` root so that creating a badge type or
+ * changing an end date refreshes it along with every other list.
+ */
+export const allBadgeTypesQueryOptions = () =>
+  queryOptions({
+    queryKey: ['badgeTypes', 'all'],
+    queryFn: () => getAllBadgeTypes(),
+    // Walks every page: reopening the admin modal within 30s reuses it instead of refetching them all
+    // (an end-date change or a creation still invalidates it right away through the `['badgeTypes']` root).
+    staleTime: 30_000,
+  });
+
+export const useAllBadgeTypes = (enabled = true) => {
+  const result = useQuery({ ...allBadgeTypesQueryOptions(), enabled });
+  return { badgeTypes: result.data, query: result };
+};
+
+/**
+ * Changing an end date changes what the library (`['badgeTypes']`) and the detail screen
+ * (`['badgeType', typeId]`, a separate singular root) show, and whether "Décerner" is enabled there.
+ */
+export const useUpdateBadgeTypeValidity = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ typeId, validUntil }: { typeId: number; validUntil: string | null }) =>
+      updateBadgeTypeValidity(typeId, validUntil),
+    onSuccess: (_data, { typeId }) => {
+      queryClient.invalidateQueries({ queryKey: ['badgeTypes'] });
+      queryClient.invalidateQueries({ queryKey: ['badgeType', typeId] });
     },
   });
 };

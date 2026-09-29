@@ -7,6 +7,7 @@ import { PictoPicker } from '~/components/PictoPicker';
 import { PictoId } from '~/config/constants';
 import { ApiError } from '~/services/api/http';
 import { useCreateBadgeType } from '~/services/queries/badgeTypes';
+import { todayIsoDate } from '~/utils/date';
 
 /**
  * "Créer un badge" (admin): creates a badge type visible only inside the admin's own establishment.
@@ -21,6 +22,10 @@ import { useCreateBadgeType } from '~/services/queries/badgeTypes';
  * derives it when there is exactly one, so the field is only rendered — and only sent — when the
  * admin belongs to several. Picking one silently on their behalf would create the badge in the wrong
  * school, and there is no delete endpoint to undo that.
+ *
+ * End date (Epic C): optional, a native date input like `PeriodPicker`'s. Left empty, the badge is
+ * permanent. A past date is refused here (inline message, submit disabled) as well as by the server;
+ * today is accepted — the badge is valid for the whole of its end day.
  *
  * `useToast().success(...)` needs a `<Toaster/>` somewhere on the page; `Layout` (mounted in
  * `routes/root`) provides one, and this modal only ever opens from `/admin`, inside that layout.
@@ -58,6 +63,7 @@ export const CreateBadgeTypeModal = ({ isOpen, onClose }: CreateBadgeTypeModalPr
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [pictureId, setPictureId] = useState<PictoId>();
   const [structureId, setStructureId] = useState<string>();
+  const [validUntil, setValidUntil] = useState('');
 
   const { mutate: createBadgeType, isPending, isError, error, reset } = useCreateBadgeType();
 
@@ -73,12 +79,16 @@ export const CreateBadgeTypeModal = ({ isOpen, onClose }: CreateBadgeTypeModalPr
       setCategoryIds([]);
       setPictureId(undefined);
       setStructureId(undefined);
+      setValidUntil('');
       reset();
     }
   }, [isOpen, reset]);
 
   const trimmedLabel = label.trim();
-  const isSubmitDisabled = !trimmedLabel || isPending || (mustChooseStructure && !structureId);
+  const today = todayIsoDate();
+  const isPastValidUntil = !!validUntil && validUntil < today;
+  const isSubmitDisabled =
+    !trimmedLabel || isPending || (mustChooseStructure && !structureId) || isPastValidUntil;
 
   // The design system's `Modal` registers `useKeyPress(onModalClose, ['Escape'])` UNCONDITIONALLY,
   // regardless of its own `isOpen`, so a mounted-but-closed modal still fires this on any Escape
@@ -100,6 +110,7 @@ export const CreateBadgeTypeModal = ({ isOpen, onClose }: CreateBadgeTypeModalPr
         // Omitted for a single-establishment admin: the server derives it, and sending a value the
         // client guessed would be ignored anyway (it is re-validated server-side regardless).
         structureId: mustChooseStructure ? structureId : undefined,
+        validUntil: validUntil || undefined,
       },
       {
         onSuccess: () => {
@@ -135,6 +146,31 @@ export const CreateBadgeTypeModal = ({ isOpen, onClose }: CreateBadgeTypeModalPr
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
+        </FormControl>
+
+        <FormControl
+          id="minibadge-create-badge-type-valid-until"
+          status={isPastValidUntil ? 'invalid' : undefined}
+          className="mb-16"
+        >
+          <FormControl.Label>{t('minibadge.badge.type.create.valid.until')}</FormControl.Label>
+          <FormControl.Input
+            type="date"
+            size="md"
+            min={today}
+            value={validUntil}
+            onChange={(event) => setValidUntil(event.target.value)}
+            aria-invalid={isPastValidUntil || undefined}
+            aria-describedby="minibadge-create-badge-type-valid-until-help"
+          />
+          {/* `FormControl.Text` takes no `id`: the wrapper carries the one `aria-describedby` points to. */}
+          <div id="minibadge-create-badge-type-valid-until-help">
+            <FormControl.Text>
+              {isPastValidUntil
+                ? t('minibadge.error.badge.type.validity.past')
+                : t('minibadge.badge.type.create.valid.until.help')}
+            </FormControl.Text>
+          </div>
         </FormControl>
 
         {mustChooseStructure ? (

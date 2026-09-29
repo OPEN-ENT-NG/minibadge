@@ -14,6 +14,7 @@ public enum SqlTable {
     BADGE_DISABLED("badge_disabled"),
     BADGE_ASSIGNED("badge_assigned"),
     BADGE_ASSIGNED_VALID("badge_assigned_valid"),
+    BADGE_ASSIGNED_ACTIVE("badge_assigned_active"),
     BADGE_ASSIGNED_STRUCTURE("badge_assigned_structure"),
     USER("user");
 

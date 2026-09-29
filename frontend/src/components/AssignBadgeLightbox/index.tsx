@@ -9,8 +9,11 @@ import { MinibadgeUser } from '~/models/user';
 import { useAssignBadge } from '~/services/queries/badgeAssigned';
 import { useGlobalSettings } from '~/services/queries/config';
 import { useSearchUsersForType } from '~/services/queries/users';
+import { isBadgeTypeExpired } from '~/utils/badgeStatus';
+import { formatIsoDateFr } from '~/utils/date';
 import { isMatchingAnyRelation } from '~/utils/relation';
 import { areThresholdsOutmoded, areThresholdsReached, assignableNumbersLabel } from '~/utils/threshold';
+import { formatMessage } from '~/utils/translate';
 
 /**
  * The single "Décerner" (assign) lightbox, shared between the badge-types
@@ -21,6 +24,10 @@ import { areThresholdsOutmoded, areThresholdsReached, assignableNumbersLabel } f
  * 'Relative' | 'Personnel' | 'Guest'>`), not `useUser().user.type` (an
  * internal ENT Core code in a completely different string domain) — the two
  * are easy to confuse since both look like "the current user's profile".
+ *
+ * An expired badge type (Epic C: end date past) cannot be awarded: the submit stays disabled and a
+ * warning says why. The detail screen already disables its "Décerner" button in that case; this guard
+ * covers the sniplet, which opens the lightbox directly from a portal page.
  *
  * `useToast().success(...)` requires some `<Toaster/>` mounted somewhere on
  * the page — it isn't tied to any particular ancestor. The standalone
@@ -98,8 +105,9 @@ export const AssignBadgeLightbox = ({ badgeType, isOpen, onClose, onAssigned }: 
 
   const isThresholdBlocked = areThresholdsOutmoded(thresholdSettings, selectedUsers.length);
   const isRelationBlocked = !isMatchingAnyRelation(assignorProfile, selectedUsers, relations);
+  const isExpired = !!badgeType && isBadgeTypeExpired(badgeType);
   const isSubmitDisabled =
-    selectedUsers.length === 0 || isThresholdBlocked || isRelationBlocked || isPending || !badgeType;
+    selectedUsers.length === 0 || isThresholdBlocked || isRelationBlocked || isExpired || isPending || !badgeType;
 
   const handleClose = () => onClose();
 
@@ -126,6 +134,13 @@ export const AssignBadgeLightbox = ({ badgeType, isOpen, onClose, onAssigned }: 
         {t('minibadge.badge.assign')} {badgeType?.label}
       </Modal.Header>
       <Modal.Body>
+        {isExpired ? (
+          <Alert type="warning" className="mb-16">
+            {formatMessage(t, 'minibadge.badge.expired.cannot.assign', [
+              formatIsoDateFr(badgeType?.setting.validUntil),
+            ])}
+          </Alert>
+        ) : null}
         <h3 className="h6 mb-8">{t('minibadge.choose.users.to.assign')}</h3>
         {/* `UserSearchBar` is uncontrolled internally (no `value` prop), so
             remounting it via `key` is how its visible text gets cleared.

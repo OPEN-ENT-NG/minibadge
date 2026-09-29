@@ -8,12 +8,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { AssignBadgeLightbox } from '~/components/AssignBadgeLightbox';
 import { AssignMyselfModal } from '~/components/AssignMyselfModal';
+import { BadgeValidity } from '~/components/BadgeValidity';
 import { CategoryChip } from '~/components/CategoryChip';
 import { MinibadgeUser } from '~/models/user';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { useBadgeType, useBadgeTypeAssigners } from '~/services/queries/badgeTypes';
+import { isBadgeTypeExpired } from '~/utils/badgeStatus';
+import { formatIsoDateFr } from '~/utils/date';
 import { getPictoSrc } from '~/utils/picto';
 import { stripHtmlTags } from '~/utils/stripHtml';
+import { formatMessage } from '~/utils/translate';
 
 const displayUserName = (user: MinibadgeUser): string =>
   user.displayName ?? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
@@ -26,6 +30,12 @@ const displayUserName = (user: MinibadgeUser): string =>
  * `descriptionShort`/`description` may contain HTML markup, so they're run
  * through `stripHtmlTags` rather than rendered with `dangerouslySetInnerHTML`
  * — this is admin-authored content, not fixed app copy.
+ *
+ * Validity (Epic C): the end date is shown under the title. Once it is past, "Décerner" and
+ * "Me décerner" stay visible but unavailable, and a visible message says why. They are marked
+ * `aria-disabled` (with a click guard) rather than `disabled`: a `disabled` button leaves the tab
+ * order, so a keyboard / screen-reader user would never land on it and hear the reason its
+ * `aria-describedby` points to.
  */
 export const BadgeTypeDetail = () => {
   const { t } = useTranslation('minibadge');
@@ -62,6 +72,8 @@ export const BadgeTypeDetail = () => {
 
   const showAssignMyself = canAssign && badgeType.setting.isSelfAssignable;
   const showAssign = canAssign;
+  const isExpired = isBadgeTypeExpired(badgeType);
+  const expiredMessageId = 'minibadge-badge-type-expired-message';
   // Extracted so TypeScript can narrow `assignersAll` directly at the point
   // of use below, instead of needing a non-null assertion.
   const assignersAll = assigners?.all;
@@ -94,12 +106,30 @@ export const BadgeTypeDetail = () => {
         </Flex>
         <Flex wrap="wrap" gap="8">
           {showAssignMyself ? (
-            <Button color="secondary" variant="outline" onClick={() => setIsAssignMyselfOpen(true)}>
+            <Button
+              color="secondary"
+              variant="outline"
+              onClick={() => {
+                if (!isExpired) setIsAssignMyselfOpen(true);
+              }}
+              className={isExpired ? 'disabled' : undefined}
+              aria-disabled={isExpired || undefined}
+              aria-describedby={isExpired ? expiredMessageId : undefined}
+            >
               {t('minibadge.badge.assign.myself.button')}
             </Button>
           ) : null}
           {showAssign ? (
-            <Button color="primary" variant="filled" onClick={() => setIsAssignOpen(true)}>
+            <Button
+              color="primary"
+              variant="filled"
+              onClick={() => {
+                if (!isExpired) setIsAssignOpen(true);
+              }}
+              className={isExpired ? 'disabled' : undefined}
+              aria-disabled={isExpired || undefined}
+              aria-describedby={isExpired ? expiredMessageId : undefined}
+            >
               {t('minibadge.badge.assign')}
             </Button>
           ) : null}
@@ -119,6 +149,16 @@ export const BadgeTypeDetail = () => {
           <Image src={imageSrc} imgPlaceholder={commonPlaceholder} alt="" ratio="1" objectFit="contain" />
         </div>
         <div className="flex-fill" style={{ minWidth: 0 }}>
+          <BadgeValidity isExpired={isExpired} validUntil={badgeType.setting.validUntil} className="mb-16" />
+          {isExpired && (showAssign || showAssignMyself) ? (
+            <Alert type="warning" className="mb-16">
+              <span id={expiredMessageId}>
+                {formatMessage(t, 'minibadge.badge.expired.cannot.assign', [
+                  formatIsoDateFr(badgeType.setting.validUntil),
+                ])}
+              </span>
+            </Alert>
+          ) : null}
           {badgeType.categories.length > 0 ? (
             <Flex wrap="wrap" gap="8" className="mb-16">
               {badgeType.categories.map((category) => (

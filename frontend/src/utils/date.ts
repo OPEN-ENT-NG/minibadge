@@ -24,6 +24,16 @@ export const formatDisplayDate = (timestamp?: string): string => {
   return `${day}-${month}-${year}`;
 };
 
+/** Today as `YYYY-MM-DD` (local time), the format of native date inputs and of `validUntil`. */
+export const todayIsoDate = (): string => toIsoDate(new Date());
+
+/** `YYYY-MM-DD` (or a timestamp starting with it) -> `DD/MM/YYYY`, the French display format. */
+export const formatIsoDateFr = (isoDate?: string | null): string => {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.slice(0, 10).split('-');
+  return `${day}/${month}/${year}`;
+};
+
 export const defaultPeriod = (): PeriodPickerValue => {
   const today = new Date();
   const oneMonthAgo = new Date(today);

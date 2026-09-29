@@ -5,6 +5,7 @@ import fr.openent.minibadge.core.constants.Actions;
 import fr.openent.minibadge.core.constants.EventBusConst;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Request;
+import fr.openent.minibadge.helper.BadgeValidityHelper;
 import fr.openent.minibadge.helper.RequestHelper;
 import fr.openent.minibadge.helper.UserHelper;
 import fr.openent.minibadge.model.BadgeType;
@@ -19,6 +20,7 @@ import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
 import fr.wseduc.rs.Post;
+import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
@@ -37,6 +39,7 @@ import org.entcore.common.http.filter.Trace;
 import org.entcore.common.user.UserUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static fr.openent.minibadge.core.constants.Field.*;
@@ -47,6 +50,12 @@ public class BadgeTypeController extends ControllerHelper {
     private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
     private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
     private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
+
+    /** Creation failures that are the client's to fix, rendered as a translated 400 rather than a 500. */
+    private static final List<String> CREATE_CLIENT_ERRORS = Arrays.asList(
+            BadgeTypeService.DUPLICATE_SLUG_ERROR,
+            BadgeTypeService.VALIDITY_INVALID_ERROR,
+            BadgeTypeService.VALIDITY_PAST_ERROR);
 
     @Get("/types")
     @ApiDoc("Retrieve badge type list")
@@ -107,6 +116,8 @@ public class BadgeTypeController extends ControllerHelper {
                     // sent for those two fields is discarded rather than trusted.
                     badgeType.setStructureId(structureId);
                     badgeType.setOwnerId(user.getUserId());
+                    // Epic C: optional end date, validated (format, not past) by the service.
+                    badgeType.getSetting().setValidUntil(body.getString(VALIDUNTIL));
 
                     badgeTypeService.create(badgeType, categoryIds(body))
                             .onSuccess(createdBadgeType -> {
@@ -114,14 +125,56 @@ public class BadgeTypeController extends ControllerHelper {
                                 renderJson(request, createdBadgeType.toJson(), 201);
                             })
                             .onFailure(err -> {
-                                if (BadgeTypeService.DUPLICATE_SLUG_ERROR.equals(err.getMessage())) {
+                                if (CREATE_CLIENT_ERRORS.contains(err.getMessage())) {
                                     badRequest(request, I18n.getInstance()
-                                            .translate(BadgeTypeService.DUPLICATE_SLUG_ERROR, host, language));
+                                            .translate(err.getMessage(), host, language));
                                     return;
                                 }
                                 renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()));
                             });
                 }));
+    }
+
+    @Put("/types/:typeId/validity")
+    @ApiDoc("Change the end date of a badge type owned by one of the current user's structures")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdminRight.class)
+    @Trace(Actions.BADGE_TYPE_VALIDITY_UPDATE)
+    public void updateBadgeTypeValidity(HttpServerRequest request) {
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+        long typeId;
+        try {
+            typeId = Long.parseLong(request.params().get(TYPEID));
+        } catch (NumberFormatException e) {
+            badRequest(request);
+            return;
+        }
+
+        RequestUtils.bodyToJson(request, String.format("%s%s", pathPrefix, "badgeTypeValidityUpdate"), body ->
+                // AdminRight is a bare workflow-right check (see UserHelper#resolveStructureId): the
+                // establishment scoping is enforced by the service, against the caller's OWN structures
+                // only — the body carries nothing but the date.
+                UserUtils.getUserInfos(eb, request, user ->
+                        badgeTypeService.updateValidity(typeId, user.getStructures(), body.getString(VALIDUNTIL))
+                                .onSuccess(v -> renderJson(request, new JsonObject()
+                                        .put(ID, typeId)
+                                        .put(VALIDUNTIL, BadgeValidityHelper.format(
+                                                BadgeValidityHelper.parseValidUntil(body.getString(VALIDUNTIL))))))
+                                .onFailure(err -> {
+                                    String message = err.getMessage();
+                                    if (BadgeTypeService.VALIDITY_FORBIDDEN_ERROR.equals(message)) {
+                                        renderJson(request, new JsonObject().put(Request.ERROR,
+                                                I18n.getInstance().translate(message, host, language)), 403);
+                                        return;
+                                    }
+                                    if (BadgeTypeService.VALIDITY_INVALID_ERROR.equals(message)
+                                            || BadgeTypeService.VALIDITY_PAST_ERROR.equals(message)) {
+                                        badRequest(request, I18n.getInstance().translate(message, host, language));
+                                        return;
+                                    }
+                                    renderError(request, new JsonObject().put(Request.MESSAGE, message));
+                                })));
     }
 
     private List<Long> categoryIds(JsonObject body) {

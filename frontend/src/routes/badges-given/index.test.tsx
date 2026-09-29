@@ -275,4 +275,36 @@ describe('BadgesGiven', () => {
     await waitFor(() => expect(screen.queryByAltText('loading')).not.toBeInTheDocument());
     expect(screen.getByText('minibadge.badge.empty.statement')).toBeInTheDocument();
   });
+
+  /**
+   * Epic C: an expired assignment reads "Expiré" in the revocation column, like a revoked one reads
+   * "Révoqué" — nothing is left to revoke. It is shown, never filtered out.
+   */
+  it('shows "Expiré" instead of the revoke button for an expired assignment', async () => {
+    server.use(
+      http.get('/minibadge/assigned/given', () =>
+        HttpResponse.json({
+          all: [{ ...fakeBadgeAssigned, expiresAt: '2024-01-03T00:00:00.000', isExpired: true }],
+        }),
+      ),
+    );
+    renderScreen();
+
+    const row = (await screen.findByText(fakeBadgeAssigned.badge.badgeType.label)).closest('tr') as HTMLElement;
+    expect(within(row).getByText('minibadge.badge.expired')).toBeInTheDocument();
+    expect(within(row).queryByRole('button', { name: 'minibadge.revoke' })).not.toBeInTheDocument();
+  });
+
+  it('keeps showing "Révoqué" for a revoked assignment whose expiry has also passed', async () => {
+    server.use(
+      http.get('/minibadge/assigned/given', () =>
+        HttpResponse.json({ all: [{ ...fakeBadgeAssignedRevoked, isExpired: true }] }),
+      ),
+    );
+    renderScreen();
+
+    const row = (await screen.findByText(fakeBadgeAssignedRevoked.badge.badgeType.label)).closest('tr') as HTMLElement;
+    expect(within(row).getByText('minibadge.revoked')).toBeInTheDocument();
+    expect(within(row).queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+  });
 });

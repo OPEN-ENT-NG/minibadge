@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { BadgeType } from '~/models/badgeType';
 import { useAssignBadge } from '~/services/queries/badgeAssigned';
 import { useGlobalSettings } from '~/services/queries/config';
+import { isBadgeTypeExpired } from '~/utils/badgeStatus';
+import { formatIsoDateFr } from '~/utils/date';
 import { areThresholdsReached, assignableNumbersLabel } from '~/utils/threshold';
+import { formatMessage } from '~/utils/translate';
 
 /**
  * Small, dedicated confirmation modal for "Me décerner", distinct from
@@ -34,7 +37,9 @@ export const AssignMyselfModal = ({ badgeType, isOpen, onClose, onAssigned }: As
   const numberAssignableLabel = assignableNumbersLabel(thresholdSettings, 0);
   const isAlreadyAssigned = !!badgeType?.isSelfAssigned;
   const isThresholdBlocked = areThresholdsReached(thresholdSettings, 0);
-  const isDisabled = isAlreadyAssigned || isThresholdBlocked || isPending || !badgeType || !user;
+  // Epic C: an expired badge type can no longer be awarded, to oneself included.
+  const isExpired = !!badgeType && isBadgeTypeExpired(badgeType);
+  const isDisabled = isAlreadyAssigned || isThresholdBlocked || isExpired || isPending || !badgeType || !user;
 
   const handleClose = () => onClose();
 
@@ -60,6 +65,13 @@ export const AssignMyselfModal = ({ badgeType, isOpen, onClose, onAssigned }: As
         <h3>{t('minibadge.badge.assign.myself.question')}</h3>
         {isAlreadyAssigned ? (
           <Alert type="warning">{t('minibadge.badge.assign.myself.already.assigned')}</Alert>
+        ) : null}
+        {isExpired ? (
+          <Alert type="warning">
+            {formatMessage(t, 'minibadge.badge.expired.cannot.assign', [
+              formatIsoDateFr(badgeType?.setting.validUntil),
+            ])}
+          </Alert>
         ) : null}
         <p>
           {t('minibadge.threshold.remaining')}&nbsp;: {numberAssignableLabel}

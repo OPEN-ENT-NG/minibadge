@@ -46,7 +46,8 @@ public class DefaultBadgeTypeSettingRepositoryTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testFindByBadgeTypeIdPrefersStructureRowOverCentralizedOne() {
-        String expectedQuery = "SELECT * FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
+        String expectedQuery = "SELECT *, (valid_until IS NOT NULL AND valid_until < CURRENT_DATE) AS is_expired" +
+                " FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
                 "WHERE badge_type_id = ? AND (structure_id IN (?) OR structure_id IS NULL) " +
                 "ORDER BY structure_id NULLS LAST, id LIMIT 1";
         JsonArray expectedParams = new JsonArray().add(7L).add("structure1");
@@ -59,7 +60,8 @@ public class DefaultBadgeTypeSettingRepositoryTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testFindByBadgeTypeIdFallsBackToCentralizedRowWhenUserHasNoStructure() {
-        String expectedQuery = "SELECT * FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
+        String expectedQuery = "SELECT *, (valid_until IS NOT NULL AND valid_until < CURRENT_DATE) AS is_expired" +
+                " FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " " +
                 "WHERE badge_type_id = ? AND (  structure_id IS NULL) " +
                 "ORDER BY structure_id NULLS LAST, id LIMIT 1";
         JsonArray expectedParams = new JsonArray().add(7L);

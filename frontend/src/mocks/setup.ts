@@ -1,9 +1,20 @@
 import '@testing-library/jest-dom';
+import { configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 
 import '~/i18n';
 
 import { server } from './server';
+
+/**
+ * RTL's default 1s `findBy*` / `waitFor` timeout is too tight for this
+ * suite under load (a full parallel run renders the whole Edifice provider
+ * tree, MSW round-trips and React Query retries in every file): unrelated
+ * tests timed out at random and passed on rerun. 3s absorbs that without
+ * hiding a genuinely missing element for long. Paired with `testTimeout` in
+ * `vite.config.ts`, which must stay comfortably above it.
+ */
+configure({ asyncUtilTimeout: 3000 });
 
 /**
  * jsdom doesn't implement `ResizeObserver`, which `apexcharts` (used by

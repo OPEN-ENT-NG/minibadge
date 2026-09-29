@@ -3,6 +3,7 @@ import { IconDelete } from '@edifice.io/react/icons';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { BadgeValidity } from '~/components/BadgeValidity';
 import { EmptyBadgeList } from '~/components/EmptyBadgeList';
 import { PeriodPicker, PeriodPickerValue } from '~/components/PeriodPicker';
 import { RevokeModal } from '~/components/RevokeModal';
@@ -10,6 +11,7 @@ import { SortableTableHeader } from '~/components/SortableTableHeader';
 import { UserSearchBar } from '~/components/UserSearchBar';
 import { BadgeAssigned } from '~/models/badgeAssigned';
 import { useBadgesGiven, useRevokeBadgeAssigned } from '~/services/queries/badgeAssigned';
+import { isExpiredAssignment } from '~/utils/badgeStatus';
 import { defaultPeriod, formatDisplayDate, toBackendDate } from '~/utils/date';
 import { getPictoSrc } from '~/utils/picto';
 
@@ -23,6 +25,10 @@ import { getPictoSrc } from '~/utils/picto';
  *
  * A confirmed revocation invalidates the `['assigned']` query root and
  * re-fetches the whole list rather than patching local state.
+ *
+ * An expired assignment (Epic C) is shown as "Expiré" in the status column (headed "Statut", since
+ * it holds both states), the same way a revoked one shows "Révoqué": it no longer counts as held, so
+ * there is nothing left to revoke. A revoked row stays "Révoqué" even if its expiry has also passed.
  *
  * `pictureId` is optional, so the `<img>` is only rendered when it's
  * actually present — otherwise the URL would resolve to a broken
@@ -146,7 +152,7 @@ export const BadgesGiven = () => {
                   onSort={handleSort}
                 />
                 <SortableTableHeader<SortColumnKey>
-                  label={t('minibadge.given.array.revoked')}
+                  label={t('minibadge.given.array.status')}
                   sortKey="revoked"
                   activeSortKey={sortColumn}
                   isAsc={isAsc}
@@ -168,6 +174,8 @@ export const BadgesGiven = () => {
                   <Table.Td>
                     {badgeGiven.revokedAt ? (
                       <span>{t('minibadge.revoked')}</span>
+                    ) : isExpiredAssignment(badgeGiven) ? (
+                      <BadgeValidity isExpired />
                     ) : (
                       <IconButton
                         icon={<IconDelete />}

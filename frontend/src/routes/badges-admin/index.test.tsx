@@ -221,4 +221,37 @@ describe('BadgesAdmin', () => {
     await waitFor(() => expect(screen.queryByAltText('loading')).not.toBeInTheDocument());
     expect(screen.getByText('minibadge.badge.empty.statement')).toBeInTheDocument();
   });
+
+  describe('validity (Epic C)', () => {
+    it('keeps expired assignments in the history, flagged in the status column', async () => {
+      server.use(
+        http.get('/minibadge/assigned/all', () =>
+          HttpResponse.json({
+            all: [
+              { ...fakeBadgeAssigned, expiresAt: '2024-01-03T00:00:00.000', isExpired: true },
+              { ...fakeBadgeAssignedAllSecond, isExpired: false },
+            ],
+          }),
+        ),
+      );
+      renderScreen();
+
+      expect(await screen.findByRole('columnheader', { name: 'minibadge.badge.status' })).toBeInTheDocument();
+      const expiredRow = screen.getByText(fakeBadgeAssigned.badge.badgeType.label).closest('tr') as HTMLElement;
+      const activeRow = screen.getByText(fakeBadgeAssignedAllSecond.badge.badgeType.label).closest('tr') as HTMLElement;
+      expect(within(expiredRow).getByText('minibadge.badge.expired')).toBeInTheDocument();
+      expect(within(activeRow).getByText('minibadge.badge.active')).toBeInTheDocument();
+      expect(within(activeRow).queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+    });
+
+    it('opens the EditBadgeValidityModal from the "Modifier la date de fin" button', async () => {
+      const user = userEvent.setup();
+      renderScreen();
+
+      await user.click(screen.getByRole('button', { name: 'minibadge.badge.type.validity.edit' }));
+
+      const dialog = await screen.findByRole('dialog');
+      expect(within(dialog).getByText('minibadge.badge.type.validity.modal.title')).toBeInTheDocument();
+    });
+  });
 });

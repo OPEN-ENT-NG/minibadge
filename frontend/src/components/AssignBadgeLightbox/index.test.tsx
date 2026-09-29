@@ -304,4 +304,28 @@ describe('AssignBadgeLightbox', () => {
 
     expect(screen.getByRole('button', { name: 'minibadge.badge.assign' })).toBeDisabled();
   });
+
+  /**
+   * Epic C: the sniplet opens this lightbox directly from a portal page, bypassing the detail
+   * screen's disabled button — so the lightbox guards an expired badge type itself.
+   */
+  it('refuses to award an expired badge type, even with a valid selection', async () => {
+    const user = userEvent.setup();
+    renderLightbox({
+      badgeType: { ...matchingBadgeType, setting: { ...matchingBadgeType.setting, validUntil: '2020-01-01', isExpired: true } },
+    });
+
+    expect(screen.getByText('minibadge.badge.expired.cannot.assign')).toBeInTheDocument();
+    await user.click(await searchAndFind(user, 'fake', fakeUser.displayName!));
+
+    expect(screen.getByRole('button', { name: 'minibadge.badge.assign' })).toBeDisabled();
+  });
+
+  it('shows no expiry warning for a badge type that is still valid', () => {
+    renderLightbox({
+      badgeType: { ...matchingBadgeType, setting: { ...matchingBadgeType.setting, validUntil: '2999-12-31', isExpired: false } },
+    });
+
+    expect(screen.queryByText('minibadge.badge.expired.cannot.assign')).not.toBeInTheDocument();
+  });
 });

@@ -31,6 +31,12 @@
         "null"
       ]
     },
+    "validUntil": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
     "categoryIds": {
       "type": "array",
       "items": {

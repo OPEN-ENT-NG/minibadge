@@ -1,7 +1,7 @@
 import { odeServices } from '@edifice.io/client';
 import { EdificeClientProvider, EdificeThemeContext } from '@edifice.io/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeBadgeType, fakeUser } from '~/mocks/handlers';
 import { server } from '~/mocks/server';
 import { MinibadgeAccessContext } from '~/routes/root/CharterGate/context';
+import { toIsoDate } from '~/utils/date';
 
 import { BadgeTypeDetail } from '.';
 
@@ -163,5 +164,74 @@ describe('BadgeTypeDetail', () => {
 
     expect(await screen.findByText('Acte d’entraide')).toBeInTheDocument();
     expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
+  });
+
+  describe('validity (Epic C)', () => {
+    const dayOffset = (days: number) => toIsoDate(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
+    const withValidUntil = (validUntil: string) =>
+      server.use(
+        http.get('/minibadge/types/:typeId', () =>
+          HttpResponse.json({
+            ...fakeBadgeType,
+            // `isExpired` is what the server computes (SQL, CURRENT_DATE) next to `validUntil`.
+            setting: { ...fakeBadgeType.setting, isSelfAssignable: true, validUntil, isExpired: validUntil < dayOffset(0) },
+          }),
+        ),
+      );
+
+    it('shows the end date and keeps both actions enabled while the badge is valid', async () => {
+      withValidUntil(dayOffset(30));
+      renderScreen();
+
+      expect(await screen.findByText('minibadge.badge.valid.until')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'minibadge.badge.assign' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'minibadge.badge.assign.myself.button' })).toBeEnabled();
+    });
+
+    it('still accepts an assignment ON the end date itself', async () => {
+      withValidUntil(dayOffset(0));
+      renderScreen();
+
+      expect(await screen.findByRole('button', { name: 'minibadge.badge.assign' })).toBeEnabled();
+      expect(screen.queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+    });
+
+    it('makes both actions unavailable once the end date is past, with a visible reason they point to', async () => {
+      withValidUntil(dayOffset(-1));
+      renderScreen();
+
+      const assign = await screen.findByRole('button', { name: 'minibadge.badge.assign' });
+      const assignMyself = screen.getByRole('button', { name: 'minibadge.badge.assign.myself.button' });
+      expect(assign).toHaveAttribute('aria-disabled', 'true');
+      expect(assignMyself).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByText('minibadge.badge.expired')).toBeInTheDocument();
+
+      const reason = screen.getByText('minibadge.badge.expired.cannot.assign');
+      expect(assign).toHaveAttribute('aria-describedby', reason.id);
+      expect(assignMyself).toHaveAttribute('aria-describedby', reason.id);
+    });
+
+    it('keeps the unavailable actions focusable (so their reason is announced) but inert', async () => {
+      withValidUntil(dayOffset(-1));
+      renderScreen();
+
+      const assign = await screen.findByRole('button', { name: 'minibadge.badge.assign' });
+      // Not `disabled`: a disabled button leaves the tab order and its description is never read.
+      expect(assign).not.toBeDisabled();
+      assign.focus();
+      expect(assign).toHaveFocus();
+
+      fireEvent.click(assign);
+      fireEvent.click(screen.getByRole('button', { name: 'minibadge.badge.assign.myself.button' }));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('shows no expiry message to a user who cannot assign anyway', async () => {
+      withValidUntil(dayOffset(-1));
+      renderScreen({ canAssign: false });
+
+      expect(await screen.findByText('minibadge.badge.expired')).toBeInTheDocument();
+      expect(screen.queryByText('minibadge.badge.expired.cannot.assign')).not.toBeInTheDocument();
+    });
   });
 });

@@ -15,6 +15,8 @@ import fr.wseduc.rs.Post;
 import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
@@ -81,7 +83,17 @@ public class BadgeAssignedController extends ControllerHelper {
                         notifyService.notifyBadgeAssigned(request, user, ownerIds, typeId);
                         renderJson(request, new JsonObject());
                     })
-                    .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+                    .onFailure(err -> {
+                        // Epic C refusals are the client's to act on (an expired badge type, or a badge
+                        // this assignor already gave and is still active): a translated 400, not a 500.
+                        if (BadgeAssignedService.BADGE_TYPE_EXPIRED_ERROR.equals(err.getMessage())
+                                || BadgeAssignedService.ALREADY_ASSIGNED_ERROR.equals(err.getMessage())) {
+                            badRequest(request, I18n.getInstance().translate(err.getMessage(),
+                                    Renders.getHost(request), I18n.acceptLanguage(request)));
+                            return;
+                        }
+                        renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()));
+                    }));
         });
     }
 

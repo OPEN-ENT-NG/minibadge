@@ -18,6 +18,17 @@ public class SqlHelper {
         throw new IllegalStateException("Utility class");
     }
 
+    /**
+     * Whether a raw sql.persistor error is a unique-constraint violation (SQLSTATE 23505). The
+     * persistor only forwards the driver's message, so it is recognised by its text (or the SQLSTATE
+     * when the driver includes it).
+     */
+    public static boolean isUniqueViolation(String errorMessage) {
+        if (errorMessage == null) return false;
+        String message = errorMessage.toLowerCase();
+        return message.contains("duplicate key") || message.contains("unique constraint") || message.contains("23505");
+    }
+
     public static String filterStructures(List<String> structureIds, JsonArray params) {
         return filterStructures(structureIds, params, null);
     }

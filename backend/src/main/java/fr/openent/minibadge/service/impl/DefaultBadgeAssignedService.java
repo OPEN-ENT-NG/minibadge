@@ -38,10 +38,16 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
     @Override
     public Future<Void> assign(long typeId, List<String> ownerIds, UserInfos assignor) {
+        if (ownerIds == null || ownerIds.isEmpty()) return Future.succeededFuture();
+
         Promise<Void> promise = Promise.promise();
-        badgeService
-                .createBadges(typeId, ownerIds)
-                .compose(badgeResult -> createBadgeAssignedRequest(typeId, ownerIds, assignor))
+        // createBadges only upserts the owners and their (owner, type) badge rows (ON CONFLICT DO
+        // NOTHING), and it must run first: the assignment references those rows. So a refused
+        // assignment (expired type, still-active assignment) may leave such a badge row behind, with no
+        // assignment attached — the same state as before Epic C, and invisible everywhere (every read
+        // path joins badge_assigned*). Every Epic C decision is taken by the INSERT statement itself.
+        badgeService.createBadges(typeId, ownerIds)
+                .compose(v -> createBadgeAssignedRequest(typeId, ownerIds, assignor))
                 .onSuccess(badgeTypes -> {
                     promise.complete();
                     badgeAssignedStructureService.createBadgeAssignedStructures(badgeTypes, ownerIds, assignor);
@@ -75,7 +81,8 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
             params.add(endDate);
         }
         String request = "SELECT ba.id, ba.badge_id, ba.assignor_id, ba.revoked_at, ba.updated_at, " +
-                " ba.created_at as created_at , bt.picture_id , us.display_name ," +
+                " ba.created_at as created_at , ba.expires_at, " + isExpiredColumn("ba") + ", " +
+                " bt.picture_id , us.display_name ," +
                 " bt.label as label, badge.owner_id " +
                 ", badge.id as " + BADGE_ID + " , bt.id as  " + BADGE_TYPE_ID +
                 " FROM " + SqlTable.BADGE_ASSIGNED.getName() + " as ba " +
@@ -101,29 +108,97 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
     }
 
 
-    private Future<List<BadgeAssigned>> createBadgeAssignedRequest(long typeId,
-                                                                   List<String> ownerIds, UserInfos assignor) {
-        Promise<List<BadgeAssigned>> promise = Promise.promise();
+    /**
+     * ONE statement decides and writes, so nothing can change between "may this be assigned" and the
+     * INSERT (a double click, a retry, or an admin changing the end date meanwhile):
+     * <ul>
+     *   <li>{@code setting}: the end date of the badge_type_setting row that applies to the assignor —
+     *   establishment row first, central one otherwise, the exact precedence of
+     *   {@code DefaultBadgeTypeSettingRepository#findByBadgeTypeId} (which UsersAssignRight used to
+     *   authorize this very assignment). No row = permanent.</li>
+     *   <li>{@code checks}: {@code type_expired} (end date strictly before {@code CURRENT_DATE}: the
+     *   end day itself is still valid; the DATABASE clock decides, never the JVM's) and
+     *   {@code already_assigned} (this assignor still holds an ACTIVE assignment on one of the target
+     *   badges — an expired one is not in badge_assigned_active and does not block re-awarding).</li>
+     *   <li>{@code inserted}: all or nothing — rows are written only when both flags are false, with
+     *   {@code expires_at} frozen to the day after the end date at 00:00 (NULL = permanent).</li>
+     * </ul>
+     * The final SELECT always returns at least the {@code checks} row (LEFT JOINs), so a refusal is told
+     * apart from success without a second query. Under READ COMMITTED two concurrent statements can
+     * still both pass {@code already_assigned}; the unique index one_assignment_per_assignor (sql/024)
+     * is the backstop for that, and its violation is mapped to {@link #ALREADY_ASSIGNED_ERROR}.
+     */
+    private Future<List<BadgeAssigned>> createBadgeAssignedRequest(long typeId, List<String> ownerIds,
+                                                                   UserInfos assignor) {
+        Promise<JsonArray> promise = Promise.promise();
 
-        String request = "WITH inserted_badge_assigned AS ( " +
-                " INSERT INTO " + SqlTable.BADGE_ASSIGNED.getName() + " (badge_id, assignor_id) " +
-                " SELECT id as badge_id, ? as assignor_id FROM  " + SqlTable.BADGE_ASSIGNABLE.getName() +
-                " WHERE badge_type_id = ? AND owner_id IN " + Sql.listPrepared(ownerIds) + " RETURNING *) " +
-                " SELECT iba.*, b.badge_type_id, b.owner_id " +
-                " FROM inserted_badge_assigned iba  JOIN " + SqlTable.BADGE_ASSIGNABLE.getName() + " b " +
-                " ON iba.badge_id = b.id";
-
-        JsonArray params = new JsonArray()
+        JsonArray params = new JsonArray().add(typeId);
+        String structureFilter = SqlHelper.filterStructuresWithNull(assignor.getStructures(), params, "bts");
+        params.add(typeId)
+                .addAll(new JsonArray(ownerIds))
                 .add(assignor.getUserId())
-                .add(typeId)
-                .addAll(new JsonArray(ownerIds));
+                .add(assignor.getUserId());
 
-        sql.prepared(request, params, SqlResult.validResultHandler(ModelHelper.sqlResultToModel(promise,
-                BadgeAssigned.class,
-                String.format("[Minibadge@%s::createBadgeAssignedRequest] Fail to create badge assigned",
-                        this.getClass().getSimpleName()))));
+        String request = "WITH setting AS (SELECT (SELECT bts.valid_until FROM " + SqlTable.BADGE_TYPE_SETTING.getName() + " bts" +
+                " WHERE bts.badge_type_id = ? AND " + structureFilter +
+                " ORDER BY bts.structure_id NULLS LAST, bts.id LIMIT 1) AS valid_until), " +
+                " candidates AS (SELECT id AS badge_id, owner_id, badge_type_id FROM " + SqlTable.BADGE_ASSIGNABLE.getName() +
+                " WHERE badge_type_id = ? AND owner_id IN " + Sql.listPrepared(ownerIds) + "), " +
+                " checks AS (SELECT s.valid_until, " +
+                " (s.valid_until IS NOT NULL AND s.valid_until < CURRENT_DATE) AS " + TYPE_EXPIRED + ", " +
+                " EXISTS (SELECT 1 FROM " + SqlTable.BADGE_ASSIGNED_ACTIVE.getName() + " baa" +
+                " INNER JOIN candidates c ON c.badge_id = baa.badge_id WHERE baa.assignor_id = ?) AS " + ALREADY_ASSIGNED +
+                " FROM setting s), " +
+                " inserted_badge_assigned AS (INSERT INTO " + SqlTable.BADGE_ASSIGNED.getName() + " (badge_id, assignor_id, expires_at)" +
+                " SELECT c.badge_id, ?, (ck.valid_until + 1)::timestamp FROM candidates c CROSS JOIN checks ck" +
+                " WHERE NOT ck." + TYPE_EXPIRED + " AND NOT ck." + ALREADY_ASSIGNED + " RETURNING *) " +
+                " SELECT ck." + TYPE_EXPIRED + ", ck." + ALREADY_ASSIGNED + ", iba.*, c.badge_type_id, c.owner_id" +
+                " FROM checks ck LEFT JOIN inserted_badge_assigned iba ON true" +
+                " LEFT JOIN candidates c ON c.badge_id = iba.badge_id";
 
-        return promise.future();
+        // No error message given to the handler: PromiseHelper would replace the raw SQL error with it,
+        // and the unique-violation case below needs that raw text to be recognised.
+        sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise)));
+
+        return promise.future()
+                .recover(err -> {
+                    if (SqlHelper.isUniqueViolation(err.getMessage())) {
+                        LoggerHelper.logError(this, "createBadgeAssignedRequest",
+                                "Concurrent assignment refused by one_assignment_per_assignor for badge type " + typeId,
+                                err.getMessage());
+                        return Future.failedFuture(ALREADY_ASSIGNED_ERROR);
+                    }
+                    LoggerHelper.logError(this, "createBadgeAssignedRequest",
+                            "Fail to create badge assigned for badge type " + typeId, err.getMessage());
+                    return Future.failedFuture(String.format("[Minibadge@%s::createBadgeAssignedRequest] Fail to create badge assigned",
+                            this.getClass().getSimpleName()));
+                })
+                .compose(rows -> {
+                    JsonObject checks = rows.isEmpty() ? new JsonObject() : rows.getJsonObject(0);
+                    if (Boolean.TRUE.equals(checks.getBoolean(TYPE_EXPIRED))) {
+                        return Future.failedFuture(BADGE_TYPE_EXPIRED_ERROR);
+                    }
+                    if (Boolean.TRUE.equals(checks.getBoolean(ALREADY_ASSIGNED))) {
+                        return Future.failedFuture(ALREADY_ASSIGNED_ERROR);
+                    }
+                    // Nothing inserted (e.g. every target badge is refused/disabled) comes back as a
+                    // single checks row with a NULL id: skip it.
+                    JsonArray inserted = new JsonArray();
+                    rows.stream()
+                            .filter(JsonObject.class::isInstance)
+                            .map(JsonObject.class::cast)
+                            .filter(row -> row.getValue(ID) != null)
+                            .forEach(inserted::add);
+                    return Future.succeededFuture(new BadgeAssigned().toList(inserted));
+                });
+    }
+
+    /**
+     * Server-side expiry flag, so the client never has to parse a timezone-less timestamp against its
+     * own clock: same rule as badge_assigned_active ({@code expires_at > now()} is active).
+     */
+    private static String isExpiredColumn(String alias) {
+        return String.format("(%1$s.expires_at IS NOT NULL AND %1$s.expires_at <= now()) AS %2$s", alias, IS_EXPIRED);
     }
 
     @Override
@@ -153,7 +228,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         String request = String.format(" SELECT DISTINCT(assignor_id) as id, bav.created_at " +
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
                         " WHERE owner_id = ? AND badge_type_id = ? " +
-                        " ORDER BY bav.created_at DESC %s", SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        " ORDER BY bav.created_at DESC %s", SqlTable.BADGE_ASSIGNED_ACTIVE.getName(),
                         SqlTable.BADGE_PUBLIC.getName(), SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params,
@@ -185,7 +260,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
 
         String request = String.format(" SELECT COUNT(DISTINCT(assignor_id)) " +
                         " FROM %s bav INNER JOIN %s bp on bp.id = bav.badge_id " +
-                        " WHERE owner_id = ? AND badge_type_id = ?", SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                        " WHERE owner_id = ? AND badge_type_id = ?", SqlTable.BADGE_ASSIGNED_ACTIVE.getName(),
                         SqlTable.BADGE_PUBLIC.getName());
 
         sql.prepared(request, params,
@@ -244,7 +319,7 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
         String request =
                 "SELECT COUNT(*) " +
                         "FROM " + SqlTable.BADGE.getName() + " b " +
-                        "JOIN " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " ba ON ba.badge_id = b.id " +
+                        "JOIN " + SqlTable.BADGE_ASSIGNED_ACTIVE.getName() + " ba ON ba.badge_id = b.id " +
                         "WHERE b.badge_type_id = ? " +
                         "AND b.owner_id = ? " +
                         "AND ba.assignor_id = ?";
@@ -285,11 +360,17 @@ public class DefaultBadgeAssignedService implements BadgeAssignedService {
             params.add(startDate);
             params.add(endDate);
         }
+        // Still read from badge_assigned_valid (non-revoked, expired included: this is the admin's
+        // history). That view deliberately carries no expires_at (it is left untouched so quotas and
+        // statistics keep their meaning), hence the primary-key join back to the table for it.
         String request = "SELECT bav.id, bav.badge_id, bav.assignor_id, bav.created_at, " +
+                " ba.expires_at, " + isExpiredColumn("ba") + ", " +
                 " bt.picture_id , receiver_us.display_name , assignor_us.display_name as " + ASSIGNOR_DISPLAY_NAME + "," +
                 " bt.label as label, badge.owner_id " +
                 ", badge.id as " + BADGE_ID + " , bt.id as  " + BADGE_TYPE_ID +
                 " FROM " + SqlTable.BADGE_ASSIGNED_VALID.getName() + " as bav " +
+                " INNER JOIN " + SqlTable.BADGE_ASSIGNED.getName() + " as ba " +
+                " ON ba.id = bav.id " +
                 " INNER JOIN " + SqlTable.BADGE.getName() +
                 " on bav.badge_id = badge.id " +
                 " INNER JOIN " + SqlTable.BADGE_TYPE.getName() + " as bt " +

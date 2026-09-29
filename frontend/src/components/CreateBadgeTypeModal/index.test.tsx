@@ -1,13 +1,14 @@
 import { odeServices } from '@edifice.io/client';
 import { EdificeClientProvider, EdificeThemeContext } from '@edifice.io/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { server } from '~/mocks/server';
+import { toIsoDate } from '~/utils/date';
 
 import { CreateBadgeTypeModal } from '.';
 
@@ -97,6 +98,9 @@ function captureCreateRequest() {
   return captured;
 }
 
+const dayOffset = (days: number) => toIsoDate(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
+const validUntilInput = () =>
+  screen.getByLabelText('minibadge.badge.type.create.valid.until') as HTMLInputElement;
 const labelInput = () => screen.getByRole('textbox', { name: /minibadge.badge.type.create.label/ });
 const submitButton = () => screen.getByRole('button', { name: 'minibadge.badge.type.create.submit' });
 
@@ -287,6 +291,85 @@ describe('CreateBadgeTypeModal', () => {
 
       const dialog = screen.getByRole('dialog');
       expect(within(dialog).queryByText('minibadge.badge.type.create.structure')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('end date (Epic C)', () => {
+    it('is optional: an empty date sends no validUntil (permanent badge)', async () => {
+      const user = userEvent.setup();
+      const captured = captureCreateRequest();
+      renderModal();
+      await screen.findByRole('dialog');
+
+      expect(validUntilInput()).toHaveAttribute('type', 'date');
+      expect(validUntilInput()).toHaveAttribute('min', dayOffset(0));
+      await user.type(labelInput(), 'Entraide');
+      await user.click(submitButton());
+
+      await waitFor(() => expect(captured.body).toBeDefined());
+      expect(captured.body).not.toHaveProperty('validUntil');
+    });
+
+    it('sends the chosen end date', async () => {
+      const user = userEvent.setup();
+      const captured = captureCreateRequest();
+      renderModal();
+      await screen.findByRole('dialog');
+
+      await user.type(labelInput(), 'Entraide');
+      fireEvent.change(validUntilInput(), { target: { value: dayOffset(90) } });
+      await user.click(submitButton());
+
+      await waitFor(() => expect(captured.body).toBeDefined());
+      expect(captured.body).toEqual({ label: 'Entraide', validUntil: dayOffset(90) });
+    });
+
+    it('accepts today: the badge is valid for the whole of its end day', async () => {
+      const user = userEvent.setup();
+      renderModal();
+      await screen.findByRole('dialog');
+
+      await user.type(labelInput(), 'Entraide');
+      fireEvent.change(validUntilInput(), { target: { value: dayOffset(0) } });
+
+      expect(submitButton()).toBeEnabled();
+    });
+
+    it('refuses a past date with an inline message and a disabled submit', async () => {
+      const user = userEvent.setup();
+      renderModal();
+      await screen.findByRole('dialog');
+
+      await user.type(labelInput(), 'Entraide');
+      fireEvent.change(validUntilInput(), { target: { value: dayOffset(-1) } });
+
+      expect(submitButton()).toBeDisabled();
+      expect(screen.getByText('minibadge.error.badge.type.validity.past')).toBeInTheDocument();
+      expect(validUntilInput()).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('clears the end date when the modal is closed and reopened', async () => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const { rerender } = render(
+        <QueryClientProvider client={queryClient}>
+          {wrapper({ children: <CreateBadgeTypeModal isOpen onClose={vi.fn()} /> })}
+        </QueryClientProvider>,
+      );
+      await screen.findByRole('dialog');
+      fireEvent.change(validUntilInput(), { target: { value: dayOffset(10) } });
+
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          {wrapper({ children: <CreateBadgeTypeModal isOpen={false} onClose={vi.fn()} /> })}
+        </QueryClientProvider>,
+      );
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          {wrapper({ children: <CreateBadgeTypeModal isOpen onClose={vi.fn()} /> })}
+        </QueryClientProvider>,
+      );
+
+      await waitFor(() => expect(validUntilInput()).toHaveValue(''));
     });
   });
 });

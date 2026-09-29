@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { fakeBadge, fakeBadgeType } from '~/mocks/handlers';
+import { toIsoDate } from '~/utils/date';
 
 import { BadgeCard } from '.';
 
@@ -124,6 +125,73 @@ describe('BadgeCard', () => {
 
       const image = container.querySelector('img');
       expect(image).toHaveAttribute('src', expect.stringContaining(`/minibadge/public/img/${fakeBadgeType.pictureId}`));
+    });
+  });
+
+  describe('validity (Epic C)', () => {
+    const dayOffset = (days: number) => toIsoDate(new Date(Date.now() + days * 24 * 60 * 60 * 1000));
+
+    it('flags a received badge whose assignments have all expired, in words', () => {
+      render(<BadgeCard badge={{ ...fakeBadge, counts: { assigned: 2, active: 0 } }} />);
+
+      expect(screen.getByText('minibadge.badge.expired')).toBeInTheDocument();
+    });
+
+    it('does not flag a received badge that still has an active assignment', () => {
+      render(<BadgeCard badge={{ ...fakeBadge, counts: { assigned: 2, active: 1 } }} />);
+
+      expect(screen.queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+    });
+
+    it("never shows the type's current end date on a received badge (its assignments carry their own)", () => {
+      render(
+        <BadgeCard
+          badge={{
+            ...fakeBadge,
+            counts: { assigned: 1, active: 1 },
+            badgeType: { ...fakeBadgeType, setting: { ...fakeBadgeType.setting, validUntil: dayOffset(30), isExpired: false } },
+          }}
+        />,
+      );
+
+      expect(screen.queryByText('minibadge.badge.valid.until')).not.toBeInTheDocument();
+    });
+
+    it('shows the end date of a library badge type that is still valid', () => {
+      render(
+        <BadgeCard badgeType={{ ...fakeBadgeType, setting: { ...fakeBadgeType.setting, validUntil: dayOffset(30), isExpired: false } }} />,
+      );
+
+      expect(screen.getByText('minibadge.badge.valid.until')).toBeInTheDocument();
+      expect(screen.queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+    });
+
+    it('flags a library badge type whose end date is past', () => {
+      render(
+        <BadgeCard badgeType={{ ...fakeBadgeType, setting: { ...fakeBadgeType.setting, validUntil: dayOffset(-1), isExpired: true } }} />,
+      );
+
+      expect(screen.getByText('minibadge.badge.expired')).toBeInTheDocument();
+    });
+
+    it('names the clickable card after the badge, "Expiré" included, instead of a generic label', () => {
+      const { rerender } = render(
+        <BadgeCard badge={{ ...fakeBadge, counts: { assigned: 2, active: 0 } }} onClick={() => undefined} />,
+      );
+      expect(
+        screen.getByRole('button', { name: `${fakeBadge.badgeType.label}, minibadge.badge.expired` }),
+      ).toBeInTheDocument();
+
+      rerender(<BadgeCard badge={{ ...fakeBadge, counts: { assigned: 2, active: 1 } }} onClick={() => undefined} />);
+      expect(screen.getByRole('button', { name: fakeBadge.badgeType.label })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'card.open.resource' })).not.toBeInTheDocument();
+    });
+
+    it('shows nothing about validity for a permanent badge type', () => {
+      render(<BadgeCard badgeType={fakeBadgeType} />);
+
+      expect(screen.queryByText('minibadge.badge.expired')).not.toBeInTheDocument();
+      expect(screen.queryByText('minibadge.badge.valid.until')).not.toBeInTheDocument();
     });
   });
 });

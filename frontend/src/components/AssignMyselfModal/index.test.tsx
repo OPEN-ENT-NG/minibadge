@@ -116,4 +116,12 @@ describe('AssignMyselfModal', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(assignCalled).toBe(false);
   });
+
+  it('disables the confirm button and says why when the badge type has expired (Epic C)', async () => {
+    const expired: BadgeType = { ...fakeBadgeType, setting: { ...fakeBadgeType.setting, validUntil: '2020-01-01', isExpired: true } };
+    renderModal({ badgeType: expired });
+
+    expect(await screen.findByText('minibadge.badge.expired.cannot.assign')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: confirmButtonName })).toBeDisabled();
+  });
 });

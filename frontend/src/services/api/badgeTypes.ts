@@ -63,6 +63,8 @@ export interface BadgeTypeCreatePayload {
   pictureId?: string;
   structureId?: string;
   categoryIds?: number[];
+  /** Optional end date (`YYYY-MM-DD`, today or later); omitted for a permanent badge. */
+  validUntil?: string;
 }
 
 /**
@@ -76,6 +78,54 @@ export const createBadgeType = async (payload: BadgeTypeCreatePayload): Promise<
     }),
   );
   return response;
+};
+
+/** Hard stop for {@link getAllBadgeTypes}: far above any real catalogue, low enough to never hang. */
+export const ALL_BADGE_TYPES_MAX_PAGES = 50;
+
+/**
+ * Every badge type visible to the user, all pages of `GET /types` concatenated. Used where a complete
+ * list matters more than a page — the admin's "Modifier la date de fin" picker must not silently miss
+ * the establishment's badges that sort past the first page.
+ *
+ * Paginates like `routes/badge-types`: the server caps `limit` (`PAGE_SIZE_MAX = 100`) and echoes the
+ * limit it actually applied, so the next offset advances by the page's EFFECTIVE size, never by the
+ * requested one (which would skip rows). It stops on an empty or short page, when a page brings no
+ * badge type not already seen (a server ignoring `offset` would otherwise loop forever), and after
+ * {@link ALL_BADGE_TYPES_MAX_PAGES} pages whatever happens.
+ */
+export const getAllBadgeTypes = async (pageSize = 100): Promise<BadgeType[]> => {
+  const all: BadgeType[] = [];
+  const seenIds = new Set<number>();
+  let offset = 0;
+  for (let pageIndex = 0; pageIndex < ALL_BADGE_TYPES_MAX_PAGES; pageIndex += 1) {
+    const page = await getBadgeTypes(offset, pageSize);
+    const fresh = page.all.filter((type) => !seenIds.has(type.id));
+    if (fresh.length === 0) return all;
+    fresh.forEach((type) => seenIds.add(type.id));
+    all.push(...fresh);
+
+    const effectiveLimit = page.limit > 0 ? page.limit : pageSize;
+    if (page.all.length < effectiveLimit) return all;
+    offset = (Number.isFinite(page.offset) ? page.offset : offset) + page.all.length;
+  }
+  return all;
+};
+
+/**
+ * PUT /minibadge/types/:typeId/validity — verified in `BadgeTypeController.java#updateBadgeTypeValidity`
+ * (body schema `jsonschema/badgeTypeValidityUpdate.json`). `null` makes the badge permanent again.
+ *
+ * The server only accepts a badge type created by one of the caller's own establishments (403
+ * otherwise, including for every central badge) and refuses a past date (400). Assignments already
+ * made keep the end date that applied when they were made.
+ */
+export const updateBadgeTypeValidity = async (typeId: number, validUntil: string | null): Promise<void> => {
+  await request(() =>
+    odeServices.http().put<void>(`/minibadge/types/${typeId}/validity`, { validUntil }, {
+      disableNotifications: true,
+    }),
+  );
 };
 
 /**

@@ -1,6 +1,7 @@
 package fr.openent.minibadge.service.impl;
 
 import fr.openent.minibadge.helper.LoggerHelper;
+import fr.openent.minibadge.model.BadgeTypeSetting;
 import fr.openent.minibadge.repository.BadgeTypeSettingRepository;
 import fr.openent.minibadge.service.AbstractService;
 import fr.openent.minibadge.service.BadgeTypeSettingService;
@@ -8,6 +9,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public class DefaultBadgeTypeSettingService extends AbstractService implements BadgeTypeSettingService {
@@ -41,5 +43,12 @@ public class DefaultBadgeTypeSettingService extends AbstractService implements B
                 });
 
         return promise.future();
+    }
+
+    @Override
+    public Future<Optional<BadgeTypeSetting>> findApplicableSetting(Long badgeTypeId, List<String> structureIds) {
+        return badgeTypeSettingRepository.findByBadgeTypeId(badgeTypeId, structureIds)
+                .onFailure(err -> LoggerHelper.logError(this, "findApplicableSetting",
+                        "Error retrieving badge type setting for badgeTypeId: " + badgeTypeId, err.getMessage()));
     }
 }

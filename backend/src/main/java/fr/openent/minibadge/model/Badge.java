@@ -16,6 +16,11 @@ public class Badge implements Model<Badge> {
     private String disabledAt;
     private User owner;
     private BadgeCounts badgeCounts;
+    /**
+     * Epic C: latest expiry among this badge's non-revoked assignments; null when at least one of them
+     * is permanent (or when there is none).
+     */
+    private String maxExpiresAt;
 
     public BadgeType badgeType() {
         return badgeType;
@@ -39,6 +44,7 @@ public class Badge implements Model<Badge> {
         this.refusedAt = badge.getString(REFUSED_AT, badge.getString(REFUSEDAT));
         this.disabledAt = badge.getString(DISABLED_AT, badge.getString(DISABLEDAT));
         this.badgeCounts = new BadgeCounts(badge);
+        this.maxExpiresAt = badge.getString(MAX_EXPIRES_AT, badge.getString(MAXEXPIRESAT));
         this.badgeType = setBadgeType(badge.getString(BADGE_TYPE_LABEL),
                 badge.getString(BADGE_TYPE_PICTURE_ID));
         this.owner = setOwner(badge.getString(OWNER_ID,badge.getString(OWNERID)),
@@ -102,6 +108,7 @@ public class Badge implements Model<Badge> {
                 .put(REFUSEDAT, this.refusedAt)
                 .put(DISABLEDAT, this.disabledAt)
                 .put(COUNTS, this.badgeCounts.toJson())
+                .put(MAXEXPIRESAT, this.maxExpiresAt)
                 .put(BADGETYPE, this.badgeType.toJson());
 
         if (this.owner != null)
@@ -118,6 +125,12 @@ public class Badge implements Model<Badge> {
 
     private static class BadgeCounts implements Model<BadgeCounts> {
         private Integer assigned;
+        /**
+         * Epic C: how many of the {@code assigned} (non-revoked) assignments are still active, i.e. not
+         * expired. {@code 0} with {@code assigned > 0} is what "this badge has expired" means for a
+         * per-type aggregate.
+         */
+        private Integer active;
 
         public BadgeCounts(JsonObject badgeCount) {
             this.set(badgeCount);
@@ -126,7 +139,8 @@ public class Badge implements Model<Badge> {
         @Override
         public JsonObject toJson() {
             return new JsonObject()
-                    .put(ASSIGNED, this.assigned);
+                    .put(ASSIGNED, this.assigned)
+                    .put(ACTIVE, this.active);
         }
 
         @Override
@@ -137,6 +151,7 @@ public class Badge implements Model<Badge> {
         @Override
         public BadgeCounts set(JsonObject badgeCounts) {
             this.assigned = badgeCounts.getInteger(COUNT_ASSIGNED);
+            this.active = badgeCounts.getInteger(COUNT_ACTIVE);
             return this;
         }
     }

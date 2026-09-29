@@ -85,19 +85,42 @@ public class DefaultBadgeService implements BadgeService {
     private Future<JsonArray> getBadgesRequest(String ownerId, String query) {
         Promise<JsonArray> promise = Promise.promise();
 
+        // Each CTE is restricted to the owner's own badges (`owner_badge`), so a request never
+        // aggregates the whole badge_assigned table: the owner id is bound once per CTE, plus once more
+        // for the unchanged outer filter.
         JsonArray params = new JsonArray()
+                .add(ownerId)
+                .add(ownerId)
+                .add(ownerId)
                 .add(ownerId);
 
+        // One row per badge (owner + type) with every non-revoked assignment counted, expired ones
+        // included: filtering this aggregate on badge_assigned_active would make a type whose
+        // assignments have all expired vanish from "Mes badges reçus". Instead it stays listed and
+        // carries `count_active` (0 = expired, Epic C) and `max_expires_at` (NULL as soon as one of the
+        // assignments is permanent). badge_assigned_valid has no expires_at column (left untouched on
+        // purpose), hence the last CTE reading the table with the same `revoked_at IS NULL` filter.
         String request = String.format(" WITH assign as (SELECT ba.badge_id, " +
                 " COUNT(ba.id) over (partition by ba.badge_id)       as count_assigned, " +
                 " MAX(ba.created_at) over (partition by ba.badge_id) as last_assign_created " +
-                " FROM %s ba) " +
+                " FROM %1$s ba INNER JOIN %4$s ob ON ob.id = ba.badge_id AND ob.owner_id = ?), " +
+                " assign_active as (SELECT baa.badge_id, COUNT(baa.id) as count_active " +
+                " FROM %2$s baa INNER JOIN %4$s ob ON ob.id = baa.badge_id AND ob.owner_id = ? GROUP BY baa.badge_id), " +
+                " assign_expiry as (SELECT bae.badge_id, " +
+                " CASE WHEN bool_or(bae.expires_at IS NULL) THEN NULL ELSE MAX(bae.expires_at) END as max_expires_at " +
+                " FROM %3$s bae INNER JOIN %4$s ob ON ob.id = bae.badge_id AND ob.owner_id = ?" +
+                " WHERE bae.revoked_at IS NULL GROUP BY bae.badge_id) " +
                 " SELECT DISTINCT b.id, b.owner_id, b.badge_type_id, privatized_at, refused_at, disabled_at, " +
                 " bt.label as badge_type_label, bt.picture_id as badge_type_picture_id, ba.count_assigned, " +
+                " COALESCE(aa.count_active, 0) as count_active, ae.max_expires_at, " +
                 " ba.last_assign_created " +
-                " FROM %s b INNER JOIN assign ba on ba.badge_id = b.id INNER JOIN %s bt ON b.badge_type_id = bt.id " +
-                " WHERE b.owner_id = ? AND ba.count_assigned > 0 %s %s ORDER BY last_assign_created DESC",
-                SqlTable.BADGE_ASSIGNED_VALID.getName(), SqlTable.BADGE.getName(),
+                " FROM %4$s b INNER JOIN assign ba on ba.badge_id = b.id " +
+                " LEFT JOIN assign_active aa on aa.badge_id = b.id " +
+                " LEFT JOIN assign_expiry ae on ae.badge_id = b.id " +
+                " INNER JOIN %5$s bt ON b.badge_type_id = bt.id " +
+                " WHERE b.owner_id = ? AND ba.count_assigned > 0 %6$s %7$s ORDER BY last_assign_created DESC",
+                SqlTable.BADGE_ASSIGNED_VALID.getName(), SqlTable.BADGE_ASSIGNED_ACTIVE.getName(),
+                SqlTable.BADGE_ASSIGNED.getName(), SqlTable.BADGE.getName(),
                 SqlTable.BADGE_TYPE.getName(), (query != null && !query.isEmpty()) ? "AND" : "",
                 SqlHelper.searchQueryInColumns(query, Collections.singletonList("bt.label"), params));
 
@@ -246,7 +269,7 @@ public class DefaultBadgeService implements BadgeService {
                         " WHERE badge_type_id = ? " +
                         " GROUP BY owner_id, bav.created_at, bav.id " +
                         " ORDER BY last_created_at DESC %s ",
-                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_VALID.getName(),
+                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_ACTIVE.getName(),
                 SqlHelper.addLimitOffset(limit, offset, params));
 
         sql.prepared(request, params, SqlResult.validResultHandler(PromiseHelper.handler(promise,
@@ -278,7 +301,7 @@ public class DefaultBadgeService implements BadgeService {
                         " FROM %s bp " +
                         " INNER JOIN %s bav on bav.badge_id = bp.id " +
                         " WHERE badge_type_id = ? ",
-                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_VALID.getName());
+                SqlTable.BADGE_PUBLIC.getName(), SqlTable.BADGE_ASSIGNED_ACTIVE.getName());
 
         sql.prepared(request, params, SqlResult.validUniqueResultHandler(PromiseHelper.handler(promise,
                 String.format("[Minibadge@%s::countBadgeTypeReceiverIdsRequest] Fail to count badge types receivers",
