@@ -14,6 +14,7 @@ import { MinibadgeUser } from '~/models/user';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { useStatistics } from '~/services/queries/statistics';
 import { toIsoDate } from '~/utils/date';
+import { getDefaultAvatarSrc, getPictoSrc } from '~/utils/picto';
 import { formatMessage } from '~/utils/translate';
 
 /**
@@ -253,7 +254,7 @@ export const Statistics = () => {
                       <Flex direction="column" gap="16">
                         <Flex align="center" gap="8">
                           {firstMostAssignedType.pictureId ? (
-                            <img src={`/minibadge/public/img/${firstMostAssignedType.pictureId}`} alt="" />
+                            <img src={getPictoSrc(firstMostAssignedType.pictureId)} alt="" />
                           ) : null}
                           <span>{firstMostAssignedType.label}</span>
                         </Flex>
@@ -286,7 +287,7 @@ export const Statistics = () => {
                               <Grid.Col sm="4" md="4" lg="6" xl="6" key={type.id}>
                                 <Flex direction="column" align="center" gap="8" className="text-center">
                                   {type.pictureId ? (
-                                    <img src={`/minibadge/public/img/${type.pictureId}`} alt="" />
+                                    <img src={getPictoSrc(type.pictureId)} alt="" />
                                   ) : null}
                                   <span>{type.label}</span>
                                   <span>
@@ -313,7 +314,7 @@ export const Statistics = () => {
                         {mostRefusedTypes.map((type) => (
                           <Grid.Col sm="4" md="4" lg="6" xl="6" key={type.id}>
                             <Flex direction="column" align="center" gap="8" className="text-center">
-                              {type.pictureId ? <img src={`/minibadge/public/img/${type.pictureId}`} alt="" /> : null}
+                              {type.pictureId ? <img src={getPictoSrc(type.pictureId)} alt="" /> : null}
                               <p className="mb-0">{type.label}</p>
                               <p className="mb-0">
                                 {formatMessage(t, 'minibadge.statistics.refused.times', [type.countRefused ?? 0])}
@@ -380,7 +381,7 @@ export const Statistics = () => {
                                   it twice to screen readers. */}
                               <Avatar
                                 src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
-                                imgPlaceholder="/minibadge/public/img/default-avatar.svg"
+                                imgPlaceholder={getDefaultAvatarSrc()}
                                 alt=""
                               />
                               <div>
@@ -414,7 +415,7 @@ export const Statistics = () => {
                             <Flex direction="column" align="center" gap="8" className="text-center">
                               <Avatar
                                 src={`/userbook/avatar/${user.id}?thumbnail=96x96`}
-                                imgPlaceholder="/minibadge/public/img/default-avatar.svg"
+                                imgPlaceholder={getDefaultAvatarSrc()}
                                 alt=""
                               />
                               <div>

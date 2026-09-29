@@ -6,6 +6,7 @@ public class Actions {
     public static final String BADGE_PUBLISH  = "BADGE_PUBLISH";
     public static final String BADGE_PRIVATIZE  = "BADGE_PRIVATIZE";
     public static final String BADGE_REFUSE  = "BADGE_REFUSE";
+    public static final String BADGE_TYPE_CREATE  = "BADGE_TYPE_CREATE";
     public static final String CHART_ACCEPT  = "BADGE_REFUSE";
     public static final String CHART_REFUSE  = "BADGE_REFUSE";
 

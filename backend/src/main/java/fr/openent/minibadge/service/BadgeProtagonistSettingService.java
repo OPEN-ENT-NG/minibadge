@@ -3,10 +3,12 @@ package fr.openent.minibadge.service;
 import fr.openent.minibadge.model.TypeSetting;
 import io.vertx.core.Future;
 
+import java.util.List;
+
 public interface BadgeProtagonistSettingService {
     /**
      * Builds the authorized assignor -> receiver relations for a given badge type, reading the
-     * centralized {@code badge_protagonist_setting} configuration (SENDER_PROFILE x TARGET_PROFILE
+     * {@code badge_protagonist_setting} configuration (SENDER_PROFILE x TARGET_PROFILE
      * cartesian product). Falls back to {@link fr.openent.minibadge.helper.SettingHelper#getDefaultTypeSetting()}
      * when no usable row is seeded for this badge type (backward compatibility) instead of failing
      * or returning an empty/broken relation set.
@@ -15,8 +17,10 @@ public interface BadgeProtagonistSettingService {
      * {@code isSelfAssignable} and {@code structureId} are set separately by callers, exactly like the
      * previous {@code SettingHelper.getDefaultTypeSetting()} call sites did.
      *
-     * @param badgeTypeId The ID of the badge type for which the relations are to be retrieved.
+     * @param badgeTypeId  The ID of the badge type for which the relations are to be retrieved.
+     * @param structureIds The reader's structures, so a badge type configured by one of them reads
+     *                     its own {@code badge_type_setting} row rather than only the centralized one.
      * @return A Future containing the resolved TypeSetting (relations only).
      */
-    Future<TypeSetting> getRelationsSetting(long badgeTypeId);
+    Future<TypeSetting> getRelationsSetting(long badgeTypeId, List<String> structureIds);
 }

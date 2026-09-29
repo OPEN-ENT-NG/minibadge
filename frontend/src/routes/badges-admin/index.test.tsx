@@ -1,3 +1,4 @@
+import { EdificeClientProvider, EdificeThemeContext } from '@edifice.io/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,20 +12,28 @@ import { MinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 
 import { BadgesAdmin } from '.';
 
+/**
+ * `EdificeClientProvider` is required since this screen now mounts `CreateBadgeTypeModal`, which
+ * reads the admin's structures through `useEdificeClient` (that hook throws outside its provider).
+ */
 function renderScreen({ isAdmin = true }: { isAdmin?: boolean } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <MinibadgeAccessContext.Provider
-        value={{ canAssign: false, canReceive: false, isAdmin, isStatisticsView: false, isStatisticsViewAllStructures: false }}
-      >
-        <MemoryRouter initialEntries={['/admin']}>
-          <Routes>
-            <Route path="/" element={<div>Accueil</div>} />
-            <Route path="/admin" element={<BadgesAdmin />} />
-          </Routes>
-        </MemoryRouter>
-      </MinibadgeAccessContext.Provider>
+      <EdificeClientProvider params={{ app: 'minibadge' }}>
+        <EdificeThemeContext.Provider value={{ theme: undefined }}>
+          <MinibadgeAccessContext.Provider
+            value={{ canAssign: false, canReceive: false, isAdmin, isStatisticsView: false, isStatisticsViewAllStructures: false }}
+          >
+            <MemoryRouter initialEntries={['/admin']}>
+              <Routes>
+                <Route path="/" element={<div>Accueil</div>} />
+                <Route path="/admin" element={<BadgesAdmin />} />
+              </Routes>
+            </MemoryRouter>
+          </MinibadgeAccessContext.Provider>
+        </EdificeThemeContext.Provider>
+      </EdificeClientProvider>
     </QueryClientProvider>,
   );
 }
@@ -173,6 +182,25 @@ describe('BadgesAdmin', () => {
     await user.click(screen.getByRole('button', { name: 'minibadge.revoke.users.modal.title' }));
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('opens the CreateBadgeTypeModal from the "Créer un badge" button', async () => {
+    const user = userEvent.setup();
+    renderScreen();
+
+    await user.click(screen.getByRole('button', { name: 'minibadge.badge.type.create' }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('minibadge.badge.type.create.modal.title')).toBeInTheDocument();
+    expect(await screen.findByRole('radiogroup', { name: 'minibadge.badge.type.create.picto' })).toBeInTheDocument();
+  });
+
+  it('keeps both admin actions hidden from a non-admin (the whole screen redirects)', async () => {
+    renderScreen({ isAdmin: false });
+
+    expect(await screen.findByText('Accueil')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'minibadge.badge.type.create' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'minibadge.revoke.users.modal.title' })).not.toBeInTheDocument();
   });
 
   it('shows a loading indicator during the initial fetch instead of the empty-state message', async () => {

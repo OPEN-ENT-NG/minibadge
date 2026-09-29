@@ -1,10 +1,15 @@
 package fr.openent.minibadge.controller;
 
 import fr.openent.minibadge.Minibadge;
+import fr.openent.minibadge.core.constants.Actions;
+import fr.openent.minibadge.core.constants.EventBusConst;
 import fr.openent.minibadge.core.constants.Field;
 import fr.openent.minibadge.core.constants.Request;
 import fr.openent.minibadge.helper.RequestHelper;
+import fr.openent.minibadge.helper.UserHelper;
+import fr.openent.minibadge.model.BadgeType;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.security.AdminRight;
 import fr.openent.minibadge.security.ReceiveRight;
 import fr.openent.minibadge.security.ViewRight;
 import fr.openent.minibadge.service.BadgeAssignedService;
@@ -13,24 +18,32 @@ import fr.openent.minibadge.service.BadgeTypeService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.rs.ApiDoc;
 import fr.wseduc.rs.Get;
+import fr.wseduc.rs.Post;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.http.Renders;
+import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.common.controller.ControllerHelper;
+import org.entcore.common.events.EventStore;
+import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ResourceFilter;
+import org.entcore.common.http.filter.Trace;
 import org.entcore.common.user.UserUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static fr.openent.minibadge.core.constants.Field.*;
 
 public class BadgeTypeController extends ControllerHelper {
 
+    private final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Minibadge.class.getSimpleName());
     private final BadgeTypeService badgeTypeService = ServiceRegistry.getService(BadgeTypeService.class);
     private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
     private final BadgeService badgeService = ServiceRegistry.getService(BadgeService.class);
@@ -61,6 +74,64 @@ public class BadgeTypeController extends ControllerHelper {
         UserUtils.getUserInfos(eb, request, user -> badgeTypeService.getBadgeTypes(user.getStructures(), query, limit, offset, finalCategoryId)
                 .onSuccess(badgeTypes -> renderJson(request, RequestHelper.formatResponse(limit, offset, badgeTypes)))
                 .onFailure(err -> renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()))));
+    }
+
+    @Post("/types")
+    @ApiDoc("Create a badge type for one of the current user's structures")
+    @SecuredAction(value = "", type = ActionType.RESOURCE)
+    @ResourceFilter(AdminRight.class)
+    @Trace(Actions.BADGE_TYPE_CREATE)
+    public void createBadgeType(HttpServerRequest request) {
+        String host = Renders.getHost(request);
+        String language = I18n.acceptLanguage(request);
+
+        RequestUtils.bodyToJson(request, String.format("%s%s", pathPrefix, "badgeTypeCreate"), body ->
+                UserUtils.getUserInfos(eb, request, user -> {
+                    String label = body.getString(LABEL, "").trim();
+                    if (label.isEmpty()) {
+                        badRequest(request, I18n.getInstance()
+                                .translate("minibadge.error.badge.type.label.required", host, language));
+                        return;
+                    }
+
+                    String structureId = UserHelper.resolveStructureId(user, body.getString(STRUCTUREID));
+                    if (structureId == null) {
+                        badRequest(request, I18n.getInstance()
+                                .translate("minibadge.error.badge.type.structure.invalid", host, language));
+                        return;
+                    }
+
+                    BadgeType badgeType = new BadgeType(body);
+                    badgeType.setLabel(label);
+                    // Both are set server-side, AFTER `new BadgeType(body)`, so whatever the client
+                    // sent for those two fields is discarded rather than trusted.
+                    badgeType.setStructureId(structureId);
+                    badgeType.setOwnerId(user.getUserId());
+
+                    badgeTypeService.create(badgeType, categoryIds(body))
+                            .onSuccess(createdBadgeType -> {
+                                eventStore.createAndStoreEvent(EventBusConst.CREATE_EVENT, request);
+                                renderJson(request, createdBadgeType.toJson(), 201);
+                            })
+                            .onFailure(err -> {
+                                if (BadgeTypeService.DUPLICATE_SLUG_ERROR.equals(err.getMessage())) {
+                                    badRequest(request, I18n.getInstance()
+                                            .translate(BadgeTypeService.DUPLICATE_SLUG_ERROR, host, language));
+                                    return;
+                                }
+                                renderError(request, new JsonObject().put(Request.MESSAGE, err.getMessage()));
+                            });
+                }));
+    }
+
+    private List<Long> categoryIds(JsonObject body) {
+        JsonArray rawCategoryIds = body.getJsonArray(CATEGORYIDS, new JsonArray());
+        List<Long> categoryIds = new ArrayList<>();
+        rawCategoryIds.stream()
+                .filter(Number.class::isInstance)
+                .map(Number.class::cast)
+                .forEach(categoryId -> categoryIds.add(categoryId.longValue()));
+        return categoryIds;
     }
 
     @Get("/types/:typeId")

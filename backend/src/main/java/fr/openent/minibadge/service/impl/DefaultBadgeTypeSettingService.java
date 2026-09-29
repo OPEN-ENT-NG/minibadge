@@ -7,6 +7,8 @@ import fr.openent.minibadge.service.BadgeTypeSettingService;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
+import java.util.List;
+
 
 public class DefaultBadgeTypeSettingService extends AbstractService implements BadgeTypeSettingService {
 
@@ -21,10 +23,10 @@ public class DefaultBadgeTypeSettingService extends AbstractService implements B
     private final BadgeTypeSettingRepository badgeTypeSettingRepository = repositories.badgeTypeSettingRepository();
 
     @Override
-    public Future<Boolean> isBadgeTypeSelfAssignable(Long badgeTypeId) {
+    public Future<Boolean> isBadgeTypeSelfAssignable(Long badgeTypeId, List<String> structureIds) {
         Promise<Boolean> promise = Promise.promise();
 
-        badgeTypeSettingRepository.findByBadgeTypeId(badgeTypeId)
+        badgeTypeSettingRepository.findByBadgeTypeId(badgeTypeId, structureIds)
                 .onSuccess(optionalSetting -> {
                     if (optionalSetting.isPresent()) {
                         promise.complete(optionalSetting.get().getIsSelfAssignable());

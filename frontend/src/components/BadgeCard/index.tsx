@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { CategoryChip } from '~/components/CategoryChip';
 import { Badge } from '~/models/badge';
 import { BadgeType } from '~/models/badgeType';
+import { getPictoSrc } from '~/utils/picto';
 import { stripHtmlTags } from '~/utils/stripHtml';
 
 /**
@@ -89,7 +90,7 @@ export type BadgeCardProps = BadgeCardSource & {
 export const BadgeCard = ({ badge, badgeType, isSelected, onClick, actions, className }: BadgeCardProps) => {
   const { t } = useTranslation();
   const type = badge ? badge.badgeType : badgeType;
-  const imageSrc = type.pictureId ? `/minibadge/public/img/${type.pictureId}` : commonPlaceholder;
+  const imageSrc = getPictoSrc(type.pictureId) ?? commonPlaceholder;
   const description = type.descriptionShort ? stripHtmlTags(type.descriptionShort) : undefined;
 
   return (

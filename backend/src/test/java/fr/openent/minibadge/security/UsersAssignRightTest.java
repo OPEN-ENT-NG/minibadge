@@ -21,6 +21,8 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.reflect.Whitebox;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +40,12 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(VertxUnitRunner.class)
 public class UsersAssignRightTest {
+
+    /**
+     * The assignor's own structures: getTypeSetting now forwards them so a badge type created by
+     * the assignor's establishment reads its own settings instead of only the centralized ones.
+     */
+    private static final List<String> STRUCTURES = Collections.singletonList("structure1");
 
     @Mock
     private BadgeTypeSettingService badgeTypeSettingService;
@@ -72,10 +80,10 @@ public class UsersAssignRightTest {
                 new BadgeProtagonistSettingRelation(profileSetting(UserType.TEACHER), profileSetting(UserType.STUDENT))
         ));
 
-        when(badgeProtagonistSettingService.getRelationsSetting(1L)).thenReturn(Future.succeededFuture(seededSetting));
-        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(1L)).thenReturn(Future.succeededFuture(false));
+        when(badgeProtagonistSettingService.getRelationsSetting(1L, STRUCTURES)).thenReturn(Future.succeededFuture(seededSetting));
+        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(1L, STRUCTURES)).thenReturn(Future.succeededFuture(false));
 
-        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 1L);
+        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 1L, STRUCTURES);
         assertTrue(resultFuture.succeeded());
         TypeSetting typeSetting = resultFuture.result();
 
@@ -94,11 +102,11 @@ public class UsersAssignRightTest {
         // Backward compatibility: badgeProtagonistSettingService itself already falls back
         // to SettingHelper.getDefaultTypeSetting() internally when unseeded (Task 2) - this
         // exercises that exact default value flowing back through getTypeSetting unchanged.
-        when(badgeProtagonistSettingService.getRelationsSetting(2L))
+        when(badgeProtagonistSettingService.getRelationsSetting(2L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(SettingHelper.getDefaultTypeSetting()));
-        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(2L)).thenReturn(Future.succeededFuture(false));
+        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(2L, STRUCTURES)).thenReturn(Future.succeededFuture(false));
 
-        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 2L);
+        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 2L, STRUCTURES);
         TypeSetting typeSetting = resultFuture.result();
 
         User assignorStudent = userOfType("student1", UserType.STUDENT);
@@ -113,12 +121,12 @@ public class UsersAssignRightTest {
 
     @Test
     public void testGetTypeSettingFallsBackToDefaultOnOutrightFailure() throws Exception {
-        when(badgeProtagonistSettingService.getRelationsSetting(3L))
+        when(badgeProtagonistSettingService.getRelationsSetting(3L, STRUCTURES))
                 .thenReturn(Future.failedFuture("db error"));
-        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(3L))
+        when(badgeTypeSettingService.isBadgeTypeSelfAssignable(3L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(true));
 
-        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 3L);
+        Future<TypeSetting> resultFuture = Whitebox.invokeMethod(usersAssignRight, "getTypeSetting", 3L, STRUCTURES);
         assertTrue(resultFuture.succeeded());
 
         User assignorStudent = userOfType("student1", UserType.STUDENT);

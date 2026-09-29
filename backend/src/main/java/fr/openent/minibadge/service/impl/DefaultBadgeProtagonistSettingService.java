@@ -29,10 +29,10 @@ public class DefaultBadgeProtagonistSettingService extends AbstractService imple
     private final BadgeProtagonistSettingRepository badgeProtagonistSettingRepository = repositories.badgeProtagonistSettingRepository();
 
     @Override
-    public Future<TypeSetting> getRelationsSetting(long badgeTypeId) {
+    public Future<TypeSetting> getRelationsSetting(long badgeTypeId, List<String> structureIds) {
         Promise<TypeSetting> promise = Promise.promise();
 
-        badgeProtagonistSettingRepository.findByBadgeTypeId(badgeTypeId)
+        badgeProtagonistSettingRepository.findByBadgeTypeId(badgeTypeId, structureIds)
                 .onSuccess(rows -> promise.complete(buildTypeSetting(rows)))
                 .onFailure(err -> {
                     String errorMessage = "Error retrieving badge protagonist settings for badgeTypeId: " + badgeTypeId;

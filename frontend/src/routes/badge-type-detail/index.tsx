@@ -12,6 +12,7 @@ import { CategoryChip } from '~/components/CategoryChip';
 import { MinibadgeUser } from '~/models/user';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { useBadgeType, useBadgeTypeAssigners } from '~/services/queries/badgeTypes';
+import { getPictoSrc } from '~/utils/picto';
 import { stripHtmlTags } from '~/utils/stripHtml';
 
 const displayUserName = (user: MinibadgeUser): string =>
@@ -64,7 +65,7 @@ export const BadgeTypeDetail = () => {
   // Extracted so TypeScript can narrow `assignersAll` directly at the point
   // of use below, instead of needing a non-null assertion.
   const assignersAll = assigners?.all;
-  const imageSrc = badgeType.pictureId ? `/minibadge/public/img/${badgeType.pictureId}` : commonPlaceholder;
+  const imageSrc = getPictoSrc(badgeType.pictureId) ?? commonPlaceholder;
   const descriptionShort = badgeType.descriptionShort ? stripHtmlTags(badgeType.descriptionShort) : undefined;
   const description = badgeType.description ? stripHtmlTags(badgeType.description) : undefined;
 

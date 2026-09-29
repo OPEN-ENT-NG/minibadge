@@ -1,6 +1,8 @@
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  BadgeTypeCreatePayload,
+  createBadgeType,
   getBadgeType,
   getBadgeTypeAssigners,
   getBadgeTypeReceivers,
@@ -67,4 +69,21 @@ export const badgeTypeReceiversQueryOptions = (
 export const useBadgeTypeReceivers = (typeId: number, page?: number, limit?: number) => {
   const result = useQuery(badgeTypeReceiversQueryOptions(typeId, page, limit));
   return { receivers: result.data, query: result };
+};
+
+/**
+ * Creating a badge type makes it appear in the library for everyone in the establishment, so the
+ * whole `['badgeTypes']` query-key root is invalidated — React Query's prefix matching then reaches
+ * every paginated/filtered list variant under it. The singular `['badgeType', id]` root is NOT a
+ * prefix of it and needs no invalidation here: a type that has just been created has no detail view
+ * cached yet.
+ */
+export const useCreateBadgeType = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: BadgeTypeCreatePayload) => createBadgeType(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['badgeTypes'] });
+    },
+  });
 };

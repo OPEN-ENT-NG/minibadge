@@ -11,6 +11,7 @@ import { UserSearchBar } from '~/components/UserSearchBar';
 import { BadgeAssigned } from '~/models/badgeAssigned';
 import { useBadgesGiven, useRevokeBadgeAssigned } from '~/services/queries/badgeAssigned';
 import { defaultPeriod, formatDisplayDate, toBackendDate } from '~/utils/date';
+import { getPictoSrc } from '~/utils/picto';
 
 /**
  * "Badges donnés": a sorted/filterable table of the badges the current user
@@ -158,7 +159,7 @@ export const BadgesGiven = () => {
                 <Table.Tr key={badgeGiven.id}>
                   <Table.Td>
                     {badgeGiven.badge.badgeType.pictureId ? (
-                      <img src={`/minibadge/public/img/${badgeGiven.badge.badgeType.pictureId}`} alt="" />
+                      <img src={getPictoSrc(badgeGiven.badge.badgeType.pictureId)} alt="" />
                     ) : null}
                     {badgeGiven.badge.badgeType.label}
                   </Table.Td>

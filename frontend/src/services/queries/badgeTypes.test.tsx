@@ -1,14 +1,17 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
+import { HttpResponse, http } from 'msw';
 import { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { fakeBadgeType, fakeUser } from '~/mocks/handlers';
+import { server } from '~/mocks/server';
 import {
   useBadgeType,
   useBadgeTypeAssigners,
   useBadgeTypeReceivers,
   useBadgeTypes,
+  useCreateBadgeType,
 } from '~/services/queries/badgeTypes';
 
 function createWrapper() {
@@ -95,5 +98,54 @@ describe('useBadgeTypeAssigners / useBadgeTypeReceivers', () => {
       pageCount: 1,
       receiversTotal: 1,
     });
+  });
+});
+
+describe('useCreateBadgeType', () => {
+  it('POSTs the payload and resolves the created badge type', async () => {
+    let receivedBody: unknown;
+    server.use(
+      http.post('/minibadge/types', async ({ request }) => {
+        receivedBody = await request.json();
+        return HttpResponse.json({ ...fakeBadgeType, id: 99, label: 'Entraide' }, { status: 201 });
+      }),
+    );
+
+    const { result } = renderHook(() => useCreateBadgeType(), { wrapper: createWrapper() });
+    result.current.mutate({ label: 'Entraide', categoryIds: [1, 2] });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(receivedBody).toEqual({ label: 'Entraide', categoryIds: [1, 2] });
+    expect(result.current.data?.id).toBe(99);
+  });
+
+  /**
+   * The new badge type must show up in the library immediately. `['badgeTypes']` is the ROOT of
+   * every list variant's key, so invalidating it reaches them all through React Query's prefix
+   * matching — invalidating a single fully-specified key would not.
+   */
+  it('invalidates the whole badgeTypes query-key root on success', async () => {
+    server.use(http.post('/minibadge/types', () => HttpResponse.json(fakeBadgeType, { status: 201 })));
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries');
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useCreateBadgeType(), { wrapper });
+    result.current.mutate({ label: 'Entraide' });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: ['badgeTypes'] });
+  });
+
+  it('surfaces a server rejection as a failed mutation', async () => {
+    server.use(http.post('/minibadge/types', () => new HttpResponse(null, { status: 400 })));
+
+    const { result } = renderHook(() => useCreateBadgeType(), { wrapper: createWrapper() });
+    result.current.mutate({ label: 'Entraide' });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });

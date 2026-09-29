@@ -53,7 +53,7 @@ public class DefaultUserService implements UserService {
         // seeded row, but we still guard against outright failure with .otherwise(...).
         // A genuine failure here (as opposed to the "no rows seeded" case, already handled inside
         // getRelationsSetting) is logged before falling back so a systemic DB issue stays visible.
-        Future<TypeSetting> typeSettingFuture = badgeProtagonistSettingService.getRelationsSetting(typeId)
+        Future<TypeSetting> typeSettingFuture = badgeProtagonistSettingService.getRelationsSetting(typeId, user.getStructures())
                 .otherwise(err -> {
                     LoggerHelper.logError(this, "search",
                             "Fail to retrieve badge protagonist relations settings for badgeTypeId: " + typeId,

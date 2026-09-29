@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,6 +37,12 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(VertxUnitRunner.class)
 public class DefaultBadgeProtagonistSettingServiceTest {
+
+    /**
+     * The reader's structures, forwarded verbatim to the repository so the structure-scoped
+     * badge_type_setting row can win over the centralized one (Epic B, blocker n°1).
+     */
+    private static final List<String> STRUCTURES = Collections.singletonList("structure1");
 
     @Mock
     private BadgeProtagonistSettingRepository badgeProtagonistSettingRepository;
@@ -58,10 +65,10 @@ public class DefaultBadgeProtagonistSettingServiceTest {
 
     @Test
     public void testFallsBackToDefaultSettingWhenNoRowFound() {
-        when(badgeProtagonistSettingRepository.findByBadgeTypeId(1L))
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(1L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(Collections.emptyList()));
 
-        TypeSetting result = service.getRelationsSetting(1L).result();
+        TypeSetting result = service.getRelationsSetting(1L, STRUCTURES).result();
 
         assertEquals(1, result.relations().size());
         assertEquals(UserType.STUDENT, result.relations().get(0).assignor().typeValue());
@@ -72,11 +79,11 @@ public class DefaultBadgeProtagonistSettingServiceTest {
     public void testFallsBackToDefaultSettingWhenOnlyAudienceRowsFound() {
         // Only *_AUDIENCE rows: SENDER_PROFILE/TARGET_PROFILE sets are both empty,
         // so there is nothing usable to build a relation from -> defensive fallback.
-        when(badgeProtagonistSettingRepository.findByBadgeTypeId(2L))
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(2L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(Collections.singletonList(
                         row(1L, "someAudienceId", Field.SENDER_AUDIENCE))));
 
-        TypeSetting result = service.getRelationsSetting(2L).result();
+        TypeSetting result = service.getRelationsSetting(2L, STRUCTURES).result();
 
         assertEquals(1, result.relations().size());
         assertEquals(UserType.STUDENT, result.relations().get(0).assignor().typeValue());
@@ -85,12 +92,12 @@ public class DefaultBadgeProtagonistSettingServiceTest {
 
     @Test
     public void testSingleStudentToStudentPair() {
-        when(badgeProtagonistSettingRepository.findByBadgeTypeId(3L))
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(3L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(Arrays.asList(
                         row(1L, UserType.STUDENT, Field.SENDER_PROFILE),
                         row(2L, UserType.STUDENT, Field.TARGET_PROFILE))));
 
-        TypeSetting result = service.getRelationsSetting(3L).result();
+        TypeSetting result = service.getRelationsSetting(3L, STRUCTURES).result();
 
         assertEquals(1, result.relations().size());
         assertEquals(UserType.STUDENT, result.relations().get(0).assignor().typeValue());
@@ -103,13 +110,13 @@ public class DefaultBadgeProtagonistSettingServiceTest {
         // assignors, Student as the only authorized receiver -> exactly 2 relations
         // (Student->Student, Teacher->Student), not 1 (missing Teacher) nor 4
         // (a spurious Student/Teacher x Student/Teacher product).
-        when(badgeProtagonistSettingRepository.findByBadgeTypeId(4L))
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(4L, STRUCTURES))
                 .thenReturn(Future.succeededFuture(Arrays.asList(
                         row(1L, UserType.STUDENT, Field.SENDER_PROFILE),
                         row(2L, UserType.TEACHER, Field.SENDER_PROFILE),
                         row(3L, UserType.STUDENT, Field.TARGET_PROFILE))));
 
-        TypeSetting result = service.getRelationsSetting(4L).result();
+        TypeSetting result = service.getRelationsSetting(4L, STRUCTURES).result();
 
         List<String> assignorTypeValues = Arrays.asList(
                 result.relations().get(0).assignor().typeValue(),
@@ -122,12 +129,36 @@ public class DefaultBadgeProtagonistSettingServiceTest {
                 assertEquals(UserType.STUDENT, relation.receiver().typeValue()));
     }
 
+    /**
+     * Epic B, blocker n°1: the reader's structures must reach the repository untouched — that
+     * argument is the entire mechanism by which a badge type created by an establishment reads its
+     * own badge_type_setting row. A caller dropping it (as every caller did before this epic) would
+     * make the establishment's relations invisible and silently fall back to Student->Student.
+     * Verified against a structure list DIFFERENT from the shared fixture, so an accidental
+     * hardcoding of the fixture would not pass.
+     */
+    @Test
+    public void testForwardsTheReadersStructuresToTheRepository() {
+        List<String> otherStructures = Arrays.asList("structureA", "structureB");
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(6L, otherStructures))
+                .thenReturn(Future.succeededFuture(Arrays.asList(
+                        row(1L, UserType.PERSONNEL, Field.SENDER_PROFILE),
+                        row(2L, UserType.STUDENT, Field.TARGET_PROFILE))));
+
+        TypeSetting result = service.getRelationsSetting(6L, otherStructures).result();
+
+        verify(badgeProtagonistSettingRepository).findByBadgeTypeId(6L, otherStructures);
+        assertEquals(1, result.relations().size());
+        assertEquals(UserType.PERSONNEL, result.relations().get(0).assignor().typeValue());
+        assertEquals(UserType.STUDENT, result.relations().get(0).receiver().typeValue());
+    }
+
     @Test
     public void testPropagatesRepositoryFailure() {
-        when(badgeProtagonistSettingRepository.findByBadgeTypeId(5L))
+        when(badgeProtagonistSettingRepository.findByBadgeTypeId(5L, STRUCTURES))
                 .thenReturn(Future.failedFuture("boom"));
 
-        Future<TypeSetting> resultFuture = service.getRelationsSetting(5L);
+        Future<TypeSetting> resultFuture = service.getRelationsSetting(5L, STRUCTURES);
 
         assertTrue(resultFuture.failed());
     }

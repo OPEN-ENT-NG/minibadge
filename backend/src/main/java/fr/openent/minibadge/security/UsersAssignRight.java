@@ -58,7 +58,10 @@ public class UsersAssignRight implements ResourcesProvider {
             List<String> ownerIds = body.getJsonArray(Field.OWNERIDS).getList();
 
             Future<JsonObject> cachedPermissionsFuture = getUserCachedPermissions(request);
-            Future<TypeSetting> badgeSettingFuture = getTypeSetting(typeId);
+            // The assignor's own structures decide which badge_type_setting row applies: without
+            // them, a badge type created by their establishment would read as unconfigured and fall
+            // back to the hardcoded Student->Student relation, refusing a legitimate assignment.
+            Future<TypeSetting> badgeSettingFuture = getTypeSetting(typeId, userInfos.getStructures());
             Future<Boolean> areReachedThresholdsFuture = areReachedThresholds(userInfos,
                     SettingHelper.getDefaultBadgeSettings());
 
@@ -111,7 +114,7 @@ public class UsersAssignRight implements ResourcesProvider {
         return promise.future();
     }
 
-    private Future<TypeSetting> getTypeSetting(Long badgeTypeId) {
+    private Future<TypeSetting> getTypeSetting(Long badgeTypeId, List<String> structureIds) {
         Promise<TypeSetting> promise = Promise.promise();
 
         // Relation lookup is now SQL-backed (badge_protagonist_setting) and thus asynchronous;
@@ -119,14 +122,14 @@ public class UsersAssignRight implements ResourcesProvider {
         // seeded, but we still guard against outright failure (e.g. DB error) with .otherwise(...).
         // A genuine failure here (as opposed to the "no rows seeded" case, already handled inside
         // getRelationsSetting) is logged before falling back so a systemic DB issue stays visible.
-        Future<TypeSetting> relationsFuture = badgeProtagonistSettingService.getRelationsSetting(badgeTypeId)
+        Future<TypeSetting> relationsFuture = badgeProtagonistSettingService.getRelationsSetting(badgeTypeId, structureIds)
                 .otherwise(err -> {
                     LoggerHelper.logError(this, "getTypeSetting",
                             "Fail to retrieve badge protagonist relations settings for badgeTypeId: " + badgeTypeId,
                             err.getMessage());
                     return SettingHelper.getDefaultTypeSetting();
                 });
-        Future<Boolean> selfAssignableFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeTypeId)
+        Future<Boolean> selfAssignableFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeTypeId, structureIds)
                 .otherwise(false);
 
         // Both inputs above are already recovered via .otherwise(...), so this composite future

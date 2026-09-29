@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
+import { CreateBadgeTypeModal } from '~/components/CreateBadgeTypeModal';
 import { EmptyBadgeList } from '~/components/EmptyBadgeList';
 import { PeriodPicker, PeriodPickerValue } from '~/components/PeriodPicker';
 import { RevokeUsersModal } from '~/components/RevokeUsersModal';
@@ -11,6 +12,7 @@ import { UserSearchBar } from '~/components/UserSearchBar';
 import { useMinibadgeAccessContext } from '~/routes/root/CharterGate/context';
 import { useBadgesAssignedAll } from '~/services/queries/badgeAssigned';
 import { defaultPeriod, formatDisplayDate, toBackendDate } from '~/utils/date';
+import { getPictoSrc } from '~/utils/picto';
 
 /**
  * "Administration" (`/admin`): a read-only, sortable/filterable audit table
@@ -53,6 +55,7 @@ export const BadgesAdmin = () => {
   const [sortColumn, setSortColumn] = useState<SortColumnKey>();
   const [isAsc, setIsAsc] = useState(true);
   const [isRevokeUsersModalOpen, setIsRevokeUsersModalOpen] = useState(false);
+  const [isCreateBadgeTypeModalOpen, setIsCreateBadgeTypeModalOpen] = useState(false);
 
   const { badgesAssignedAll, query: badgesAssignedAllQuery } = useBadgesAssignedAll({
     query: searchQuery.trim() || undefined,
@@ -105,6 +108,11 @@ export const BadgesAdmin = () => {
           onSearch={setSearchQuery}
           className="flex-fill"
         />
+        {/* Primary (creation) before destructive (revocation), so the ordinary action is the
+            first one reached by keyboard and the eye. */}
+        <Button color="primary" variant="filled" onClick={() => setIsCreateBadgeTypeModalOpen(true)}>
+          {t('minibadge.badge.type.create')}
+        </Button>
         <Button color="danger" variant="filled" onClick={() => setIsRevokeUsersModalOpen(true)}>
           {t('minibadge.revoke.users.modal.title')}
         </Button>
@@ -154,7 +162,7 @@ export const BadgesAdmin = () => {
                 <Table.Tr key={badgeAssigned.id}>
                   <Table.Td>
                     {badgeAssigned.badge.badgeType.pictureId ? (
-                      <img src={`/minibadge/public/img/${badgeAssigned.badge.badgeType.pictureId}`} alt="" />
+                      <img src={getPictoSrc(badgeAssigned.badge.badgeType.pictureId)} alt="" />
                     ) : null}
                     {badgeAssigned.badge.badgeType.label}
                   </Table.Td>
@@ -169,6 +177,10 @@ export const BadgesAdmin = () => {
       </div>
 
       <RevokeUsersModal isOpen={isRevokeUsersModalOpen} onClose={() => setIsRevokeUsersModalOpen(false)} />
+      <CreateBadgeTypeModal
+        isOpen={isCreateBadgeTypeModalOpen}
+        onClose={() => setIsCreateBadgeTypeModalOpen(false)}
+      />
     </div>
   );
 };

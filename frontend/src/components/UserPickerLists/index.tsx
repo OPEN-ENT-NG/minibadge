@@ -2,6 +2,7 @@ import { Avatar, IconButton } from '@edifice.io/react';
 import { IconDelete } from '@edifice.io/react/icons';
 
 import { MinibadgeUser } from '~/models/user';
+import { getDefaultAvatarSrc } from '~/utils/picto';
 
 /**
  * Shared search-results/selected-users list UI, factored out of
@@ -18,7 +19,7 @@ import { MinibadgeUser } from '~/models/user';
  */
 const avatarProps = (userId: string) => ({
   src: `/userbook/avatar/${userId}?thumbnail=48x48`,
-  imgPlaceholder: '/minibadge/public/img/default-avatar.svg',
+  imgPlaceholder: getDefaultAvatarSrc(),
   alt: '',
   size: 'sm' as const,
   variant: 'circle' as const,
