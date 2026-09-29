@@ -119,6 +119,16 @@ public class Field {
     public static final String SETTINGS = "settings";
     public static final String SETTING = "setting";
     public static final String RELATIONS = "relations";
+    public static final String BADGE_TYPE_SETTING_ID = "badge_type_setting_id";
+    public static final String PROTAGONIST_TYPE_ID = "protagonist_type_id";
+    public static final String PROTAGONISTTYPEID = "protagonistTypeId";
+    public static final String PROTAGONIST_TYPE = "protagonist_type";
+    public static final String PROTAGONISTTYPE = "protagonistType";
+    // badge_protagonist_setting.protagonist_type values (see sql/003-init-setting-tables.sql CHECK constraint)
+    public static final String SENDER_PROFILE = "SENDER_PROFILE";
+    public static final String TARGET_PROFILE = "TARGET_PROFILE";
+    public static final String SENDER_AUDIENCE = "SENDER_AUDIENCE";
+    public static final String TARGET_AUDIENCE = "TARGET_AUDIENCE";
 
     // Badge Setting
     public static final String MAXASSIGNABLE = "maxAssignable";

@@ -8,6 +8,7 @@ import fr.openent.minibadge.model.Chart;
 import fr.openent.minibadge.model.ThresholdSetting;
 import fr.openent.minibadge.model.TypeSetting;
 import fr.openent.minibadge.model.User;
+import fr.openent.minibadge.service.BadgeProtagonistSettingService;
 import fr.openent.minibadge.service.BadgeTypeSettingService;
 import fr.openent.minibadge.service.ServiceRegistry;
 import fr.wseduc.webutils.Server;
@@ -39,6 +40,7 @@ public class UsersAssignRight implements ResourcesProvider {
             Field.ACCEPTRECEIVE);
     private final Logger log = LoggerFactory.getLogger(UsersAssignRight.class);
     private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
+    private final BadgeProtagonistSettingService badgeProtagonistSettingService = ServiceRegistry.getService(BadgeProtagonistSettingService.class);
 
     @Override
     @SuppressWarnings("unchecked")
@@ -112,13 +114,26 @@ public class UsersAssignRight implements ResourcesProvider {
     private Future<TypeSetting> getTypeSetting(Long badgeTypeId) {
         Promise<TypeSetting> promise = Promise.promise();
 
-        TypeSetting defaultSetting = SettingHelper.getDefaultTypeSetting();
+        // Relation lookup is now SQL-backed (badge_protagonist_setting) and thus asynchronous;
+        // it already falls back internally to SettingHelper.getDefaultTypeSetting() when no row is
+        // seeded, but we still guard against outright failure (e.g. DB error) with .otherwise(...).
+        // A genuine failure here (as opposed to the "no rows seeded" case, already handled inside
+        // getRelationsSetting) is logged before falling back so a systemic DB issue stays visible.
+        Future<TypeSetting> relationsFuture = badgeProtagonistSettingService.getRelationsSetting(badgeTypeId)
+                .otherwise(err -> {
+                    LoggerHelper.logError(this, "getTypeSetting",
+                            "Fail to retrieve badge protagonist relations settings for badgeTypeId: " + badgeTypeId,
+                            err.getMessage());
+                    return SettingHelper.getDefaultTypeSetting();
+                });
+        Future<Boolean> selfAssignableFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeTypeId)
+                .otherwise(false);
 
-        badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeTypeId)
-                .onSuccess(isSelfAssignable -> {
-                    promise.complete(defaultSetting.setSelfAssignable(isSelfAssignable));
-                })
-                .onFailure(err -> promise.complete(defaultSetting));
+        // Both inputs above are already recovered via .otherwise(...), so this composite future
+        // can never actually fail; only onSuccess is reachable.
+        Future.all(relationsFuture, selfAssignableFuture)
+                .onSuccess(cf -> promise.complete(
+                        relationsFuture.result().setSelfAssignable(selfAssignableFuture.result())));
 
         return promise.future();
     }

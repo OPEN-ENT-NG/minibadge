@@ -6,6 +6,7 @@ public enum SqlTable {
     REL_BADGE_CATEGORY_BADGE_TYPE("rel_badge_category_badge_type"),
     BADGE_TYPE("badge_type"),
     BADGE_TYPE_SETTING("badge_type_setting"),
+    BADGE_PROTAGONIST_SETTING("badge_protagonist_setting"),
     BADGE_CATEGORY("badge_category"),
     BADGE("badge"),
     BADGE_PUBLIC("badge_public"),

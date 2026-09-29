@@ -24,6 +24,7 @@ public final class ServiceRegistry {
         SERVICES.put(BadgeAssignedService.class, DefaultBadgeAssignedService.getInstance());
         SERVICES.put(BadgeCategoryService.class, DefaultBadgeCategoryService.getInstance());
         SERVICES.put(BadgeTypeSettingService.class, DefaultBadgeTypeSettingService.getInstance());
+        SERVICES.put(BadgeProtagonistSettingService.class, DefaultBadgeProtagonistSettingService.getInstance());
         SERVICES.put(BadgeTypeService.class, DefaultBadgeTypeService.getInstance());
         SERVICES.put(StructureService.class, DefaultStructureService.getInstance());
         SERVICES.put(StatisticService.class, DefaultStatisticService.getInstance());

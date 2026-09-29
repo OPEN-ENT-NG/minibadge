@@ -7,6 +7,7 @@ import fr.openent.minibadge.helper.PromiseHelper;
 import fr.openent.minibadge.helper.SettingHelper;
 import fr.openent.minibadge.helper.SqlHelper;
 import fr.openent.minibadge.model.BadgeType;
+import fr.openent.minibadge.model.TypeSetting;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.BadgeCategory;
 import fr.openent.minibadge.service.*;
@@ -38,6 +39,7 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
     private final Sql sql = Sql.getInstance();
     private final BadgeCategoryService badgeCategoryService = ServiceRegistry.getService(BadgeCategoryService.class);
     private final BadgeTypeSettingService badgeTypeSettingService = ServiceRegistry.getService(BadgeTypeSettingService.class);
+    private final BadgeProtagonistSettingService badgeProtagonistSettingService = ServiceRegistry.getService(BadgeProtagonistSettingService.class);
     private final BadgeAssignedService badgeAssignedService = ServiceRegistry.getService(BadgeAssignedService.class);
 
     @Override
@@ -53,10 +55,8 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                     for (BadgeType badgeType : badgeTypes) {
                         Future<List<BadgeCategory>> categoryFuture = badgeCategoryService.getBadgeCategoriesByBadgeTypeId(badgeType.id())
                                 .onSuccess(badgeType::setCategories);
-                        Future<Boolean> settingFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id())
-                                .onSuccess(isSelfAssignable -> badgeType.setSetting(SettingHelper.getDefaultTypeSetting().setSelfAssignable(isSelfAssignable)));
                         categoryFutures.add(categoryFuture);
-                        categoryFutures.add(settingFuture);
+                        categoryFutures.add(getSetting(badgeType));
                     }
 
                     CompositeFuture.all(categoryFutures)
@@ -66,6 +66,30 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                 .onFailure(promise::fail);
 
         return promise.future();
+    }
+
+    /**
+     * Fetches the relations (SQL-backed, async, falls back to SettingHelper.getDefaultTypeSetting()
+     * internally when unseeded) and isSelfAssignable, combines them onto badgeType.setting, and
+     * returns a Future<Void> so callers can add it to a raw List<Future> alongside other per-badge-type
+     * futures (mirrors the previous single settingFuture that only awaited isSelfAssignable).
+     */
+    private Future<Void> getSetting(BadgeType badgeType) {
+        // A genuine failure here (as opposed to the "no rows seeded" case, already handled inside
+        // getRelationsSetting) is logged before falling back so a systemic DB issue stays visible.
+        Future<TypeSetting> relationsFuture = badgeProtagonistSettingService.getRelationsSetting(badgeType.id())
+                .otherwise(err -> {
+                    LoggerHelper.logError(this, "getSetting",
+                            "Fail to retrieve badge protagonist relations settings for badgeTypeId: " + badgeType.id(),
+                            err.getMessage());
+                    return SettingHelper.getDefaultTypeSetting();
+                });
+        Future<Boolean> selfAssignableFuture = badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id());
+
+        return Future.all(relationsFuture, selfAssignableFuture)
+                .onSuccess(cf -> badgeType.setSetting(
+                        relationsFuture.result().setSelfAssignable(selfAssignableFuture.result())))
+                .mapEmpty();
     }
 
     private Future<JsonArray> getBadgesTypesRequest(List<String> structureIds, String queryText, int limit, Integer offset, Long badgeCategoryId) {
@@ -131,12 +155,9 @@ public class DefaultBadgeTypeService implements BadgeTypeService {
                 })
                 .compose(badgeCategories -> {
                     badgeType.setCategories(badgeCategories);
-                    return badgeTypeSettingService.isBadgeTypeSelfAssignable(badgeType.id());
+                    return getSetting(badgeType);
                 })
-                .compose(isSelfAssignable -> {
-                    badgeType.setSetting(SettingHelper.getDefaultTypeSetting().setSelfAssignable(isSelfAssignable));
-                    return badgeAssignedService.isSelfAssigned(userInfos, badgeType.id());
-                })
+                .compose(v -> badgeAssignedService.isSelfAssigned(userInfos, badgeType.id()))
                 .onSuccess(isSelfAssigned -> {
                     badgeType.setSelfAssigned(isSelfAssigned);
                     promise.complete(badgeType);

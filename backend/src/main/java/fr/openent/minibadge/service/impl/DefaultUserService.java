@@ -5,8 +5,11 @@ import fr.openent.minibadge.core.constants.Rights;
 import fr.openent.minibadge.core.enums.MinibadgeUserState;
 import fr.openent.minibadge.core.enums.SqlTable;
 import fr.openent.minibadge.helper.*;
+import fr.openent.minibadge.model.TypeSetting;
 import fr.openent.minibadge.model.User;
 import fr.openent.minibadge.model.UserMinibadge;
+import fr.openent.minibadge.service.BadgeProtagonistSettingService;
+import fr.openent.minibadge.service.ServiceRegistry;
 import fr.openent.minibadge.service.UserService;
 import fr.wseduc.webutils.I18n;
 import fr.wseduc.webutils.Server;
@@ -39,18 +42,32 @@ public class DefaultUserService implements UserService {
 
     private final Sql sql = Sql.getInstance();
     private final Neo4j neo = Neo4j.getInstance();
+    private final BadgeProtagonistSettingService badgeProtagonistSettingService = ServiceRegistry.getService(BadgeProtagonistSettingService.class);
 
     @Override
     public Future<List<User>> search(HttpServerRequest request, UserInfos user, Long typeId, String query) {
         Promise<List<User>> promise = Promise.promise();
 
+        // Relation lookup is SQL-backed (badge_protagonist_setting) and thus asynchronous - it already
+        // falls back internally to SettingHelper.getDefaultTypeSetting() when this badge type has no
+        // seeded row, but we still guard against outright failure with .otherwise(...).
+        // A genuine failure here (as opposed to the "no rows seeded" case, already handled inside
+        // getRelationsSetting) is logged before falling back so a systemic DB issue stays visible.
+        Future<TypeSetting> typeSettingFuture = badgeProtagonistSettingService.getRelationsSetting(typeId)
+                .otherwise(err -> {
+                    LoggerHelper.logError(this, "search",
+                            "Fail to retrieve badge protagonist relations settings for badgeTypeId: " + typeId,
+                            err.getMessage());
+                    return SettingHelper.getDefaultTypeSetting();
+                });
+
         List<User> users = new ArrayList<>();
         searchRequest(request, query)
-                .compose(queriedUsers -> {
-                    users.addAll(mapToAuthorizedAssignUsers(user, queriedUsers));
+                .compose(queriedUsers -> typeSettingFuture.compose(typeSetting -> {
+                    users.addAll(mapToAuthorizedAssignUsers(user, queriedUsers, typeSetting));
                     return getUnassignableUserIds(typeId, user,
                             users.stream().map(User::getUserId).collect(Collectors.toList()));
-                })
+                }))
                 .onFailure(promise::fail)
                 .onSuccess(receivedUsers -> promise.complete(filterUsersNotAssignedYet(users, receivedUsers)));
 
@@ -80,14 +97,12 @@ public class DefaultUserService implements UserService {
         return promise.future();
     }
 
-    private List<User> mapToAuthorizedAssignUsers(UserInfos user, JsonArray users) {
+    private List<User> mapToAuthorizedAssignUsers(UserInfos user, JsonArray users, TypeSetting typeSetting) {
         return new User().toList(users)
                 .stream().filter(queriedUser ->
                         queriedUser.permissions().validateChart() == null
                                 || queriedUser.permissions().acceptReceive() != null
-                                // We currently consider that all types have default setting
-                                && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser,
-                                SettingHelper.getDefaultTypeSetting())
+                                && SettingHelper.isAuthorizedToAssign(new User(user), queriedUser, typeSetting)
                 )
                 .collect(Collectors.toList());
     }
