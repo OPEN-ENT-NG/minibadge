@@ -19,6 +19,8 @@ public final class ServiceRegistry {
 
         // Epic D: first, DefaultSettingService reads it. Configured later, in Minibadge#initMinibadge.
         SERVICES.put(PdfExportService.class, DefaultPdfExportService.getInstance());
+        // Before UserService and BadgeTypeService, which both resolve it when their singleton is built.
+        SERVICES.put(BadgeProtagonistSettingService.class, DefaultBadgeProtagonistSettingService.getInstance());
         SERVICES.put(UserService.class, DefaultUserService.getInstance());
         SERVICES.put(SettingService.class, DefaultSettingService.getInstance());
         SERVICES.put(BadgeService.class, DefaultBadgeService.getInstance());
@@ -26,7 +28,6 @@ public final class ServiceRegistry {
         SERVICES.put(BadgeAssignedService.class, DefaultBadgeAssignedService.getInstance());
         SERVICES.put(BadgeCategoryService.class, DefaultBadgeCategoryService.getInstance());
         SERVICES.put(BadgeTypeSettingService.class, DefaultBadgeTypeSettingService.getInstance());
-        SERVICES.put(BadgeProtagonistSettingService.class, DefaultBadgeProtagonistSettingService.getInstance());
         SERVICES.put(BadgeTypeService.class, DefaultBadgeTypeService.getInstance());
         SERVICES.put(StructureService.class, DefaultStructureService.getInstance());
         SERVICES.put(StatisticService.class, DefaultStatisticService.getInstance());
