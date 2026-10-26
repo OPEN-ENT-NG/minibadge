@@ -11,7 +11,7 @@
   </parent>
   <groupId>fr.openent</groupId>
   <artifactId>minibadge</artifactId>
-  <version>2.3-SNAPSHOT</version>
+  <version>2.3-develop-integration-migration-SNAPSHOT</version>
   <scm>
     <connection>scm:git:https://github.com/OPEN-ENT-NG/minibadge.git</connection>
     <developerConnection>scm:git:https://github.com/OPEN-ENT-NG/minibadge.git</developerConnection>
