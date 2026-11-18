@@ -26,7 +26,7 @@ function renderNavbar(isAdmin: boolean, isStatisticsView = false, initialEntry =
           { path: 'badge-types/:typeId', element: <div>Détail</div> },
           { path: 'badges-given', element: <div>Donnés</div> },
           { path: 'admin', element: <div>Admin</div> },
-          { path: 'statistics', element: <div>Statistiques</div> },
+          { path: 'stats', element: <div>Statistiques</div> },
           { path: '*', element: <div>Introuvable</div> },
         ],
       },

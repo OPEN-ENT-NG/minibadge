@@ -49,10 +49,10 @@ function renderScreen(overrides: Partial<MinibadgeAccessContextValue> = {}) {
   return render(
     <QueryClientProvider client={queryClient}>
       <MinibadgeAccessContext.Provider value={contextValue}>
-        <MemoryRouter initialEntries={['/statistics']}>
+        <MemoryRouter initialEntries={['/stats']}>
           <Routes>
             <Route path="/" element={<div>Accueil</div>} />
-            <Route path="/statistics" element={<Statistics />} />
+            <Route path="/stats" element={<Statistics />} />
           </Routes>
         </MemoryRouter>
       </MinibadgeAccessContext.Provider>

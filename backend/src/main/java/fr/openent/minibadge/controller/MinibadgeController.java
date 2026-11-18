@@ -45,8 +45,46 @@ public class MinibadgeController extends ControllerHelper {
     @ApiDoc("Render view")
     @SecuredAction(Rights.VIEW)
     public void view(HttpServerRequest request) {
-        renderView(request, new JsonObject());
+        renderAppView(request);
+    }
 
+    @Get("/badges-given")
+    @ApiDoc("Render view on the given badges page")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void badgesGivenView(HttpServerRequest request) {
+        renderAppView(request);
+    }
+
+    @Get("/badge-types")
+    @ApiDoc("Render view on the badge library page")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void badgeTypesView(HttpServerRequest request) {
+        renderAppView(request);
+    }
+
+    @Get("/badge-types/:typeId")
+    @ApiDoc("Render view on a badge type page")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void badgeTypeView(HttpServerRequest request) {
+        renderAppView(request);
+    }
+
+    @Get("/admin")
+    @ApiDoc("Render view on the administration page")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void adminView(HttpServerRequest request) {
+        renderAppView(request);
+    }
+
+    @Get("/stats")
+    @ApiDoc("Render view on the statistics page")
+    @SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+    public void statisticsView(HttpServerRequest request) {
+        renderAppView(request);
+    }
+
+    private void renderAppView(HttpServerRequest request) {
+        renderView(request, new JsonObject(), "index.html", null);
         eventStore.createAndStoreEvent(EventBusConst.ACCESS_EVENT, request);
     }
 

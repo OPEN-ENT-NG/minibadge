@@ -67,7 +67,7 @@ export const MINIBADGE_WORKFLOW_RIGHTS = {
   assign: 'fr.openent.minibadge.controller.FakeRight|assign',
   receive: 'fr.openent.minibadge.controller.FakeRight|receive',
   admin: 'fr.openent.minibadge.controller.FakeRight|admin',
-  // `statisticsView` gates the whole `/statistics` route (like `admin`
+  // `statisticsView` gates the whole `/stats` route (like `admin`
   // above); `statisticsViewAllStructures` only gates extra sections/columns
   // INSIDE that already-accessible screen — it never gates a route or a
   // distinct server call on its own. A user can have `statisticsView`

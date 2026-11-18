@@ -42,7 +42,7 @@ const PATH_FOR_TAB: Record<TabId, string> = {
   library: '/badge-types',
   given: '/badges-given',
   admin: '/admin',
-  statistics: '/statistics',
+  statistics: '/stats',
 };
 
 export const AppNavbar = ({ isAdmin, isStatisticsView }: AppNavbarProps) => {
@@ -52,7 +52,7 @@ export const AppNavbar = ({ isAdmin, isStatisticsView }: AppNavbarProps) => {
   const isLibrary = !!useMatch('/badge-types/*');
   const isGiven = !!useMatch('/badges-given/*');
   const isAdminRoute = !!useMatch('/admin/*');
-  const isStatisticsRoute = !!useMatch('/statistics/*');
+  const isStatisticsRoute = !!useMatch('/stats/*');
   const activeId: TabId = isLibrary
     ? 'library'
     : isGiven

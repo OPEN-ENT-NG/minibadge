@@ -39,7 +39,7 @@ public class DefaultNotifyService implements NotifyService {
 
         badgeTypeService.getBadgeType(assigner, typeId, host, language)
                 .onSuccess(badgeType -> {
-                    String uri = String.format("/minibadge#/badge-types/%s", badgeType.id());
+                    String uri = String.format("/minibadge/badge-types/%s", badgeType.id());
                     JsonObject params = new JsonObject()
                             .put(Field.USERNAME, assigner.getUsername())
                             .put(Field.BADGETYPELABEL, badgeType.label())
@@ -59,7 +59,7 @@ public class DefaultNotifyService implements NotifyService {
 
     @Override
     public void notifyRevokeUsers(HttpServerRequest request, UserInfos admin, List<String> userIds) {
-        String uri = "/minibadge#/";
+        String uri = "/minibadge";
 
         JsonObject params = new JsonObject()
                 .put(Field.MINIBADGE, Field.MINIBADGES)

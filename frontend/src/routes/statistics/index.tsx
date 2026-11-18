@@ -18,7 +18,7 @@ import { getDefaultAvatarSrc, getPictoSrc } from '~/utils/picto';
 import { formatMessage } from '~/utils/translate';
 
 /**
- * "Statistiques" (`/statistics`) — usage statistics for the module
+ * "Statistiques" (`/stats`) — usage statistics for the module
  * (participation, most/least assigned/refused badge types, most active
  * users/structures), filterable by a sliding period.
  *

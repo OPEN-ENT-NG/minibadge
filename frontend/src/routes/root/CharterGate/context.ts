@@ -13,9 +13,9 @@ export interface MinibadgeAccessContextValue {
   canReceive: boolean;
   /** Gates `/admin` and the `AppNavbar` "Administration" item. */
   isAdmin: boolean;
-  /** Gates `/statistics` and the `AppNavbar` "Statistiques" item. */
+  /** Gates `/stats` and the `AppNavbar` "Statistiques" item. */
   isStatisticsView: boolean;
-  /** Gates extra sections INSIDE `/statistics` only (never a route). Independent from `isStatisticsView`. */
+  /** Gates extra sections INSIDE `/stats` only (never a route). Independent from `isStatisticsView`. */
   isStatisticsViewAllStructures: boolean;
 }
 

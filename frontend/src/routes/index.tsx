@@ -47,7 +47,7 @@ const routes = (_queryClient: QueryClient): RouteObject[] => [
         },
       },
       {
-        path: 'statistics',
+        path: 'stats',
         async lazy() {
           const { Statistics: Component } = await import('~/routes/statistics');
           return { Component };

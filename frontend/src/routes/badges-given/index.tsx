@@ -19,7 +19,7 @@ import { getPictoSrc } from '~/utils/picto';
  * "Badges donnés": a sorted/filterable table of the badges the current user
  * has assigned to other people, with per-row revocation.
  *
- * Deliberately has no right gating, unlike `/admin` and `/statistics` — it's
+ * Deliberately has no right gating, unlike `/admin` and `/stats` — it's
  * reachable (and shows whatever the backend returns, typically empty)
  * regardless of `canAssign`.
  *
